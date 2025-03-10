@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .card {
+            background: var(--bs-light);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .form-control {
+            border-radius: 0;
+            border-color: var(--bs-gray-dark);
+        }
+        .form-label {
+            font-weight: 500;
+            color: var(--bs-black);
+        }
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: var(--bs-black);
+        }
+        .error-message {
+            color: red; 
+            font-size: 14px;
+            display: none;
+        }
+        #resendOtp {
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card p-4 shadow-lg">
+                    <h3 class="text-center mb-3">Verify OTP</h3>
+
+                    <div id="otpMessage" class="alert d-none"></div> 
+
+                    <form id="verifyOtpForm" method="post" action="/verify-otp">
+                        <label class="form-label">Enter OTP</label>
+                        <input type="text" name="otp" id="otpInput" class="form-control mb-3" placeholder="Enter OTP" required>
+                        <button type="submit" class="btn btn-primary w-100">Verify OTP</button>
+                    </form>
+
+                   <!-- <p class="text-center mt-3">
+                        Didn't receive the OTP? 
+                        <button id="resendOtp" class="btn btn-link" onclick="resendOTP(event)">Resend OTP (<span id="timer">60</span>s)</button>
+                    </p>-->
+                    <p class="text-center mt-3">
+                        Didn't receive the OTP? 
+                        <button id="resendOtp" class="btn btn-link" onclick="resendOTP(event)" disabled>
+                            Resend OTP (<span id="timer">60</span>s)
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       let timer = 60;
+    let countdown;
+    let resendBtn = document.getElementById("resendOtp");
+    let timerDisplay = document.getElementById("timer");
+    let otpInput = document.getElementById("otpInput");
+
+    function startTimer() {
+        otpInput.disabled = false;
+        resendBtn.disabled = true;
+        resendBtn.style.pointerEvents = "none"; 
+
+        countdown = setInterval(() => {
+            timerDisplay.textContent = timer; // ✅ Update the countdown display
+            timer--;
+            
+            if (timer < 0) {
+                clearInterval(countdown);
+                otpInput.disabled = true;  // Disable OTP input when timer ends
+                resendBtn.disabled = false;
+                resendBtn.style.pointerEvents = "auto"; 
+                resendBtn.textContent = "Resend OTP";
+            }
+        }, 1000);
+    }
+
+    async function resendOTP(event) {
+        event.preventDefault();
+        resendBtn.disabled = true;
+        resendBtn.style.pointerEvents = "none";
+        resendBtn.textContent = "Sending...";
+        
+        try {
+            let response = await fetch("/resend-otp", { method: "POST" });
+            let data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                clearInterval(countdown);
+                timer = 60;
+                resendBtn.innerHTML = `Resend OTP (<span id="timer">60</span>s)`;
+                timerDisplay = document.getElementById("timer"); // Re-select timer span
+                startTimer();
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Something went wrong. Please try again.");
+        }
+    }
+
+    startTimer();
+    </script>
+</body>
+</html>

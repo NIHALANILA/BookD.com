@@ -7,8 +7,10 @@ const {Schema}=mongoose;
 const userSchema=new Schema ({
     username:{
         type:String,
-        required:true,
-        unique:true
+        required:function (){
+            return ! this.googleId
+        },
+        unique:false
          
     },
     email:{
@@ -20,7 +22,7 @@ const userSchema=new Schema ({
     phone:{
         type:String,
         required:false,
-        unique:false,
+        unique:true,
         sparse:true,
         default:null,
           
@@ -32,16 +34,14 @@ const userSchema=new Schema ({
     googleId:{
         type:String,
         unique:true,
-
+        
     },
-    isBlocked:{
-        type:Boolean,
-        default:false
+    status: { 
+        type: String,
+        enum: ["active", "blocked"], 
+        default: "active"
     },
-    isAdmin:{
-        type:Boolean,
-        default:false 
-    },
+    
     cart:[{
         type:Schema.Types.ObjectId,
         ref:"Cart"
@@ -92,7 +92,7 @@ const userSchema=new Schema ({
     
 
 
-})
+},{ timestamps: true })
 const User=mongoose.model("User",userSchema
 )
 module.exports=User

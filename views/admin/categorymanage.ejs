@@ -1,0 +1,122 @@
+
+<%-include("../../views/partials/admin/header")%>
+
+<h2>Category Management</h2>
+
+<!-- Search Form -->
+<form class="user-search-form"   action="/admin/categories" method="GET">
+    <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search categories">
+    <button type="submit">Search</button>
+    <% if (searchQuery) { %>
+        <a href="/admin/categories"><button type="button">Reset</button></a>
+    <% } %>
+</form>
+<% if (message) { %>
+    <p class="alert alert-warning"><%= message %></p>
+<% } %>
+
+<!-- Category Table -->
+<table class="book-table">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% categories.forEach((category, index) => { %>
+            <tr>
+                <td><%= (currentPage - 1) * 5 + index + 1 %></td>
+                <td><%= category.name %></td>
+                <td>
+                    <%= category.isListed ? "Active" : "Inactive" %>
+                </td>
+                <td>
+                    <button class="edit-btn" onclick="editCategory('<%= category._id %>', '<%= category.name %>')">Edit</button>
+                    <button class="delete-btn" onclick="toggleCategory('<%= category._id %>')">
+                        <%= category.isListed ? "Deactivate" : "Activate" %>
+                    </button>
+                </td>
+            </tr>
+        <% }) %>
+    </tbody>
+</table>
+
+<!-- Add Category Form -->
+<form class="user-search-form" action="/admin/categories/add" method="POST">
+    <input type="text" name="name" required placeholder="Category Name">
+    <button type="submit">Add Category</button>
+</form>
+
+<div class="pagination-container">
+    <% for(let i = 1; i <= totalPages; i++) { %>
+        <a href="/admin/categories?page=<%= i %>&search=<%= searchQuery %>">
+            <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
+        </a>
+    <% } %>
+</div>
+
+<!-- JavaScript for Edit and Status Toggle -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    async function editCategory(id, name) {
+    const result = await Swal.fire({
+        title: "Edit Category",
+        input: "text",
+        inputValue: name,
+        showCancelButton: true,
+        confirmButtonText: "Save"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/categories/edit/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: result.value })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                await Swal.fire("Error!", "Failed to update category.", "error");
+            }
+        } catch (error) {
+            console.error("Error updating category:", error);
+            await Swal.fire("Error!", "Something went wrong.", "error");
+        }
+    }
+}
+
+
+async function toggleCategory(id) {
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "This will change the category status.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, update!",
+        cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/categories/toggle/${id}`, { method: "PATCH" });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                await Swal.fire("Error!", "Failed to update category status.", "error");
+            }
+        } catch (error) {
+            console.error("Error toggling category:", error);
+            await Swal.fire("Error!", "Something went wrong.", "error");
+        }
+    }
+}
+
+</script>

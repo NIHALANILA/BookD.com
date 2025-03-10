@@ -1,0 +1,123 @@
+
+<%-include("../../views/partials/admin/header")%>
+            <!-- Book Management Section -->
+            <section class="content">
+                <h2>User Management</h2>
+                 <!-- Search Form -->
+    <form class="user-search-form"   action="/admin/customers" method="GET">
+        <input type="text" name="search" value="<%= search %>" placeholder="Search users">
+        <button type="submit">Search</button>
+        <% if (search) { %>
+            <a href="/admin/customers"><button type="button">Reset</button></a>
+
+        <% } %>
+        <% if (message) { %>
+            <p class="alert alert-warning"><%= message %></p>
+        <% } %>
+        
+    </form>
+                <table class="book-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% users.forEach((user, index) => { %>
+                        <tr>
+                            <td><%= (currentPage - 1) * 3 + index + 1 %></td>
+                            <td><%= user.username %></td>
+                            <td><%= user.email %></td>
+                            <td><%= user.phone %></td>
+                            <td><%= user.status %></td>
+                            <td>
+                                <td>
+                                    <% if (user.status === "active") { %>
+                                        <button class="delete-btn" type="button" onclick="blockUser('<%= user._id %>')">Block</button>
+                                    <% } else { %>
+                                        <button class="edit-btn" type="button" onclick="unblockUser('<%= user._id %>')">Unblock</button>
+                                    <% } %>
+                                </td>
+                                
+                            </td>
+                        </tr>
+    
+                        <% }); %>
+                    </tbody>
+                </table>
+                <!-- Pagination Controls -->
+    <div class="pagination-container">
+        <% for(let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/customers?page=<%= i %>&search=<%= search %>">
+                <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
+            </a>
+        <% } %>
+    </div>
+            </section>
+        </main>
+    </div>
+    <script>
+       async function blockUser(userId) {
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "This user will be blocked!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, block!",
+        cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/block/${userId}`, { method: "PATCH" });
+
+            if (response.ok) {
+                await Swal.fire("Blocked!", "The user has been blocked.", "success");
+                location.reload();
+            } else {
+                await Swal.fire("Error!", "Failed to block user.", "error");
+            }
+        } catch (error) {
+            console.error("Error blocking user:", error);
+            await Swal.fire("Error!", "Something went wrong.", "error");
+        }
+    }
+}
+async function unblockUser(userId) {
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "This user will be unblocked!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, unblock!",
+        cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/unblock/${userId}`, { method: "PATCH" });
+
+            if (response.ok) {
+                await Swal.fire("Unblocked!", "The user has been unblocked.", "success");
+                location.reload();
+            } else {
+                await Swal.fire("Error!", "Failed to unblock user.", "error");
+            }
+        } catch (error) {
+            console.error("Error unblocking user:", error);
+            await Swal.fire("Error!", "Something went wrong.", "error");
+        }
+    }
+}
+
+    </script>
+</body>
+</html>

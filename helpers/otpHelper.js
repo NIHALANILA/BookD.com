@@ -1,5 +1,6 @@
 
 const nodemailer = require("nodemailer");
+const bcrypt=require("bcryptjs")
 
 
 function generateOtp() {
@@ -36,5 +37,15 @@ async function sendVerificationEmail(email, otp) {
     }
 }
 
+const securePassword=async(password)=>{
+    try{
+        const passwordHash= await bcrypt.hash(password,10)
+        return passwordHash
+    }
+    catch(error){
+        console.log(error)
+    }
+}
 
-module.exports = { generateOtp, sendVerificationEmail };
+
+module.exports = { generateOtp, sendVerificationEmail,securePassword };

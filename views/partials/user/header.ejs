@@ -19,6 +19,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link
     href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
@@ -239,8 +240,21 @@
   </div>
   <header class="top-header bg-light py-2 border-bottom fixed-top">
     <div class="container d-flex justify-content-end">
+      <% if(user){%>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class='bx bx-user'></i> Hi,<%= user.username %><!-- Boxicon User Icon -->
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/userProfile">Profile</a></li>
+            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            
+          </ul>
+        </div>
+        <%}else{%>
       <a href="/signup" class="me-3 text-dark text-decoration-none">Signup</a>
-      <a href="login.html" class="text-dark text-decoration-none">Login</a>
+      <a href="/login" class="text-dark text-decoration-none">Login</a>
+      <%}%>
     </div>
   </header>
 
