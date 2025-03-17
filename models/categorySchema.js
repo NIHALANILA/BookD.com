@@ -16,7 +16,9 @@ const categorySchema=new Schema({
   createdAt: {
       type: Date,
       default: Date.now
-  }
+  },
+  isDeleted: { type: Boolean, default: false },
+  deleted_at: { type: Date, default: null } 
 })
 const Category=mongoose.model("Category",categorySchema);
 module.exports=Category

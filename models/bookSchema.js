@@ -4,7 +4,6 @@ const {Schema}=mongoose;
 
 const bookSchema = new Schema({
   category_id: { type: Schema.Types.ObjectId, required: true, ref: "Category" },
-  offer_id: { type: Schema.Types.ObjectId, ref: "Offer" },
   title: { type: String, required: true },
   isbn: { type: String, unique: true },
   author: { type: String, required: true },
@@ -16,8 +15,12 @@ const bookSchema = new Schema({
   number_of_pages: { type: Number },
   price: { type: Number, required: true },
   stock: { type: Number, default: 0 },
-  book_img: { type: String }
+  book_images: [{ type: String, required: true }], 
+  isDeleted: { type: Boolean, default: false },   
+       
 }, { timestamps: true });
+
+
 
 Books = mongoose.model("Book", bookSchema);
 module.exports=Books;

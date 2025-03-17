@@ -1,0 +1,70 @@
+<%-include("../../views/partials/admin/header")%>
+<!-- Book Management Section -->
+<section class="content">
+    <h2>User Management</h2>
+                 <!-- Search Form -->
+    <form class="user-search-form"   action="/admin/books" method="GET">
+        <input type="text" name="search" value="<%= search %>" placeholder="Search users">
+        <button type="submit">Search</button>
+        <% if (search) { %>
+            <a href="/admin/books"><button type="button">Reset</button></a>
+
+        <% } %>
+        <% if (message) { %>
+            <p class="alert alert-warning"><%= message %></p>
+        <% } %>
+        
+    </form>
+
+    <table class="book-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% books.forEach((book, index) => { %>
+                        <tr>
+                            <td><%= (currentPage - 1) * 3 + index + 1 %></td>
+                            <td><%= book.title %></td>
+                            <td><%= book.author %></td>
+                            <td><%= book.price %></td>
+                            <td><%= book.category_id ? book.category_id.name : "No Category" %></td>
+                            <td><%= book.stock %></td>
+                            
+                                <td>
+                                    
+                                        <button class="delete-btn" type="button" onclick="softDelete('<%= book._id %>')">Delete</button>
+                                   
+                                        <a href="/admin/books/edit/<%= book._id %>" class="edit-btn" style="text-decoration: none;" >Edit</a>
+
+                                    
+                                </td>                                                            
+                        </tr>
+    
+                        <% }); %>
+                    </tbody>
+                </table>
+
+     <!-- Pagination Controls -->
+    <div class="pagination-container">
+        <% for(let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/customers?page=<%= i %>&search=<%= search %>">
+                <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
+            </a>
+        <% } %>
+    </div>
+    
+ 
+    
+</section>
+</main>
+</div>
+</body>
+</html>

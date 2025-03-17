@@ -1,0 +1,620 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  <style>
+    /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.content-main {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Container */
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Left & Right Sections */
+.left-section, .right-section {
+    flex: 1;
+    min-width: 300px;
+}
+.center-section{
+    flex:2;
+    text-align: center;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    flex-direction: column; /* Stacks elements vertically */
+    text-align: center; 
+
+}
+/* Card Styling */
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Form Inputs */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
+}
+
+/* Error Messages */
+.text-danger {
+    font-size: 12px;
+    color: red;
+    margin-top: 3px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: #4a90e2;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background: #357ac7;
+}
+
+/* Image Upload Section */
+.image-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.image-preview {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 5px; 
+    overflow: hidden;
+    position: relative;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
+}
+
+.delete-btn {
+    background: #e94e4e;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background: #c73b3b;
+}
+
+/* Modal Styling */
+#cropperModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px; /* Adjust modal width */
+    height: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 1000;
+}
+
+#cropperImage {
+    width: 100%;
+    max-height: 300px; /* Limit image size */
+    display: block;
+    margin: 0 auto;
+}
+
+.cropper-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.cropper-buttons button {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#cropSaveBtn {
+    background-color: #28a745;
+    color: white;
+}
+
+#cropCancelBtn {
+    background-color: #dc3545;
+    color: white;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-container {
+        flex-direction: column;
+    }
+    
+    .left-section, .right-section {
+        width: 100%;
+    }
+
+    .image-upload-container {
+        justify-content: center;
+    }
+}
+
+    
+       
+         
+    </style> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+</head>
+
+<%-include("../../views/partials/admin/header")%>
+<section class="content-main">
+    <h3>Add Books</h3>
+    
+    <form  method="post"  enctype="multipart/form-data" id="addBookForm" onsubmit="return false" action="/admin/books/add">
+        <div class="form-container">
+            <!--left-->
+            <div class="left-section">
+               <div class="card">
+                    <h3>Title</h3>
+                    <div class="form-group">
+                        <label for="Title">Title of the book</label>
+                        <input type="text" id="title" name="title" placeholder="Enter title of the book" >
+                        <div id="titleError" class="text-danger"></div>
+                    </div>
+                </div>
+               <div class="card">
+                    <h3>Author</h3>
+                    <div class="form-group">
+                        <label for="Author">Author of the book</label>
+                        <input type="text" id="author" name="author" placeholder="Enter Author of the book" >
+                        <div id="authorError" class="text-danger"></div>
+                    </div>
+                </div>
+                <!--category sect-->
+               <div class="card">
+                    <h3>Category
+                    <div class="form-group">
+                        <label for="Category">Select Category</label>
+                        <select name="category_id" class="form-select" id="category_id" >
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.name %></option>
+                            <% }) %>                            
+                        </select>                       
+                        <div id="categoryError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>ISBN</h3>
+                    <div class="form-group">
+                        <label for="Isbn">Enter ISBN number</label>
+                        <input type="text" id="isbn" name="isbn" placeholder="Enter ISBN number" >
+                        <div id="isbnError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Publisher</h3>
+                    <div class="form-group">
+                        <label for="Publisher">Enter publisher name</label>
+                        <input type="text" id="publisher" name="publisher" placeholder="Enter Publisher name">
+                        <div id="publisherError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Language</h3>
+                    <div class="form-group">
+                        <label for="Language">Enter publisher name</label>
+                        <input type="text" id="language" name="language" placeholder="Enter Language" >
+                        <div id="languageError" class="text-danger"></div>
+                    </div>
+                </div>
+           
+            </div>
+            <!--right-->
+            <div class="right-section">
+                
+               
+                <div class="card">
+                    <h3>Binding</h3>
+                    <div class="form-group">
+                        <label for="Language">Choose Binding </label>
+                        <select name="binding" class="form-select" id="binding" >
+                            <option value="paperback">Paperback</option>
+                            <option value="hardcover">Hardcover</option>                
+                        </select>
+                        <div id="bindingError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Publishing Date</h3>
+                    <div class="form-group">
+                        <label for="Language"> publishing date</label>
+                        <input type="date" id="publishingDate" name="publishing_date" placeholder="Enter publishing date">
+                        <div id="dateError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Edition</h3>
+                    <div class="form-group">
+                        <label for="Edition"> Edition</label>
+                        <input type="number" id="edition" name="edition" placeholder="Enter current Edition" >
+                        <div id="editionError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Number of pages</h3>
+                    <div class="form-group">
+                        <label for="number of pages"> no:of pages</label>
+                        <input type="number" id="pages" name="pages" placeholder="Enter no:of pages" >
+                        <div id="pagesError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Price</h3>
+                    <div class="form-group">
+                        <label for="Price"> Price</label>
+                        <input type="number" id="price" name="price" placeholder="Enter the price" >
+                        <div id="priceError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Stock</h3>
+                    <div class="form-group">
+                        <label for="Stock"> Stock</label>
+                        <input type="number" id="stock" name="stock" placeholder="Enter the Stock" >
+                        <div id="stockError" class="text-danger"></div>
+                    </div>
+                </div>
+                
+            </div>
+            <!--center-->
+            <div class="center-section">
+                <div class="card">
+                    <h3>Media</h3>
+                    <div class="image-upload-container">
+                        <% for (let i = 0; i < 3; i++) { %>
+                        <div class="image-container">
+                            <div class="image-preview" id="previewContainer<%= i %>">
+                                <span>Add Image</span>
+                            </div>
+                            <input type="file" name="images" multiple id="imageInput<%= i %>" accept="image/*" style="display: none;">
+                            <div class="button-group">
+                                <!-- <button type="button" class="save-btn" onclick="handleSave('<%= i %>')">Save</button> -->
+                                <button type="button" class="delete-btn" onclick="handleDelete('<%= i %>')">Delete</button>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-primary">Add Product</button>
+                </div>
+    
+            </div>
+           
+        </div>  
+    </form>
+
+</section>
+<!-- Cropper Modal -->
+<div id="cropperModal">
+    <div class="modal-content">
+        <img id="cropperImage" alt="Crop Image">
+        <div class="modal-buttons">
+            <button class="btn-primary" id="cropSaveBtn">Save</button>
+            <button class="btn-primary" id="cropCancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+<!--old-->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<script>
+    
+    const maxImages = 3;
+    let cropper = null;
+    let currentImageIndex = null;
+
+    for (let i = 0; i < maxImages; i++) {
+        const previewContainer = document.getElementById(`previewContainer${i}`);
+        const imageInput = document.getElementById(`imageInput${i}`);
+
+        previewContainer.addEventListener('click', () => imageInput.click());
+        imageInput.addEventListener('change', (event) => handleFileChange(event, i));
+    } 
+
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImage = document.getElementById('cropperImage');
+    const cropSaveBtn = document.getElementById('cropSaveBtn');
+    const cropCancelBtn = document.getElementById('cropCancelBtn');
+
+    function handleFileChange(event, index) {
+
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropperImage.src = e.target.result;
+                
+                openCropperModal(index);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function openCropperModal(index) {
+        currentImageIndex = index;
+        cropperModal.style.display = 'flex';
+        if (cropper) cropper.destroy();
+       
+
+        cropper = new Cropper(cropperImage, {
+        aspectRatio: NaN,
+        viewMode: 1, 
+        autoCropArea: 1,  
+        movable: true, 
+        zoomable: true, 
+        scalable: true, 
+        responsive: true,
+        background: false,
+        ready() {
+            
+            const imageData = cropper.getImageData();
+            cropper.setCropBoxData({
+                left: imageData.left,
+                top: imageData.top,
+                width: imageData.width,
+                height: imageData.height
+            });
+        }
+    });
+    }
+
+    cropSaveBtn.addEventListener('click', () => {
+    const croppedCanvas = cropper.getCroppedCanvas();
+
+    if (!croppedCanvas) return;
+
+    croppedCanvas.toBlob((blob) => {
+        const file = new File([blob], `cropped-image-${currentImageIndex}.png`, { type: "image/png" });
+
+        const imageInput = document.getElementById(`imageInput${currentImageIndex}`);
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        imageInput.files = dataTransfer.files;
+
+        const previewContainer = document.getElementById(`previewContainer${currentImageIndex}`);
+        previewContainer.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Cropped Image">`;
+
+        closeCropperModal();
+    }, "image/png");
+    });
+
+    cropCancelBtn.addEventListener('click', closeCropperModal);
+    function closeCropperModal() {
+        cropperModal.style.display = 'none';
+        if (cropper) cropper.destroy();
+    }
+
+    function handleDelete(index) {
+        const previewContainer = document.getElementById(`previewContainer${index}`);
+        previewContainer.innerHTML = `<span>Add Image</span>`;
+        alert(`Image ${index + 1} deleted!`);
+    }
+
+    
+    document.getElementById("addBookForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent form submission
+    validateForm();
+});
+
+function validateImages() {
+    let images = document.querySelectorAll('input[type="file"]');
+    let hasImage = Array.from(images).some(input => input.files.length > 0);
+
+    if (!hasImage) {
+        alert("Please upload at least one image.");
+        return false;
+    }
+    return true;
+}
+
+//form validation
+function validateForm() {
+    let isValid = true;
+
+    // Reset all error messages
+    document.querySelectorAll('.text-danger').forEach(error => error.innerText = '');
+
+    // Title Validation
+    let title = document.getElementById('title');
+    if (title.value.trim() === '') {
+        document.getElementById('titleError').innerText = "Title is required";
+        isValid = false;
+    }
+
+    // Author Validation
+    let author = document.getElementById('author');
+    if (author.value.trim() === '') {
+        document.getElementById('authorError').innerText = "Author is required";
+        isValid = false;
+    }
+
+    // Category Validation
+    let category = document.getElementById('category_id');
+    if (category.value === '') {
+        document.getElementById('categoryError').innerText = "Please select a category";
+        isValid = false;
+    }
+
+    // ISBN Validation (Checking if it’s a number and 10-13 digits long)
+    let isbn = document.getElementById('isbn');
+    if (!/^\d{10,13}$/.test(isbn.value.trim())) {
+        document.getElementById('isbnError').innerText = "Enter a valid ISBN (10-13 digits)";
+        isValid = false;
+    }
+
+    // Publisher Validation
+    let publisher = document.getElementById('publisher');
+    if (publisher.value.trim() === '') {
+        document.getElementById('publisherError').innerText = "Publisher is required";
+        isValid = false;
+    }
+
+    // Language Validation
+    let language = document.getElementById('language');
+    if (language.value.trim() === '') {
+        document.getElementById('languageError').innerText = "Language is required";
+        isValid = false;
+    }
+
+    // Binding Validation
+    let binding = document.getElementById('binding');
+    if (binding.value === '') {
+        document.getElementById('bindingError').innerText = "Please select a binding type";
+        isValid = false;
+    }
+
+    // Publishing Date Validation
+    let publishingDate = document.getElementById('publishingDate');
+    if (publishingDate.value === '') {
+        document.getElementById('dateError').innerText = "Publishing date is required";
+        isValid = false;
+    }
+
+    // Edition Validation (Should be a positive number)
+    let edition = document.getElementById('edition');
+    if (edition.value.trim() === '' || edition.value <= 0) {
+        document.getElementById('editionError').innerText = "Enter a valid edition number";
+        isValid = false;
+    }
+
+    // Number of Pages Validation (Should be a positive number)
+    let pages = document.getElementById('pages');
+    if (pages.value.trim() === '' || pages.value <= 0) {
+        document.getElementById('pagesError').innerText = "Enter a valid number of pages";
+        isValid = false;
+    }
+
+    // Price Validation (Should be a positive number)
+    let price = document.getElementById('price');
+    if (price.value.trim() === '' || price.value <= 0) {
+        document.getElementById('priceError').innerText = "Enter a valid price";
+        isValid = false;
+    }
+
+    // Stock Validation (Should be a non-negative number)
+    let stock = document.getElementById('stock');
+    if (stock.value.trim() === '' || stock.value < 0) {
+        document.getElementById('stockError').innerText = "Enter a valid stock quantity";
+        isValid = false;
+    }
+    
+if (!validateImages()) {
+    isValid = false;
+}
+
+    // If all fields are valid, proceed with form submission
+    if (isValid) {
+        alert("Form submitted successfully!");
+        document.getElementById("addBookForm").submit();
+    }
+}
+
+
+
+
+
+</script>
+</body>
+</html>

@@ -35,6 +35,7 @@
                 </td>
                 <td>
                     <button class="edit-btn" onclick="editCategory('<%= category._id %>', '<%= category.name %>')">Edit</button>
+                    <button class="delete-btn" onclick="softDeleteCategory('<%= category._id %>')">Delete</button>
                     <button class="delete-btn" onclick="toggleCategory('<%= category._id %>')">
                         <%= category.isListed ? "Deactivate" : "Activate" %>
                     </button>
@@ -45,7 +46,7 @@
 </table>
 
 <!-- Add Category Form -->
-<form class="user-search-form" action="/admin/categories/add" method="POST">
+<form class="user-search-form" action="/admin/categories" method="POST">
     <input type="text" name="name" required placeholder="Category Name">
     <button type="submit">Add Category</button>
 </form>
@@ -77,11 +78,13 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: result.value })
             });
+            const data= await response.json()
 
             if (response.ok) {
+                await Swal.fire("Success",data.message,"success")
                 location.reload();
             } else {
-                await Swal.fire("Error!", "Failed to update category.", "error");
+                await Swal.fire("Error!",data.message||"failed to update category");
             }
         } catch (error) {
             console.error("Error updating category:", error);
@@ -89,8 +92,6 @@
         }
     }
 }
-
-
 async function toggleCategory(id) {
     const result = await Swal.fire({
         title: "Are you sure?",
@@ -106,6 +107,35 @@ async function toggleCategory(id) {
     if (result.isConfirmed) {
         try {
             const response = await fetch(`/admin/categories/toggle/${id}`, { method: "PATCH" });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                await Swal.fire("Error!", "Failed to update category status.", "error");
+            }
+        } catch (error) {
+            console.error("Error toggling category:", error);
+            await Swal.fire("Error!", "Something went wrong.", "error");
+        }
+    }
+}
+
+
+async function softDeleteCategory(id) {
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "This will remove the category from the panel.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete!",
+        cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/categories/delete/${id}`, { method: "PATCH" });
 
             if (response.ok) {
                 location.reload();

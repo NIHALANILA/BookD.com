@@ -23,6 +23,7 @@
                             <th>Username</th>
                             <th>Email</th>
                             <th>phone</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -34,7 +35,7 @@
                             <td><%= user.email %></td>
                             <td><%= user.phone %></td>
                             <td><%= user.status %></td>
-                            <td>
+                            
                                 <td>
                                     <% if (user.status === "active") { %>
                                         <button class="delete-btn" type="button" onclick="blockUser('<%= user._id %>')">Block</button>
@@ -43,7 +44,7 @@
                                     <% } %>
                                 </td>
                                 
-                            </td>
+                            
                         </tr>
     
                         <% }); %>
@@ -60,6 +61,10 @@
             </section>
         </main>
     </div>
+</main>
+</div>
+</body>
+</html>
     <script>
        async function blockUser(userId) {
     const result = await Swal.fire({

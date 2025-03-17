@@ -15,21 +15,12 @@ db()
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
-/*app.use(session({
-    secret:process.env.SESSION_SECRET,
-    resave:false,
-    saveUninitialized:true,
-    cookie:{
-        secure:false,
-        httpOnly:true,
-        maxAge:72*60*60*1000
-    }
-}))*/
+
 app.use(session({
-    secret: "your-secret-key",   // Use a strong secret key
+    secret: "your-secret-key",   
     resave: false,
-    saveUninitialized: false, // Change this to false if the session resets
-    cookie: { secure: false, httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000 } // 3 days
+    saveUninitialized: false, 
+    cookie: { secure: false, httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000 } 
 }));
 
 app.use(passport.initialize());
