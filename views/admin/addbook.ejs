@@ -210,6 +210,36 @@ body {
     color: white;
 }
 
+/* Apply input-like styling to the category dropdown */
+.custom-dropdown {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    text-align: left;
+}
+
+/* Focus effect like input fields */
+.custom-dropdown:focus, .custom-dropdown:active {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
+}
+.dropdown-menu li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures the label is on the left, checkbox on the right */
+    padding: 5px 10px; /* Adjust padding */
+}
+
+.dropdown-menu .form-check-input {
+    margin-left: auto; /* Pushes checkbox to the right */
+}
+
+
+
 
 
 /* Responsive Design */
@@ -232,13 +262,17 @@ body {
          
     </style> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    
 </head>
 
 <%-include("../../views/partials/admin/header")%>
 <section class="content-main">
     <h3>Add Books</h3>
+    <% if (message) { %>
+        <p class="alert alert-warning"><%= message %></p>
+    <% } %>
     
-    <form  method="post"  enctype="multipart/form-data" id="addBookForm" onsubmit="return false" action="/admin/books/add">
+    <form  method="post"  enctype="multipart/form-data" id="addBookForm"  action="/admin/books/add">
         <div class="form-container">
             <!--left-->
             <div class="left-section">
@@ -261,15 +295,26 @@ body {
                 <!--category sect-->
                <div class="card">
                     <h3>Category
-                    <div class="form-group">
-                        <label for="Category">Select Category</label>
-                        <select name="category_id" class="form-select" id="category_id" >
-                            <% categories.forEach(category => { %>
-                                <option value="<%= category._id %>"><%= category.name %></option>
-                            <% }) %>                            
-                        </select>                       
-                        <div id="categoryError" class="text-danger"></div>
-                    </div>
+                        <div class="form-group">
+                            <label for="categoryDropdown">Select Category</label>
+                            <div class="dropdown">
+                                <button class="form-select custom-dropdown w-100 text-start" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Select Categories
+                                </button>
+                                <ul class="dropdown-menu p-2" aria-labelledby="categoryDropdown" style="max-height: 200px; overflow-y: auto;">
+                                    <% categories.forEach(category => { %>
+                                        <li>
+                                            <label class="form-check-label" for="category_<%= category._id %>"><%= category.name %></label>
+                                            <input class="form-check-input me-2 category-checkbox" type="checkbox" name="category_ids[]" value="<%= category._id %>" id="category_<%= category._id %>">
+                                            
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                            <span id="categoryError" class="text-danger"></span>
+
+                        </div>
+                        
                 </div>
                 <div class="card">
                     <h3>ISBN</h3>
@@ -290,7 +335,7 @@ body {
                 <div class="card">
                     <h3>Language</h3>
                     <div class="form-group">
-                        <label for="Language">Enter publisher name</label>
+                        <label for="Language">Enter language </label>
                         <input type="text" id="language" name="language" placeholder="Enter Language" >
                         <div id="languageError" class="text-danger"></div>
                     </div>
@@ -332,7 +377,7 @@ body {
                     <h3>Number of pages</h3>
                     <div class="form-group">
                         <label for="number of pages"> no:of pages</label>
-                        <input type="number" id="pages" name="pages" placeholder="Enter no:of pages" >
+                        <input type="number" id="pages" name="number_of_pages" placeholder="Enter no:of pages" >
                         <div id="pagesError" class="text-danger"></div>
                     </div>
                 </div>
@@ -366,7 +411,7 @@ body {
                             </div>
                             <input type="file" name="images" multiple id="imageInput<%= i %>" accept="image/*" style="display: none;">
                             <div class="button-group">
-                                <!-- <button type="button" class="save-btn" onclick="handleSave('<%= i %>')">Save</button> -->
+                               
                                 <button type="button" class="delete-btn" onclick="handleDelete('<%= i %>')">Delete</button>
                             </div>
                         </div>
@@ -399,6 +444,37 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
 <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const categoryDropdown = document.getElementById("categoryDropdown");
+
+    if (!categoryDropdown) {
+        console.error("categoryDropdown not found in the DOM.");
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll(".category-checkbox");
+
+    function updateCategoryButtonText() {
+        let selectedCategories = [];
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                
+                selectedCategories.push(checkbox.closest("li").querySelector("label").textContent.trim());
+            }
+        });
+
+        categoryDropdown.innerText = selectedCategories.length > 0 ? selectedCategories.join(", ") : "Select Categories";
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", updateCategoryButtonText);
+    });
+
+    // Ensure pre-selected categories appear in the dropdown
+    updateCategoryButtonText();
+});
+
     
     const maxImages = 3;
     let cropper = null;
@@ -492,11 +568,137 @@ body {
         alert(`Image ${index + 1} deleted!`);
     }
 
-    
-    document.getElementById("addBookForm").addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent form submission
-    validateForm();
+document.getElementById("addBookForm").addEventListener("submit", async function (event) {
+    event.preventDefault(); 
+    let isValid = validateForm(); 
+
+    if (isValid) {
+        let isbnInput = document.getElementById("isbn").value;
+        let isbnError = document.getElementById("isbnError");
+
+       
+        const response = await fetch("/admin/books/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest" 
+            },
+            body: JSON.stringify({ isbn: isbnInput })
+        });
+
+        const result = await response.json();
+
+        if (result.exists) {
+            isbnError.innerText = "This ISBN already exists. Please enter a unique ISBN.";
+            isbnError.classList.remove("d-none"); 
+        } else {
+            isbnError.classList.add("d-none"); 
+            alert("Form submitted successfully!");
+            document.getElementById("addBookForm").submit(); 
+        }
+    }
 });
+
+
+function validateForm() {
+    let isValid = true;
+
+    
+    document.querySelectorAll('.text-danger').forEach(error => error.innerText = '');
+
+    
+    let title = document.getElementById('title');
+    if (title.value.trim() === '') {
+        document.getElementById('titleError').innerText = "Title is required";
+        isValid = false;
+    }
+
+    
+    let author = document.getElementById('author');
+    if (author.value.trim() === '') {
+        document.getElementById('authorError').innerText = "Author is required";
+        isValid = false;
+    }
+
+   
+    const checkboxes = document.querySelectorAll(".category-checkbox");
+    let isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+    if (!isChecked) {
+        document.getElementById('categoryError').innerText = "Please select at least one category";
+        isValid = false;
+    }
+
+    
+    let isbn = document.getElementById('isbn');
+    if (!/^\d{10,13}$/.test(isbn.value.trim())) {
+        document.getElementById('isbnError').innerText = "Enter a valid ISBN (10-13 digits)";
+        isValid = false;
+    }
+
+   
+    let publisher = document.getElementById('publisher');
+    if (publisher.value.trim() === '') {
+        document.getElementById('publisherError').innerText = "Publisher is required";
+        isValid = false;
+    }
+
+    
+    let language = document.getElementById('language');
+    if (language.value.trim() === '') {
+        document.getElementById('languageError').innerText = "Language is required";
+        isValid = false;
+    }
+
+   
+    let binding = document.getElementById('binding');
+    if (binding.value === '') {
+        document.getElementById('bindingError').innerText = "Please select a binding type";
+        isValid = false;
+    }
+
+   
+    let publishingDate = document.getElementById('publishingDate');
+    if (publishingDate.value === '') {
+        document.getElementById('dateError').innerText = "Publishing date is required";
+        isValid = false;
+    }
+
+   
+    let edition = document.getElementById('edition');
+    if (edition.value.trim() === '' || edition.value <= 0) {
+        document.getElementById('editionError').innerText = "Enter a valid edition number";
+        isValid = false;
+    }
+
+   
+    let pages = document.getElementById('pages');
+    if (pages.value.trim() === '' || pages.value <= 0) {
+        document.getElementById('pagesError').innerText = "Enter a valid number of pages";
+        isValid = false;
+    }
+
+   
+    let price = document.getElementById('price');
+    if (price.value.trim() === '' || price.value <= 0) {
+        document.getElementById('priceError').innerText = "Enter a valid price";
+        isValid = false;
+    }
+
+    
+    let stock = document.getElementById('stock');
+    if (stock.value.trim() === '' || stock.value < 0) {
+        document.getElementById('stockError').innerText = "Enter a valid stock quantity";
+        isValid = false;
+    }
+
+   
+    if (!validateImages()) {
+        isValid = false;
+    }
+
+    return isValid;
+}
+
 
 function validateImages() {
     let images = document.querySelectorAll('input[type="file"]');
@@ -508,110 +710,7 @@ function validateImages() {
     }
     return true;
 }
-
-//form validation
-function validateForm() {
-    let isValid = true;
-
-    // Reset all error messages
-    document.querySelectorAll('.text-danger').forEach(error => error.innerText = '');
-
-    // Title Validation
-    let title = document.getElementById('title');
-    if (title.value.trim() === '') {
-        document.getElementById('titleError').innerText = "Title is required";
-        isValid = false;
-    }
-
-    // Author Validation
-    let author = document.getElementById('author');
-    if (author.value.trim() === '') {
-        document.getElementById('authorError').innerText = "Author is required";
-        isValid = false;
-    }
-
-    // Category Validation
-    let category = document.getElementById('category_id');
-    if (category.value === '') {
-        document.getElementById('categoryError').innerText = "Please select a category";
-        isValid = false;
-    }
-
-    // ISBN Validation (Checking if it’s a number and 10-13 digits long)
-    let isbn = document.getElementById('isbn');
-    if (!/^\d{10,13}$/.test(isbn.value.trim())) {
-        document.getElementById('isbnError').innerText = "Enter a valid ISBN (10-13 digits)";
-        isValid = false;
-    }
-
-    // Publisher Validation
-    let publisher = document.getElementById('publisher');
-    if (publisher.value.trim() === '') {
-        document.getElementById('publisherError').innerText = "Publisher is required";
-        isValid = false;
-    }
-
-    // Language Validation
-    let language = document.getElementById('language');
-    if (language.value.trim() === '') {
-        document.getElementById('languageError').innerText = "Language is required";
-        isValid = false;
-    }
-
-    // Binding Validation
-    let binding = document.getElementById('binding');
-    if (binding.value === '') {
-        document.getElementById('bindingError').innerText = "Please select a binding type";
-        isValid = false;
-    }
-
-    // Publishing Date Validation
-    let publishingDate = document.getElementById('publishingDate');
-    if (publishingDate.value === '') {
-        document.getElementById('dateError').innerText = "Publishing date is required";
-        isValid = false;
-    }
-
-    // Edition Validation (Should be a positive number)
-    let edition = document.getElementById('edition');
-    if (edition.value.trim() === '' || edition.value <= 0) {
-        document.getElementById('editionError').innerText = "Enter a valid edition number";
-        isValid = false;
-    }
-
-    // Number of Pages Validation (Should be a positive number)
-    let pages = document.getElementById('pages');
-    if (pages.value.trim() === '' || pages.value <= 0) {
-        document.getElementById('pagesError').innerText = "Enter a valid number of pages";
-        isValid = false;
-    }
-
-    // Price Validation (Should be a positive number)
-    let price = document.getElementById('price');
-    if (price.value.trim() === '' || price.value <= 0) {
-        document.getElementById('priceError').innerText = "Enter a valid price";
-        isValid = false;
-    }
-
-    // Stock Validation (Should be a non-negative number)
-    let stock = document.getElementById('stock');
-    if (stock.value.trim() === '' || stock.value < 0) {
-        document.getElementById('stockError').innerText = "Enter a valid stock quantity";
-        isValid = false;
-    }
-    
-if (!validateImages()) {
-    isValid = false;
-}
-
-    // If all fields are valid, proceed with form submission
-    if (isValid) {
-        alert("Form submitted successfully!");
-        document.getElementById("addBookForm").submit();
-    }
-}
-
-
+</script>
 
 
 

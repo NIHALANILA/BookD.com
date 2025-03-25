@@ -3,7 +3,7 @@ const {Schema}=mongoose;
 
 
 const bookSchema = new Schema({
-  category_id: { type: Schema.Types.ObjectId, required: true, ref: "Category" },
+  category_ids: [{ type: Schema.Types.ObjectId, required: true, ref: "Category" }],
   title: { type: String, required: true },
   isbn: { type: String, unique: true },
   author: { type: String, required: true },
@@ -17,6 +17,7 @@ const bookSchema = new Schema({
   stock: { type: Number, default: 0 },
   book_images: [{ type: String, required: true }], 
   isDeleted: { type: Boolean, default: false },   
+  isListed: { type: Boolean, default: true },
        
 }, { timestamps: true });
 

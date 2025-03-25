@@ -8,7 +8,7 @@ function generateOtp() {
 }
 
 
-async function sendVerificationEmail(email, otp) {
+/*async function sendVerificationEmail(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -35,7 +35,36 @@ async function sendVerificationEmail(email, otp) {
         console.error("Error sending email:", error);
         return false;
     }
+}*/
+
+async function sendVerificationEmail(email, otp, subject, message) {
+    try {
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: process.env.EMAIL_NAME,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+        const info = await transporter.sendMail({
+            from: process.env.EMAIL_NAME,
+            to: email,
+            subject: subject, // Dynamic subject
+            text: `${message}: ${otp}`, 
+            html: `<b>${message}: ${otp}</b>`, 
+        });
+
+        return info.accepted.length > 0;
+    } catch (error) {
+        console.error("Error sending email:", error);
+        return false;
+    }
 }
+
 
 const securePassword=async(password)=>{
     try{

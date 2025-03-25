@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  <style>
+    /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.content-main {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Container */
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Left & Right Sections */
+.left-section, .right-section {
+    flex: 1;
+    min-width: 300px;
+}
+.center-section{
+    flex:2;
+    text-align: center;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    flex-direction: column; /* Stacks elements vertically */
+    text-align: center; 
+
+}
+/* Card Styling */
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Form Inputs */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
+}
+
+/* Error Messages */
+.text-danger {
+    font-size: 12px;
+    color: red;
+    margin-top: 3px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: #4a90e2;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background: #357ac7;
+}
+
+/* Image Upload Section */
+.image-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.image-preview {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 5px; 
+    overflow: hidden;
+    position: relative;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
+}
+
+.delete-btn {
+    background: #e94e4e;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background: #c73b3b;
+}
+
+/* Modal Styling */
+#cropperModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px; /* Adjust modal width */
+    height: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 1000;
+}
+
+#cropperImage {
+    width: 100%;
+    max-height: 300px; /* Limit image size */
+    display: block;
+    margin: 0 auto;
+}
+
+.cropper-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.cropper-buttons button {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#cropSaveBtn {
+    background-color: #28a745;
+    color: white;
+}
+
+#cropCancelBtn {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Apply input-like styling to the category dropdown */
+.custom-dropdown {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    text-align: left;
+}
+
+/* Focus effect like input fields */
+.custom-dropdown:focus, .custom-dropdown:active {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
+}
+
+.dropdown-menu li {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Adjust spacing between checkbox and label */
+    padding: 5px 10px; /* Optional: adjust padding */
+}
+
+.dropdown-menu .form-check-input {
+    margin-top: 0; /* Align checkbox properly */
+    vertical-align: middle;
+}
+
+.dropdown-menu .form-check-label {
+    white-space: nowrap; /* Prevents label from wrapping to a new line */
+    vertical-align: middle;
+}
+
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-container {
+        flex-direction: column;
+    }
+    
+    .left-section, .right-section {
+        width: 100%;
+    }
+
+    .image-upload-container {
+        justify-content: center;
+    }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+
+<%-include("../../views/partials/admin/header")%>
+<section class="content-main">
+    <h3>Edit Book</h3>
+
+    <form enctype="multipart/form-data" id="editBookForm" method="post" action="/admin/books/edit/<%= book._id %>">
+        <input type="hidden" name="book_id" id="bookId" value="<%= book._id %>">
+
+        <div class="form-container">
+            <!-- Left Section -->
+            <div class="left-section">
+                <div class="card">
+                    <h3>Title</h3>
+                    <div class="form-group">
+                        <label for="Title">Title of the book</label>
+                        <input type="text" id="title" name="title" value="<%= book.title %>" placeholder="Enter title of the book">
+                        <div id="titleError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Author</h3>
+                    <div class="form-group">
+                        <label for="Author">Author of the book</label>
+                        <input type="text" id="author" name="author" value="<%= book.author %>" placeholder="Enter Author of the book">
+                        <div id="authorError" class="text-danger"></div>
+                    </div>
+                </div>
+              
+                <div class="card">
+                    <h3>Category</h3>
+                    <div class="form-group">
+                        <label for="categoryDropdown">Select Category</label>
+                        <div class="dropdown">
+                            <button class="form-select custom-dropdown w-100 text-start" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Categories
+                            </button>
+                            <ul class="dropdown-menu p-2" aria-labelledby="categoryDropdown" style="max-height: 200px; overflow-y: auto;">
+                                <% categories.forEach(category => { %>
+                                    <li>
+                                        <input 
+                                            class="form-check-input me-2 category-checkbox" 
+                                            type="checkbox" 
+                                            name="category_ids[]" 
+                                            value="<%= category._id %>" 
+                                            id="category_<%= category._id %>"
+                                            <% if (book.category_ids && book.category_ids.includes(category._id)) { %> checked <% } %> 
+                                        >
+                                        <label class="form-check-label" for="category_<%= category._id %>"><%= category.name %></label>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                        <span id="categoryError" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>ISBN</h3>
+                    <div class="form-group">
+                        <label for="Isbn">Enter ISBN number</label>
+                        <input type="text" id="isbn" name="isbn" value="<%= book.isbn %>" placeholder="Enter ISBN number">
+                        <div id="isbnError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Publisher</h3>
+                    <div class="form-group">
+                        <label for="publisher">Enter Publisher name</label>
+                        <input type="text" id="publisher" name="publisher" value="<%= book.publisher %>" placeholder="Enter publisher name">
+                        <div id="publisherError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Language</h3>
+                    <div class="form-group">
+                        <label for="Language">Enter publisher name</label>
+                        <input type="text" id="language" name="language" value="<%= book.language %>" placeholder="Enter Language" >
+                        <div id="languageError" class="text-danger"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="right-section">
+                <div class="card">
+                    <h3>Binding</h3>
+                    <div class="form-group">
+                        <label for="Binding">Choose Binding</label>
+                        <select name="binding" class="form-select" id="binding">
+                            <option value="paperback" <%= book.binding === 'paperback' ? 'selected' : '' %>>Paperback</option>
+                            <option value="hardcover" <%= book.binding === 'hardcover' ? 'selected' : '' %>>Hardcover</option>
+                        </select>
+                        <div id="bindingError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Publishing Date</h3>
+                    <div class="form-group">
+                        <label for="Publishing Date">Publishing date</label>
+                      
+                        <input type="date" id="publishing_date" name="publishing_date" 
+                        value="<%= book.publishing_date ? book.publishing_date.toISOString().split('T')[0] : '' %>">
+                 
+                        
+
+                        <div id="dateError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Edition</h3>
+                    <div class="form-group">
+                        <label for="Edition">Edition</label>
+                        <input type="number" id="edition" name="edition" value="<%= book.edition %>" placeholder="Enter current Edition">
+                        <div id="editionError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Number of pages</h3>
+                   
+                    <div class="form-group">
+                        <label for="number_of_pages">No. of pages</label>
+                        <input type="number" id="pages" name="number_of_pages" value="<%= book.number_of_pages %>" placeholder="Enter no:of pages">
+                        <div id="pagesError" class="text-danger"></div>
+                    </div>
+                    
+                </div>
+                <div class="card">
+                    <h3>Price</h3>
+                    <div class="form-group">
+                        <label for="Price"> Price</label>
+                        <input type="number" id="price" name="price" value="<%= book.price %>" placeholder="Enter the price" >
+                        <div id="priceError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Stock</h3>
+                    <div class="form-group">
+                        <label for="Stock"> Stock</label>
+                        <input type="number" id="stock" name="stock" value="<%= book.stock %>" placeholder="Enter the Stock" >
+                        <div id="stockError" class="text-danger"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Section (Image Upload) -->
+            <div class="center-section">
+                <div class="mb-3">
+                    <label class="form-label">Book Images</label>
+                  
+                </div>
+                <% book.book_images.forEach((image, index) => { %>
+                    <div class="img-container" id="img-container-<%= index %>">
+                        <img id="previewImage-<%= index %>" src="/<%= image %>" alt="Book Image <%= index + 1 %>" class="img-thumbnail">
+                        <input type="hidden" name="existingImages[]" value="<%= image %>">
+                        <span id="imageError" class="text-danger"></span>
+                        
+                       
+                        <button type="button" class="btn btn-change btn-sm" onclick="triggerFileInput('<%= index %>')">Change</button>
+                        
+                        
+                        <input type="file" id="fileInput-<%= index %>" name="images" accept="image/*" class="form-control file-input" style="display: none;" onchange="previewImage(this, '<%= index %>')">
+
+                    </div>
+                <% }); %>
+                
+                <!-- Submit and Cancel Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    <a href="/admin/productview" class="btn btn-secondary">Cancel</a>
+                </div>
+                
+            </div>
+        </div>
+    </form>
+</section>
+<!-- Cropper Modal -->
+<div id="cropperModal">
+    <div class="modal-content">
+        <img id="cropperImage" alt="Crop Image">
+        <div class="modal-buttons">
+            <button class="btn-primary" id="cropSaveBtn">Save</button>
+            <button class="btn-primary" id="cropCancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+<!--old-->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const categoryDropdown = document.getElementById("categoryDropdown");
+
+    if (!categoryDropdown) {
+        console.error("categoryDropdown not found in the DOM.");
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll(".category-checkbox");
+
+    function updateCategoryButtonText() {
+        let selectedCategories = [];
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                // Fix: Select the corresponding label properly
+                selectedCategories.push(checkbox.closest("li").querySelector("label").textContent.trim());
+            }
+        });
+
+        categoryDropdown.innerText = selectedCategories.length > 0 ? selectedCategories.join(", ") : "Select Categories";
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", updateCategoryButtonText);
+    });
+
+    // Ensure pre-selected categories appear in the dropdown
+    updateCategoryButtonText();
+});
+
+     let cropper = null;
+    let currentImageIndex = null;
+
+   
+    function triggerFileInput(index) {
+    const fileInput = document.getElementById(`fileInput-${index}`);
+    if (fileInput) {
+        fileInput.click(); // Opens file picker
+    }
+}
+
+
+    
+    function previewImage(input, index) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                currentImageIndex = index;
+                const cropperImage = document.getElementById('cropperImage');
+                cropperImage.src = e.target.result;
+                openCropperModal();
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function openCropperModal() {
+        const modal = document.getElementById('cropperModal');
+        modal.style.display = 'flex';
+        
+        if (cropper) {
+            cropper.destroy();
+        }
+        
+        cropper = new Cropper(document.getElementById('cropperImage'), {
+            aspectRatio: 4/5,
+            viewMode: 1,
+            autoCropArea: 1,
+        });
+    }
+
+    function closeCropperModal() {
+        const modal = document.getElementById('cropperModal');
+        modal.style.display = 'none';
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    }
+
+    document.getElementById('cropSaveBtn').addEventListener('click', () => {
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 400,
+            height: 500
+        });
+
+        const croppedImageUrl = canvas.toDataURL('image/jpeg');
+        const container = document.getElementById(`img-container-${currentImageIndex}`);
+        
+        
+        container.innerHTML = `
+            <img src="${croppedImageUrl}" alt="Product Image" class="img-thumbnail">
+            
+            <input type="file" id="fileInput-${currentImageIndex}" name="images" accept="image/*" class="form-control file-input" style="display: none;" onchange="previewImage(this, '${currentImageIndex}')">
+        `;
+
+        
+        canvas.toBlob((blob) => {
+            const file = new File([blob], `cropped-image-${Date.now()}.jpg`, { 
+                type: 'image/jpeg',
+                lastModified: Date.now()
+            });
+            
+           
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+
+            const fileInput = document.getElementById(`fileInput-${currentImageIndex}`);
+            fileInput.files = dataTransfer.files;
+        }, 'image/jpeg', 0.95);
+
+        closeCropperModal();
+    });
+
+
+
+document.getElementById("editBookForm").addEventListener("submit", function (event) {
+    event.preventDefault(); 
+
+    if (validateForm()) {
+        alert("Form submitted successfully!");
+        document.getElementById("editBookForm").submit(); 
+    }
+});
+
+function validateForm() {
+    let isValid = true;
+
+   
+    document.querySelectorAll('.text-danger').forEach(error => error.innerText = '');
+
+    
+    let title = document.getElementById('title');
+    if (title.value.trim() === '') {
+        document.getElementById('titleError').innerText = "Title is required";
+        isValid = false;
+    }
+
+    
+    let author = document.getElementById('author');
+    if (author.value.trim() === '') {
+        document.getElementById('authorError').innerText = "Author is required";
+        isValid = false;
+    }
+
+    
+    /*let category = document.getElementById('category_id');
+    if (category.value === '') {
+        document.getElementById('categoryError').innerText = "Please select a category";
+        isValid = false;
+    }*/
+    const checkboxes = document.querySelectorAll(".category-checkbox");
+let isChecked = false;
+
+checkboxes.forEach(checkbox => {
+    if (checkbox.checked) {
+        isChecked = true;
+    }
+});
+
+if (!isChecked) {
+    document.getElementById('categoryError').innerText = "Please select at least one category";
+    isValid = false;
+} else {
+    document.getElementById('categoryError').innerText = "";
+}
+
+  
+    let isbn = document.getElementById('isbn');
+    if (!/^\d{10,13}$/.test(isbn.value.trim())) {
+        document.getElementById('isbnError').innerText = "Enter a valid ISBN (10-13 digits)";
+        isValid = false;
+    }
+
+   
+    let publisher = document.getElementById('publisher');
+    if (publisher.value.trim() === '') {
+        document.getElementById('publisherError').innerText = "Publisher is required";
+        isValid = false;
+    }
+
+    
+    let language = document.getElementById('language');
+    if (language.value.trim() === '') {
+        document.getElementById('languageError').innerText = "Language is required";
+        isValid = false;
+    }
+
+    
+    let binding = document.getElementById('binding');
+    if (binding.value === '') {
+        document.getElementById('bindingError').innerText = "Please select a binding type";
+        isValid = false;
+    }
+    
+
+    let publishingDate = document.getElementById('publishing_date'); 
+
+if (publishingDate.value.trim()==="") { 
+    document.getElementById('dateError').innerText = "Publishing date is required";
+    isValid = false;
+} 
+
+   
+  
+    let edition = document.getElementById('edition');
+    if (edition.value.trim() === '' || edition.value <= 0) {
+        document.getElementById('editionError').innerText = "Enter a valid edition number";
+        isValid = false;
+    }
+
+    
+    let pages = document.getElementById('pages');
+    if (pages.value.trim() === '' || pages.value <= 0) {
+        document.getElementById('pagesError').innerText = "Enter a valid number of pages";
+        isValid = false;
+    }
+
+    
+    let price = document.getElementById('price');
+    if (price.value.trim() === '' || price.value <= 0) {
+        document.getElementById('priceError').innerText = "Enter a valid price";
+        isValid = false;
+    }
+
+   
+    let stock = document.getElementById('stock');
+    if (stock.value.trim() === '' || stock.value < 0) {
+        document.getElementById('stockError').innerText = "Enter a valid stock quantity";
+        isValid = false;
+    }
+
+  
+
+    return isValid; 
+}
+
+
+
+
+
+</script>
+</body>
+</html>
+
+

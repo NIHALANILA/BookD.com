@@ -2,7 +2,8 @@ const User=require('../../models/userSchema')
 console.log("User Model Loaded:", User);
 const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
 const bcrypt= require('bcryptjs')
-
+const Category=require('../../models/categorySchema')
+const Books=require('../../models/bookSchema')
 
 
 
@@ -17,8 +18,14 @@ const loadHome=async(req,res)=>{
              userData= await User.findOne({username:req.session.user.username})
            
         }
-       
-        return res.render('home',{user:userData})
+        
+        const { search } = req.query;
+        
+        const newArrivals= await Books.find({isDeleted:false,isListed:true}).sort({_id:1})
+        const bestSellers=await Books.find({isDeleted:false,isListed:true}).sort({edition:-1})
+        
+        
+        return res.render('home',{user:userData,newArrivals,bestSellers, searchQuery: search || "" })
     
     }
     catch(error){
@@ -60,9 +67,10 @@ const signup=async(req,res)=>{
         if(findUser){
             return res.render("signup",{message:"User with this email already exist"})
         }
-        
+        const subject = "Verify Your Account";
+        const message = "Your OTP for account verification is";
         const otp= generateOtp();
-        const emailSent = await sendVerificationEmail(email,otp)
+        const emailSent = await sendVerificationEmail(email,otp,subject,message)
         if(!emailSent){
             return res.json("email-error")
         }
@@ -71,10 +79,12 @@ const signup=async(req,res)=>{
 
         req.session.userOtp=otp;
         
+        req.session.otpExpires = Date.now() + 60000;
         
+         
         req.session.userData={username,phone,email,password}
         
-        res.render('verify-otp')
+        res.render('verify-otp',{message:null ,otpExpires: req.session.otpExpires})
 
         console.log("OTP Sent",otp);
     }
@@ -89,8 +99,10 @@ const signup=async(req,res)=>{
 const verifyOtp = async (req, res) => {
     console.log("Request body:", req.body);
     console.log("Session Data at verifyOtp:", req.session);
-
-    if (req.body.otp === req.session.userOtp) {
+      
+      const {otp}=req.body
+   
+    if (otp === req.session.userOtp) {
         console.log("OTP Matched! Saving user...");
 
         const user = req.session.userData;
@@ -110,23 +122,86 @@ const verifyOtp = async (req, res) => {
         
         delete req.session.userOtp;
         delete req.session.userData;
+        delete req.session.otpExpires;
 
         
         return res.redirect('/login'); 
-    } else {
+    } 
+
+    //forget password
+    else if (otp === req.session.resetOtp) {
+        console.log("OTP Matched for Reset Password! Redirecting to reset page...");
+
+        
+        delete req.session.resetOtp;
+        delete req.session.otpExpires;
+
+        return res.render("reset-password", { email: req.session.resetEmail, message: "" });
+    } 
+    
+    else {
         console.log("Incorrect OTP entered.");
-        return res.status(400).json({ success: false, message: "Incorrect OTP. Please try again!" });
+        return res.render("verify-otp", { message: "OTP incorrect", otpExpires: req.session.otpExpires });
     }
+    
+
+
 };
 
 
-const resendotp= async(req,res)=>{
+const resendOtp= async(req,res)=>{
     const newOtp=generateOtp()
-    req.session.userOtp=newOtp;
+    req.session.userOtp=newOtp;    
+    req.session.otpExpires = Date.now() + 60000;
     console.log("new otp",newOtp)
     res.json({success:true,message:"new otp sent"})
 
 }
+const resendPassOtp= async(req,res)=>{
+    const newOtp=generateOtp()
+   req.session.resetOtp=newOtp;    
+    req.session.otpExpires = Date.now() + 60000;
+    console.log("new otp",newOtp)
+    res.json({success:true,message:"new otp sent"})
+
+}
+
+
+
+
+const loadForgotPassword=async(req,res)=>{
+    try {
+        res.render('forgot-password',{message:null})
+    } catch (error) {
+        console.log(error)
+        res.redirect('/pageNotfound')
+        
+    }
+}
+const forgotPassword=async(req,res)=>{
+    try {
+        const {email}=req.body;
+        const user= await User.findOne({email})
+        if(!user){
+            return res.render('forgot-password',{message:"user not found"})
+        }
+        const otp=generateOtp()
+        const subject = "Reset Your Password";
+        const message = "Your OTP for password reset is";
+        const emailSent=await sendVerificationEmail(email,otp,subject,message)
+        if(!emailSent){
+            return res.render("forgot-password",{message:"error happened in sending otp to given mail"})
+        }
+        req.session.resetOtp=otp;
+        req.session.otpExpires=Date.now()+60000;
+        req.session.resetEmail=email;
+        res.render('veryfy-passotp',{message:"verify otp to reset password",otpExpires: req.session.otpExpires})
+        console.log("reset otp sent:",otp)
+    } catch (error) {
+        console.error(error)
+        res.redirect("/forgot-password")
+    }}
+
 
 const loadlogin=async(req,res)=>{
     try{
@@ -198,5 +273,6 @@ const logout= async(req,res)=>{
 
 
 module.exports={
-    loadHome,pageNotFound,loadSignup,signup,verifyOtp,resendotp,loadlogin,login,logout
+    loadHome,pageNotFound,loadSignup,signup,verifyOtp,resendOtp,loadlogin,login,logout,loadForgotPassword,forgotPassword,resendPassOtp
+    
 }

@@ -110,6 +110,19 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
   <script src="js/script.min.js"></script>
+  <script>
+   document.addEventListener('DOMContentLoaded',function(){
+    const clearBtn=document.getElementById('clear-search')
+    const searchInput=document.getElementById('search-form')
+    if(clearBtn&&searchInput){
+      clearBtn.addEventListener('click',function(){
+        searchInput.value="";
+        window.location.href="/shop"
+      })
+    }
+   })
+   
+  </script>
 </body>
 
 </html>

@@ -42,6 +42,12 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
+                <h2 class="text-center mb-3">Login</h2>
+                <% if (message) { %>
+                    <div class="alert alert-warning text-center">
+                        <%= message %>
+                    </div>
+                <% } %>
                 <div class="card p-4 shadow-lg">
                     <h3 class="text-center mb-3">Verify OTP</h3>
 
@@ -51,15 +57,13 @@
                         <label class="form-label">Enter OTP</label>
                         <input type="text" name="otp" id="otpInput" class="form-control mb-3" placeholder="Enter OTP" required>
                         <button type="submit" class="btn btn-primary w-100">Verify OTP</button>
+                        <input type="hidden" id="otpExpireTime" value="<%= otpExpires %>">
                     </form>
 
-                   <!-- <p class="text-center mt-3">
-                        Didn't receive the OTP? 
-                        <button id="resendOtp" class="btn btn-link" onclick="resendOTP(event)">Resend OTP (<span id="timer">60</span>s)</button>
-                    </p>-->
+                   
                     <p class="text-center mt-3">
                         Didn't receive the OTP? 
-                        <button id="resendOtp" class="btn btn-link" onclick="resendOTP(event)" disabled>
+                        <button id="resendOtp" class="btn btn-link"  disabled>
                             Resend OTP (<span id="timer">60</span>s)
                         </button>
                     </p>
@@ -69,58 +73,70 @@
     </div>
 
     <script>
-       let timer = 60;
-    let countdown;
-    let resendBtn = document.getElementById("resendOtp");
-    let timerDisplay = document.getElementById("timer");
-    let otpInput = document.getElementById("otpInput");
+   document.addEventListener("DOMContentLoaded", function () {
+    let otpExpireTimeEl = document.getElementById("otpExpireTime");
+    let otpExpireTime = otpExpireTimeEl ? parseInt(otpExpireTimeEl.value, 10) : NaN;
 
-    function startTimer() {
-        otpInput.disabled = false;
-        resendBtn.disabled = true;
-        resendBtn.style.pointerEvents = "none"; 
+    if (isNaN(otpExpireTime) || otpExpireTime < Date.now()) {
+       
+        otpExpireTime = Date.now() + 60000; 
+    }
+    
 
-        countdown = setInterval(() => {
-            timerDisplay.textContent = timer; // ✅ Update the countdown display
-            timer--;
-            
-            if (timer < 0) {
-                clearInterval(countdown);
-                otpInput.disabled = true;  // Disable OTP input when timer ends
-                resendBtn.disabled = false;
-                resendBtn.style.pointerEvents = "auto"; 
-                resendBtn.textContent = "Resend OTP";
-            }
-        }, 1000);
+    const timerElement = document.getElementById("timer");
+    const resendBtn = document.getElementById("resendOtp");
+
+    if (!resendBtn) {
+        
+        return;
     }
 
-    async function resendOTP(event) {
-        event.preventDefault();
-        resendBtn.disabled = true;
-        resendBtn.style.pointerEvents = "none";
-        resendBtn.textContent = "Sending...";
-        
-        try {
-            let response = await fetch("/resend-otp", { method: "POST" });
-            let data = await response.json();
+    let countdown;
 
-            if (response.ok) {
-                alert(data.message);
+    function startTimer() {
+        function updateTimer() {
+            let timeRemaining = Math.max(0, Math.floor((otpExpireTime - Date.now()) / 1000));
+            timerElement.textContent = timeRemaining;
+
+            if (timeRemaining <= 0) {
                 clearInterval(countdown);
-                timer = 60;
-                resendBtn.innerHTML = `Resend OTP (<span id="timer">60</span>s)`;
-                timerDisplay = document.getElementById("timer"); // Re-select timer span
-                startTimer();
-            } else {
-                alert(data.message);
+                resendBtn.removeAttribute("disabled");
+                resendBtn.style.pointerEvents = "auto"; 
+                resendBtn.style.cursor = "pointer"; 
+               
             }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Something went wrong. Please try again.");
         }
+
+        updateTimer();
+        countdown = setInterval(updateTimer, 1000);
     }
 
     startTimer();
+
+    async function resendOTP(event) {
+        event.preventDefault();
+        
+
+        try {
+            const response = await fetch("/resend-otp", { method: "POST" });
+           
+            const data = await response.json();
+            
+            if (data.success) {
+                otpExpireTime = Date.now() + 60000; 
+                resendBtn.setAttribute("disabled", "true"); 
+                resendBtn.style.pointerEvents = "none"; 
+                startTimer(); 
+            } 
+        } catch (error) {
+            console.error(" Error in fetch:", error);
+        }
+    }
+
+    resendBtn.addEventListener("click", resendOTP);
+});
+
     </script>
+    
 </body>
 </html>

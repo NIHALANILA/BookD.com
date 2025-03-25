@@ -1,3 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+   
+
+
+        .btn.success {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        float:right;
+        margin-bottom: 15px;
+    }
+
+    .btn.success:hover {
+        background-color: #218838;
+    }
+    </style>
+        
+
+    
 <%-include("../../views/partials/admin/header")%>
 <!-- Book Management Section -->
 <section class="content">
@@ -15,6 +46,9 @@
         <% } %>
         
     </form>
+
+    <a href="/admin/books/add" class="btn success">Add books</a>
+    
 
     <table class="book-table">
                     <thead>
@@ -35,14 +69,26 @@
                             <td><%= book.title %></td>
                             <td><%= book.author %></td>
                             <td><%= book.price %></td>
-                            <td><%= book.category_id ? book.category_id.name : "No Category" %></td>
+                            <!--<td><%= book.category_ids ? book.category_ids.name : "No Category" %></td>-->
+                            <td>
+                                <% if (book.category_ids && book.category_ids.length > 0) { %>
+                                    <%= book.category_ids.map(category => category.name).join(", ") %>
+                                <% } else { %>
+                                    No Category
+                                <% } %>
+                            </td>
                             <td><%= book.stock %></td>
                             
                                 <td>
                                     
-                                        <button class="delete-btn" type="button" onclick="softDelete('<%= book._id %>')">Delete</button>
-                                   
+                                       <button class="delete-btn" type="button" onclick="softDelete('<%= book._id %>')">Delete</button>
+                                       
+                                       
                                         <a href="/admin/books/edit/<%= book._id %>" class="edit-btn" style="text-decoration: none;" >Edit</a>
+
+                                        <button class="delete-btn" onclick="toggleBook('<%= book._id %>')">
+                                            <%= book.isListed ? "Unlist" : "list" %>
+                                        </button>
 
                                     
                                 </td>                                                            
@@ -55,7 +101,7 @@
      <!-- Pagination Controls -->
     <div class="pagination-container">
         <% for(let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/customers?page=<%= i %>&search=<%= search %>">
+            <a href="/admin/books?page=<%= i %>&search=<%= search %>">
                 <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
             </a>
         <% } %>
@@ -66,5 +112,52 @@
 </section>
 </main>
 </div>
+
+<script>
+    function softDelete(bookId) {
+        if (confirm("Are you sure you want to delete this book?")) {
+            fetch(`/admin/books/delete/${bookId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert("Error deleting book");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    }
+    function toggleBook(bookId) {
+    if (confirm("Are you sure you want to unlist this book?")) {
+        fetch(`/admin/books/toggle/${bookId}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json()) // Fix: Added parentheses to `.json()`
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert("Error unlisting the book");
+            }
+        })
+        .catch(error => console.error("Error:", error)); // Fix: Proper error logging
+    }
+}
+
+</script>
+
+
 </body>
 </html>
+

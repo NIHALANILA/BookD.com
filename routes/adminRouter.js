@@ -32,7 +32,6 @@ router.get("/categories",adminAuth.adminIn, categoryController.listCategories);
 router.post("/categories",adminAuth.adminIn, categoryController.addCategory);
 router.patch("/categories/edit/:id",adminAuth.adminIn, categoryController.editCategory);
 router.patch("/categories/delete/:id",adminAuth.adminIn, categoryController.softDeleteCategory);
-router.patch("/categories/delete/:id",adminAuth.adminIn, categoryController.softDeleteCategory);
 router.patch("/categories/toggle/:id",adminAuth.adminIn, categoryController.toggleCategory);
 
 
@@ -51,6 +50,13 @@ router.put("/offers/edit/:id",offerController.updateOffers)
 router.get("/books", bookController.listbooks);
 router.get("/books/add", bookController.loadaddbook);
 router.post("/books/add", upload.array("images", 5), processImages, bookController.addbook);
+
+
+router.get('/books/edit/:id',bookController.loadeditbook)
+router.post('/books/edit/:id',upload.array("images", 5), processImages, bookController.editbook)
+router.post('/books/delete/:id',bookController.softDeletebook)
+router.patch('/books/toggle/:id',bookController.toggleBook)
+
 
 
 

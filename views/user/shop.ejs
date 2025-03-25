@@ -1,0 +1,74 @@
+<%-include("../../views/partials/user/header")%>
+
+<div class="container">
+    <h2 class="text-center mt-4"><%= filterTitle %></h2>
+
+    <div class="row">
+        <!-- Sidebar: Filtering Section -->
+        <div class="col-md-3">
+            <form action="/shop" method="GET">
+                <h4>Category</h4>
+                <select name="category" class="form-control">
+                    <option value="">All Categories</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.name %>"><%= cat.name %></option>
+                    <% }) %>
+                </select>
+
+                <h4>Language</h4>
+                <select name="language" class="form-control">
+                    <option value="">All Languages</option>
+                    <option value="english">English</option>
+                    <option value="malayalam">Malayalam</option>
+                </select>
+
+                <h4>Price Range</h4>
+                <input type="number" name="minPrice" class="form-control" placeholder="Min Price">
+                <input type="number" name="maxPrice" class="form-control" placeholder="Max Price">
+
+                <button type="submit" class="btn btn-primary mt-2">Apply Filters</button>
+            </form>
+        </div>
+
+        <!-- Books Section -->
+        <div class="col-md-9">
+            <div class="row">
+                <% if (books.length > 0) { %>
+                    <% books.forEach(book => { %>
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="<%= book.book_images[0] %>" class="card-img-top" alt="<%= book.title %>">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= book.title %></h5>
+                                    <p class="card-text">Author: <%= book.author %></p>
+                                    <p class="card-text">Price: ₹<%= book.price %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="text-center">No books found.</p>
+                <% } %>
+            </div>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item"><a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a></li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item"><a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<%-include("../../views/partials/user/footer")%>
