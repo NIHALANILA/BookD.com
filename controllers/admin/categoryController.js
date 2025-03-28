@@ -11,7 +11,7 @@ const listCategories = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
 
-        const query = { isDeleted: false }; // Exclude soft-deleted categories
+        const query = { isDeleted: false }; 
         if (searchQuery) {
             query.name = { $regex: searchQuery, $options: "i" };
         }

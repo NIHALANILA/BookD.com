@@ -8,7 +8,7 @@ const auth=require('../middleware/auth')
 
 
 
-router.get('/',auth.userValid,userController.loadHome)
+
 
 
 router.get('/pageNotFound',userController.pageNotFound)
@@ -19,6 +19,7 @@ router.post('/resend-otp',auth.userNotIn,userController.resendOtp)
 router.get('/forgot-password', userController.loadForgotPassword);
 router.post('/forgot-password', userController.forgotPassword); 
 router.post('/resend-passotp',auth.userNotIn,userController.resendPassOtp) 
+router.post('/reset-password',userController.resetPassword)
 
 //router.post('/reset-password', resetPassword); 
 
@@ -31,8 +32,10 @@ router.get('/login',auth.userNotIn,userController.loadlogin)
 router.post('/login',userController.login)
 router.get('/logout',userController.logout)
 
-router.get('/shop',shopController.loadShopage)
 
+router.get('/',shopController.loadHome)
+router.get('/shop',shopController.loadShopage)
+router.get('/book/:id',shopController.viewBookDetails)
 
 
 

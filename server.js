@@ -36,6 +36,6 @@ app.use('/admin',adminRouter)
 
 
 app.listen(process.env.PORT,()=>{
-    console.log("hi serer")
+    
     console.log('http://localhost:3000')
 })

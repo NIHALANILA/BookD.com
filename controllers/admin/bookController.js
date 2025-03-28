@@ -7,15 +7,19 @@ const listbooks = async (req, res) => {
     try {
         let search= req.query?.search||"";
         let page=parseInt(req.query.page)||1;
-        const limit=3
+        const limit=5
         
         const query = { isDeleted: false };
 
 
 if (search) {
+
+    const matchingCategories = await Category.find({ name: { $regex: search, $options: "i" } });
+    const categoryIds = matchingCategories.map(category => category._id);
     query.$or = [
         { title: { $regex: search, $options: "i" } },
-        { author: { $regex: search, $options: "i" } }
+        { author: { $regex: search, $options: "i" } },
+        { category_ids: { $in: categoryIds } } 
     ];
 }
       
@@ -46,7 +50,7 @@ if (search) {
 
 const loadaddbook = async (req, res) => {
     try {
-        const categories = await Category.find({ isListed: true });
+        const categories = await Category.find({ isListed: true,isDeleted:false });
         res.render("addbook", { categories,message:null });
     } catch (error) {
         console.log(error, "add books");
@@ -59,7 +63,7 @@ const addbook = async (req, res) => {
         
         const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock } = req.body;
 
-        const categories = await Category.find({ isListed: true });
+        const categories = await Category.find({ isListed: true,isDeleted:false });
 
          
          if (req.headers["x-requested-with"] === "XMLHttpRequest") {
@@ -75,7 +79,7 @@ const addbook = async (req, res) => {
         }
 
         
-
+ 
         const processedImages = req.files ? req.files.map(file => file.path) : [];
 
         if (!req.processedImages || req.processedImages.length < 3) {
@@ -112,7 +116,7 @@ const loadeditbook=async(req,res)=>{
     try {
         const bookId = req.params.id;
     const book = await Book.findById(bookId);
-    const categories = await Category.find(); 
+    const categories = await Category.find({isListed:true,isDeleted:false}); 
     res.render('editbook', { book, categories });
     } catch (error) {
         console.log(error)
@@ -140,7 +144,7 @@ const editbook = async (req, res) => {
         const bookId = req.params.id;
         const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock } = req.body;
         
-        // Find the book by ID
+        
         const book = await Book.findById(bookId);
         if (!book) {
             return res.status(404).json({ message: "Book not found" });
@@ -225,9 +229,7 @@ try{
         return res.status(404).send('book not found')
     }
 
-    if (!book.isListed && book.stock === 0) {
-        return res.status(400).json({ success: false, message: "Cannot list a book with zero stock" });
-    }
+   
     book.isListed = !book.isListed;
         await book.save();
         res.json({ success: true, message: "book status updated successfully" });

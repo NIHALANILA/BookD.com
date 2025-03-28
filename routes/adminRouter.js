@@ -37,7 +37,7 @@ router.patch("/categories/toggle/:id",adminAuth.adminIn, categoryController.togg
 
 
 
-//offermanage--need to work more
+//offermanage--need to work more-no need to do in this week
 
 router.get("/offers", offerController.getOffers);
 router.get("/offers/add", offerController.addOfferForm);
@@ -47,15 +47,15 @@ router.put("/offers/edit/:id",offerController.updateOffers)
 
 //books-not completed
 
-router.get("/books", bookController.listbooks);
-router.get("/books/add", bookController.loadaddbook);
-router.post("/books/add", upload.array("images", 5), processImages, bookController.addbook);
+router.get("/books",adminAuth.adminIn, bookController.listbooks);
+router.get("/books/add",adminAuth.adminIn, bookController.loadaddbook);
+router.post("/books/add",adminAuth.adminIn, upload.array("images", 5), processImages, bookController.addbook);
 
 
-router.get('/books/edit/:id',bookController.loadeditbook)
-router.post('/books/edit/:id',upload.array("images", 5), processImages, bookController.editbook)
-router.post('/books/delete/:id',bookController.softDeletebook)
-router.patch('/books/toggle/:id',bookController.toggleBook)
+router.get('/books/edit/:id',adminAuth.adminIn,bookController.loadeditbook)
+router.post('/books/edit/:id',adminAuth.adminIn,upload.array("images", 5), processImages, bookController.editbook)
+router.post('/books/delete/:id',adminAuth.adminIn,bookController.softDeletebook)
+router.patch('/books/toggle/:id',adminAuth.adminIn,bookController.toggleBook)
 
 
 

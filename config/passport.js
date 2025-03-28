@@ -15,20 +15,15 @@ passport.use(new GoogleStrategy({
 async(accessToken,refreshToken,profile,done)=>{
     try{
 
-      console.log("✅ Google OAuth Callback Triggered");
-        console.log("🔹 Google Profile:", profile);
       let user=await User.findOne({googleId:profile.id})
       if(user){
-        return done(null,user)
-        console.log("✅ User already exists:", user);
+        return done(null,user)       
       }
        existingUser=await User.findOne({email:profile.emails[0].value})
       if(existingUser){
 
-        console.log("🔄 Updating existing user with Google ID");
         existingUser.googleId=profile.id;
         await existingUser.save()
-        console.log("✅ New User Created:", user);
         return done(null,existingUser)
 
       }

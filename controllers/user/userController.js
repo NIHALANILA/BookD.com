@@ -1,38 +1,10 @@
 const User=require('../../models/userSchema')
-console.log("User Model Loaded:", User);
 const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
 const bcrypt= require('bcryptjs')
 const Category=require('../../models/categorySchema')
 const Books=require('../../models/bookSchema')
 
 
-
-
-
-
-const loadHome=async(req,res)=>{
-    try{
-        
-        let userData=null
-        if(req.session.user){
-             userData= await User.findOne({username:req.session.user.username})
-           
-        }
-        
-        const { search } = req.query;
-        
-        const newArrivals= await Books.find({isDeleted:false,isListed:true}).sort({_id:1})
-        const bestSellers=await Books.find({isDeleted:false,isListed:true}).sort({edition:-1})
-        
-        
-        return res.render('home',{user:userData,newArrivals,bestSellers, searchQuery: search || "" })
-    
-    }
-    catch(error){
-        console.log(error)
-
-    }
-}
 const pageNotFound=async(req,res)=>{
     try{
     res.render('page404')
@@ -103,7 +75,7 @@ const verifyOtp = async (req, res) => {
       const {otp}=req.body
    
     if (otp === req.session.userOtp) {
-        console.log("OTP Matched! Saving user...");
+        
 
         const user = req.session.userData;
         const passwordHash = await securePassword(user.password);
@@ -116,7 +88,7 @@ const verifyOtp = async (req, res) => {
         });
 
         await saveUserData.save();
-        console.log("User successfully saved in the database!");
+        
 
         
         
@@ -130,9 +102,7 @@ const verifyOtp = async (req, res) => {
 
     //forget password
     else if (otp === req.session.resetOtp) {
-        console.log("OTP Matched for Reset Password! Redirecting to reset page...");
-
-        
+           
         delete req.session.resetOtp;
         delete req.session.otpExpires;
 
@@ -140,7 +110,7 @@ const verifyOtp = async (req, res) => {
     } 
     
     else {
-        console.log("Incorrect OTP entered.");
+       
         return res.render("verify-otp", { message: "OTP incorrect", otpExpires: req.session.otpExpires });
     }
     
@@ -225,11 +195,11 @@ const login=async(req,res)=>{
      const {username,password}=req.body;
     
      const findUser= await User.findOne({username:username})
-     console.log(findUser)
+     
      if(!findUser){
         return res.render("login",{message:"user not found"})
      }
-     if(findUser.isBlocked){
+     if(findUser.status==='blocked'){
         return res.render("login",{message:"user is blocked"})
      }
 
@@ -270,9 +240,34 @@ const logout= async(req,res)=>{
     }
 }
 
+const resetPassword=async(req,res)=>{
+    try {
+        const{password,cpassword}=req.body;
+       const email= req.session.resetEmail
+
+        if (!email) {
+            return res.redirect("/forgot-password");
+        }
+
+        if (password !== cpassword) {
+            return res.render("reset-password", { email, message: "Passwords do not match" });
+        }
+
+        const passwordHash = await securePassword(password);
+
+        await User.updateOne({ email }, { $set: { password: passwordHash } });
+
+        delete req.session.resetEmail;
+        res.redirect("/login");
+
+    } catch (error) {
+        console.error(error);
+        res.redirect("/pageNotfound");
+    }
+}
 
 
 module.exports={
-    loadHome,pageNotFound,loadSignup,signup,verifyOtp,resendOtp,loadlogin,login,logout,loadForgotPassword,forgotPassword,resendPassOtp
+    pageNotFound,loadSignup,signup,verifyOtp,resendOtp,loadlogin,login,logout,loadForgotPassword,forgotPassword,resendPassOtp,resetPassword
     
 }

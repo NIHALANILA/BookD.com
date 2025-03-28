@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
   <style>
-    /* General Styles */
+    
 body {
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
@@ -22,14 +22,14 @@ body {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Form Container */
+
 .form-container {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
 }
 
-/* Left & Right Sections */
+
 .left-section, .right-section {
     flex: 1;
     min-width: 300px;
@@ -37,13 +37,13 @@ body {
 .center-section{
     flex:2;
     text-align: center;
-    justify-content: center; /* Centers horizontally */
-    align-items: center; /* Centers vertically */
-    flex-direction: column; /* Stacks elements vertically */
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column; 
     text-align: center; 
 
 }
-/* Card Styling */
+
 .card {
     background: #fff;
     padding: 15px;
@@ -58,7 +58,7 @@ body {
     color: #333;
 }
 
-/* Form Inputs */
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -85,14 +85,14 @@ body {
     box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
 }
 
-/* Error Messages */
+
 .text-danger {
     font-size: 12px;
     color: red;
     margin-top: 3px;
 }
 
-/* Buttons */
+
 .btn-primary {
     background: #4a90e2;
     color: white;
@@ -107,7 +107,7 @@ body {
     background: #357ac7;
 }
 
-/* Image Upload Section */
+
 .image-upload-container {
     display: flex;
     flex-wrap: wrap;
@@ -227,21 +227,18 @@ body {
     box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
 }
 
+
+
+
 .dropdown-menu li {
     display: flex;
     align-items: center;
-    gap: 5px; /* Adjust spacing between checkbox and label */
-    padding: 5px 10px; /* Optional: adjust padding */
+    justify-content: space-between; 
+    padding: 5px 10px; 
 }
 
 .dropdown-menu .form-check-input {
-    margin-top: 0; /* Align checkbox properly */
-    vertical-align: middle;
-}
-
-.dropdown-menu .form-check-label {
-    white-space: nowrap; /* Prevents label from wrapping to a new line */
-    vertical-align: middle;
+    margin-left: auto; /* Pushes checkbox to the right */
 }
 
 
@@ -263,6 +260,8 @@ body {
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+
 
 
 <%-include("../../views/partials/admin/header")%>
@@ -303,6 +302,7 @@ body {
                             <ul class="dropdown-menu p-2" aria-labelledby="categoryDropdown" style="max-height: 200px; overflow-y: auto;">
                                 <% categories.forEach(category => { %>
                                     <li>
+                                        <label class="form-check-label" for="category_<%= category._id %>"><%= category.name %></label>
                                         <input 
                                             class="form-check-input me-2 category-checkbox" 
                                             type="checkbox" 
@@ -311,7 +311,7 @@ body {
                                             id="category_<%= category._id %>"
                                             <% if (book.category_ids && book.category_ids.includes(category._id)) { %> checked <% } %> 
                                         >
-                                        <label class="form-check-label" for="category_<%= category._id %>"><%= category.name %></label>
+                                        
                                     </li>
                                 <% }) %>
                             </ul>
@@ -432,7 +432,7 @@ body {
                 <!-- Submit and Cancel Buttons -->
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary">Update Product</button>
-                    <a href="/admin/productview" class="btn btn-secondary">Cancel</a>
+                    
                 </div>
                 
             </div>
@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", function () {
         checkbox.addEventListener("change", updateCategoryButtonText);
     });
 
-    // Ensure pre-selected categories appear in the dropdown
+    
     updateCategoryButtonText();
 });
 
@@ -493,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function triggerFileInput(index) {
     const fileInput = document.getElementById(`fileInput-${index}`);
     if (fileInput) {
-        fileInput.click(); // Opens file picker
+        fileInput.click(); 
     }
 }
 
@@ -523,11 +523,27 @@ document.addEventListener("DOMContentLoaded", function () {
             cropper.destroy();
         }
         
-        cropper = new Cropper(document.getElementById('cropperImage'), {
-            aspectRatio: 4/5,
-            viewMode: 1,
-            autoCropArea: 1,
-        });
+       
+        cropper = new Cropper(cropperImage, {
+        aspectRatio: NaN,
+        viewMode: 1, 
+        autoCropArea: 1,  
+        movable: true, 
+        zoomable: true, 
+        scalable: true, 
+        responsive: true,
+        background: false,
+        ready() {
+            
+            const imageData = cropper.getImageData();
+            cropper.setCropBoxData({
+                left: imageData.left,
+                top: imageData.top,
+                width: imageData.width,
+                height: imageData.height
+            });
+        }
+    });
     }
 
     function closeCropperModal() {
@@ -607,11 +623,7 @@ function validateForm() {
     }
 
     
-    /*let category = document.getElementById('category_id');
-    if (category.value === '') {
-        document.getElementById('categoryError').innerText = "Please select a category";
-        isValid = false;
-    }*/
+   
     const checkboxes = document.querySelectorAll(".category-checkbox");
 let isChecked = false;
 

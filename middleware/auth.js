@@ -31,29 +31,8 @@ const userNotIn=async(req,res,next)=>{
 }
 
 
-const userValid= async(req,res,next)=>{
-
-    try {
-
-        const user= await User.findOne({username:req.session.user})
-
-        if(user?.isBlocked){
-
-            delete req.session.user;
-            return res.redirect("/")
-
-        }
-
-        next()
-        
-    } catch (error) {
-        console.log(error.message)
-        r
-    }
-
-
-}
 
 
 
-module.exports={userIn,userNotIn,userValid}
+
+module.exports={userIn,userNotIn}

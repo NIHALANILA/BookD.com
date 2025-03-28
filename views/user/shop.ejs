@@ -15,6 +15,15 @@
                     <% }) %>
                 </select>
 
+                <h4>Publisher</h4>
+                 <select name="publisher" class="form-control">
+               <option value="">All Publishers</option>
+                 <% publishers.forEach(pub => { %>
+              <option value="<%= pub %>"><%= pub %></option>
+              <% }) %>
+             </select>
+
+
                 <h4>Language</h4>
                 <select name="language" class="form-control">
                     <option value="">All Languages</option>
@@ -26,23 +35,53 @@
                 <input type="number" name="minPrice" class="form-control" placeholder="Min Price">
                 <input type="number" name="maxPrice" class="form-control" placeholder="Max Price">
 
-                <button type="submit" class="btn btn-primary mt-2">Apply Filters</button>
+                <h4>Sort By</h4>
+            <select name="sort" class="form-control" onchange="this.form.submit()">
+                <option value="">Default</option>
+                <option value="priceLow" <%= sortQuery === 'priceLow' ? 'selected' : '' %>>Price: Low to High</option>
+                <option value="priceHigh" <%= sortQuery === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
+                <option value="az" <%= sortQuery === 'az' ? 'selected' : '' %>>A-Z (Title)</option>
+                <option value="za" <%= sortQuery === 'za' ? 'selected' : '' %>>Z-A (Title)</option>
+            </select>
+
+                <button type="submit" class="btn btn-primary mt-2">Apply</button>
             </form>
+
+            
+            
         </div>
 
+    
+
         <!-- Books Section -->
+         
         <div class="col-md-9">
             <div class="row">
                 <% if (books.length > 0) { %>
                     <% books.forEach(book => { %>
                         <div class="col-md-4 mb-4">
                             <div class="card">
-                                <img src="<%= book.book_images[0] %>" class="card-img-top" alt="<%= book.title %>">
+                                <a href="/book/<%= book._id %>"><img src="<%= book.book_images[0] %>" class="card-img-top" alt="<%= book.title %>">
+                                
+                                
                                 <div class="card-body">
                                     <h5 class="card-title"><%= book.title %></h5>
                                     <p class="card-text">Author: <%= book.author %></p>
                                     <p class="card-text">Price: ₹<%= book.price %></p>
-                                </div>
+                                     <!-- View Details Button -->
+                            
+                                     <a href="/cart/add/<%= book._id %>" class="text-decoration-none">
+                                        <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                                    </a>
+                                    <a href="/wishlist/<%= book._id %>" class="text-decoration-none">
+                                        <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f; float: right;">favorite</span>
+                                    </a>
+                                    
+                                </div></a>
+                               
+                
+                                   
+                                  </a>
                             </div>
                         </div>
                     <% }) %>

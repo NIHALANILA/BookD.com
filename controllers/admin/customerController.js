@@ -4,7 +4,7 @@ const customerlist= async(req,res)=>{
     try {
         let search= req.query?.search||"";
         let page=parseInt(req.query.page)||1;
-        const limit=3
+        const limit=5
 
         const query = search ?{
             $or:[{username:{$regex:search,$options:"i"}},         //avoid regex search whn serach is empty
