@@ -150,22 +150,21 @@ const editbook = async (req, res) => {
             return res.status(404).json({ message: "Book not found" });
         }
 
-        
-        let updatedImages = book.book_images;
 
-        
-        if (req.processedImages.length > 0) {
-            deleteOldImages(book.book_images); 
-            updatedImages = req.processedImages; 
-        }
+            let updatedImages = [...book.book_images]; 
 
-        
-      
+            if (req.processedImages.length > 0) {
+   
+           req.processedImages.forEach((newImage, index) => {
+        updatedImages[index] = newImage; 
+    });
+    }
 
-            if (req.processedImages.length > 0 && updatedImages.length < 3) {
-                return res.status(400).json({ message: "At least 3 images are required." });
-            }
-            
+
+    if (updatedImages.length < 3) {
+    return res.status(400).json({ message: "At least 3 images are required." });
+   }
+
 
         
         let updatedFields = {
@@ -209,10 +208,10 @@ const softDeletebook=async(req,res)=>{
 
         if (result) {
             return res.json({ success: true, message: "Book deleted successfully!" });
-            console.log('book deleted')
+            
         } else {
             return res.status(404).json({ success: false, message: "Book not found" });
-            console.log('book deleted')
+            
         }
     } catch (error) {
         console.error("Error deleting book:", error);

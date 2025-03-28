@@ -30,7 +30,7 @@
       div.swiper-wrapper {
   height: 80%;
 }
-/* 📌 Main book image container */
+
 .main-image-container {
     overflow: hidden;
     position: relative;
@@ -38,7 +38,7 @@
     height: auto;
 }
 
-/* 📌 Zoom effect */
+
 .book-image {
     width: 100%;
     transition: transform 0.3s ease-in-out;
@@ -49,7 +49,7 @@
     cursor: zoom-in;
 }
 
-/* 📌 Thumbnail styling */
+
 .thumbnail img {
     width: 50px; /* Adjust size */
     height: auto;
@@ -60,7 +60,7 @@
 .thumbnail img:hover,
 .active-thumbnail {
     opacity: 0.6;
-    border: 2px solid #007bff; /* Highlight active thumbnail */
+    border: 2px solid #007bff; 
 }
 
   </style>
@@ -221,22 +221,22 @@
           <a href="/shop?filter=newArrivals" title="Novels">NewArrivals</a>
         </li>
         <li class="cat-list-item">
-          <a href="/shop?category=poetry" title="Poetry">Poetry</a>
+          <a href="/shop?category=Poetry" title="Poetry">Poetry</a>
         </li>
         <li class="cat-list-item">
-          <a href="/shop?category=shortStories" title="Short stories">Short stories</a>
+          <a href="/shop?category=Best Seller" title="Best Sellers">Short stories</a>
         </li>
         <li class="cat-list-item">
-          <a href="/shop?category=studies" title="Studies">Studies</a>
+          <a href="/shop?category=Studies" title="Studies">Studies</a>
         </li>
         <li class="cat-list-item">
-          <a href="/shop?category=biogrophies" title="Biogrophy">Biographies and Autobiographies</a>
+          <a href="/shop?category=Memoirs" title="Memoirs">Biographies and Autobiographies</a>
         </li>
         <li class="cat-list-item">
-          <a href="/shop?category=children stories" title="Children stories">Children stories</a>
+          <a href="/shop?category=Novels" title="Novels">Children stories</a>
         </li>
         <li class="cat-list-item">
-          <a href="/shop?category=Science and technology" title="Science and technology">Science and technology</a>
+          <a href="/shop?category=Award Winning" title="Science and technology">Science and technology</a>
         </li>
       </ul>
 
@@ -488,22 +488,6 @@
     </div>
 </div>
 
-<!-- Zoom Modal -->
-<div class="modal fade" id="zoomModal" tabindex="-1" aria-labelledby="zoomModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="zoomModalLabel">Image Zoom</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="/<%= data.imageUrl %>" alt="<%= data.title %>" class="img-fluid">
-            </div>
-        </div>
-    </div>
-</div>
-
-
 
   <footer id="footer" class="mt-5">
     <div class="container">
@@ -633,10 +617,12 @@
       })
     }
    })
-   const mainImage = document.getElementById('bookImage');
-const mainImageContainer = mainImage.parentElement;
 
-// 🔍 Handle image zoom effect
+   //image zooming
+   const mainImage = document.getElementById('bookImage');
+   const mainImageContainer = mainImage.parentElement;
+
+
 mainImageContainer.addEventListener('mouseenter', () => {
     mainImage.classList.add('zoomed');
 });
@@ -645,20 +631,20 @@ mainImageContainer.addEventListener('mouseleave', () => {
     mainImage.classList.remove('zoomed');
 });
 
-// 🔄 Change image on thumbnail click
-function changeImage(src, thumbnail) {
-    mainImage.src = src; // Update main image
 
-    // Remove 'active' class from all thumbnails
+function changeImage(src, thumbnail) {
+    mainImage.src = src; 
+
+   
     document.querySelectorAll('.thumbnail img').forEach(thumb => {
         thumb.classList.remove('active-thumbnail');
     });
 
-    // Add 'active' class to clicked thumbnail
+    
     thumbnail.classList.add('active-thumbnail');
 }
 
-// 🎯 Adjust zoom position on mouse move
+
 mainImageContainer.addEventListener('mousemove', (e) => {
     if (mainImage.classList.contains('zoomed')) {
         const rect = mainImageContainer.getBoundingClientRect();

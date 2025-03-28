@@ -38,14 +38,6 @@ const loadHome=async(req,res)=>{
 }
 
 
-
-
-
-
-
-
-
-
 const loadShopage = async (req, res) => {
     try {
        
@@ -69,7 +61,7 @@ const loadShopage = async (req, res) => {
         
         if (category) {
             const categoryData = await Category.findOne({ name: category });
-            console.log("Category Data Found:", categoryData); 
+            
 
             if (categoryData) {
                 booksQuery.category_ids = { $in: [categoryData._id] }; 
