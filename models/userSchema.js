@@ -41,7 +41,10 @@ const userSchema=new Schema ({
         enum: ["active", "blocked"], 
         default: "active"
     },
-    
+    profileImage: {
+        type: String,  
+        default: ""    
+    },
     cart:[{
         type:Schema.Types.ObjectId,
         ref:"Cart"

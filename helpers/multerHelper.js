@@ -3,8 +3,8 @@ const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 
-// Multer Storage (Stores file in memory)
-const storage = multer.memoryStorage(); // Store in memory before processing
+
+const storage = multer.memoryStorage(); 
 
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
@@ -15,6 +15,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage, fileFilter });
+
+const uploadProfile=multer({storage,fileFilter}).single('profilePicture')
 
 
 
@@ -48,4 +50,31 @@ const processImages = async (req, res, next) => {
     }
 };
 
-module.exports = { upload, processImages };
+const processProfileImage=async(req,res,next)=>{
+    try {
+        if(!req.file){
+            req.processedImage = null;
+            return next();
+        }
+         
+        const userId = req.session.user ? req.session.user._id : "guest"; 
+        const filename = `profile-${userId}-${Date.now()}.jpeg`;
+        const filepath = path.join(__dirname, "../public/uploads/profiles", filename);
+
+        await sharp(req.file.buffer)
+            .resize(250, 250)
+            .toFormat("jpeg")
+            .jpeg({ quality: 90 })
+            .toFile(filepath);
+
+        req.processedImage = `uploads/profiles/${filename}`;
+        next();
+    } catch (error) {
+
+        console.error("Profile image processing failed:", error);
+        res.status(500).json({ message: "Error processing profile image" });
+        
+    }
+}
+
+module.exports = { upload, processImages,uploadProfile,processProfileImage };

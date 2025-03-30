@@ -4,6 +4,9 @@ const userController=require('../controllers/user/userController')
 const shopController=require('../controllers/user/shopController')
 const passport = require('passport')
 const auth=require('../middleware/auth')
+const profileController=require('../controllers/user/profileController')
+const addressController=require('../controllers/user/addressController')
+const { uploadProfile,processProfileImage } = require("../helpers/multerHelper");
 
 
 
@@ -38,6 +41,31 @@ router.get('/shop',shopController.loadShopage)
 router.get('/book/:id',shopController.viewBookDetails)
 
 
+
+
+
+
+
+ 
+
+
+// Route for uploading profile image
+router.get('/userProfile',profileController.loadprofile)
+router.post("/profile/upload-image", uploadProfile, processProfileImage, profileController.updateProfileImage);
+router.delete('/profile/delete-image',profileController.deleteProfileImage)
+router.get('/profile/email-change',profileController.loadChangemail)
+router.post('/profile/change-email',profileController.changEmail)
+router.post('/profile/verify-email',profileController.verifyChangEmail)
+router.post('/resend-emailotp',profileController.resendEmailOtp) 
+router.post("/profile/update-username",profileController.Changeusername )
+router.post("/profile/update-phone",profileController.changephone)
+
+
+router.get('/profile/address',addressController.loadAddressPage)
+router.post('/profile/address',addressController.addNewaddress)
+router.get('/profile/address/:id',addressController.loadeditaddress)
+router.patch("/profile/address", addressController.editaddress);
+router.delete('/profile/address/:id',addressController.deleteAddress)
 
 
 

@@ -3,6 +3,7 @@ const Category = require('../../models/categorySchema');
 const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const {checkUserSession} = require('../../helpers/userDry')
+const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
 
 
 
@@ -215,6 +216,8 @@ if (categoryArray.length > 0) {
   res.status(500).send("Internal Server Error");
 }
 };
+
+
 
 
 

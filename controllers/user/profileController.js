@@ -1,0 +1,253 @@
+
+const User=require('../../models/userSchema')
+const Address=require('../../models/addressSchema')
+const {checkUserSession} = require('../../helpers/userDry')
+const path = require("path");
+const fs=require('fs')
+const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
+
+
+const loadprofile=async(req,res)=>{
+    try {
+        const { search } = req.query;
+        const userData = await checkUserSession(req)
+        const user = await User.findById(userData);       
+        
+        res.render('profile',{user:user||{},searchQuery: search || "",message:null})
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+
+
+
+const updateProfileImage = async (req, res) => {
+    try {
+        if (!req.processedImage) {
+            return  res.render('profile',{user:user||{},searchQuery: search || "",message:"please choose a photo"})
+        }
+
+        const user = await User.findById(req.session.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found!" });
+        }
+
+        // Delete old profile picture if it exists (and is not the default)
+        if (user.profileImage && user.profileImage !== "/images/default-avatar.png") {
+            const oldImagePath = path.join(__dirname,"../public/uploads/profiles", user.profileImage);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+
+        // Save new profile image path
+        user.profileImage = req.processedImage;
+        await user.save();
+
+        res.redirect('/userProfile');
+    } catch (error) {
+        console.error("Error updating profile picture:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+
+const deleteProfileImage = async (req, res) => {
+    try {
+       
+
+        const user = await User.findById(req.session.user._id);
+        if (!user) {
+            
+            return res.status(404).json({ success: false, message: "User not found!" });
+        }
+
+        
+        // Only delete if the image is not the default one
+        if (user.profileImage && user.profileImage !== "/images/default-avatar.png") {
+            const imagePath = path.join(__dirname, "..", "..", "public", user.profileImage);
+           
+
+            if (fs.existsSync(imagePath)) {
+                
+                fs.unlinkSync(imagePath);
+            } else {
+                console.log("File not found:", imagePath);
+            }
+        }
+
+        
+        user.profileImage = "/images/default-avatar.png";
+        await user.save();
+
+        
+
+        
+        res.json({ success: true, message: "Profile picture deleted!", profileImage: user.profileImage });
+
+    } catch (error) {
+      
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+
+const loadChangemail=async(req,res)=>{
+    try {
+        res.render('changemail',{message:null})
+    } catch (error) {
+        console.log(error)
+    }
+}
+const changEmail=async(req,res)=>{
+    try {
+        const user= await checkUserSession(req)
+        if(!user){
+            res.redirect('/')
+
+        }
+
+        const newEmail=req.body.newEmail;
+        const otp = generateOtp();
+
+          // Store OTP temporarily in session (not in DB)
+          req.session.emailOtp = otp;
+          req.session.newEmail = newEmail;
+          req.session.otpExpires = Date.now() + 60000;
+
+          // Send OTP via email
+        const emailSent = await sendVerificationEmail(
+            newEmail,
+            otp,
+            "Verify Your Email Change",
+            "Your OTP for email verification is"
+        );
+
+        if (emailSent) {
+            res.render('veryfy-mailotp',{message:"verify otp to change email",otpExpires: req.session.otpExpires})
+        } else {
+            res.send(`<script>alert('Failed to send OTP. Try again later.'); window.location.href='/profile/email-change';</script>`);
+        }
+        console.log("OTP Sent",otp);
+
+    } catch (error) {
+        
+        console.error("Request Email Change Error:", error);
+        res.status(500).send("Something went wrong.");
+    }
+}
+const verifyChangEmail=async(req,res)=>{
+
+    try {
+
+        const {otp}=req.body;
+        const userId= await checkUserSession(req)
+        if(!userId){
+            res.redirect('/')
+
+        }
+
+        const user= await User.findById(userId);
+        if (!user) return res.status(404).send("User not found");
+
+         // Debugging: Check OTP values
+         console.log("Stored OTP in Session:", req.session.emailOtp);
+         console.log("Received OTP from User:", otp);
+         // Check OTP from session
+         if (!req.session.emailOtp || !req.session.newEmail) {
+            return res.send(`<script>alert('No OTP request found.'); window.location.href='/profile/email-change';</script>`);
+        }
+
+        if (String(req.session.emailOtp) !== String(otp)) {
+            return res.render("veryfy-mailotp", { message: "OTP incorrect", otpExpires: req.session.otpExpires });
+        }
+
+        // Update email
+        user.email = req.session.newEmail;
+        await user.save();
+
+        // Clear OTP session data
+        delete req.session.emailOtp;
+        delete req.session.newEmail;
+        delete req.session.otpExpires;
+
+
+        res.send(`<script>alert('Email updated successfully!'); window.location.href='/userProfile';</script>`);
+
+    
+        
+    } catch (error) {
+
+        console.error("Email Verification Error:", error);
+        res.status(500).send("Something went wrong.");
+        
+    }
+
+
+}
+
+const resendEmailOtp= async(req,res)=>{
+    const newOtp=generateOtp()
+   req.session.emailOtp=newOtp;    
+    req.session.otpExpires = Date.now() + 60000;
+    console.log("new otp",newOtp)
+    res.json({success:true,message:"new otp sent"})
+
+}
+
+const Changeusername=async(req,res)=>{
+    try {
+        const userId = await checkUserSession(req);
+        if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+        const { username } = req.body;
+        if (!username) return res.status(400).json({ success: false, message: "Username is required" });
+
+        
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "Username already taken" });
+        }
+
+        
+        await User.findByIdAndUpdate(userId, { username });
+
+       return res.json({ success: true, message: "Username updated successfully please login again " });
+       
+
+
+       
+      
+    } catch (error) {
+        console.error("Error updating username:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+const changephone=async(req,res)=>{
+    try {
+        const userId = await checkUserSession(req);
+        if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+        const{phone}=req.body
+        if (!phone) return res.status(400).json({ success: false, message: "Phone number is required" });
+
+        const existingUser = await User.findOne({ phone });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "this phone already used" });
+        }
+
+        await User.findByIdAndUpdate(userId, { phone });
+        return res.json({ success: true, message: "Username updated successfully" });
+    } catch (error) {
+
+        console.error("Error updating phone:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+        
+    }
+}
+
+
+module.exports={loadprofile,updateProfileImage,deleteProfileImage,loadChangemail,changEmail,verifyChangEmail,resendEmailOtp,Changeusername,changephone}

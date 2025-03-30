@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="author" content="TemplatesJungle">
+  <meta name="keywords" content="ecommerce,fashion,store">
+  <meta name="description" content="Bootstrap 5 Fashion Store HTML CSS Template">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" href="/https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+  <link rel="stylesheet" type="text/css" href="/style.css">
+
+  <link rel="preconnect" href="/https://fonts.googleapis.com">
+  <link rel="preconnect" href="/https://fonts.gstatic.com" crossorigin>
+  <link href="/https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link
+    href="/https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
+    rel="stylesheet">
+    <link rel="stylesheet" href="/https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    <style>
+      div.swiper-wrapper {
+  height: 80%;
+}
+
+.con {
+    margin-top: 80px; /* Adjust as needed */
+    padding-top: 100px; /* Extra spacing */
+    padding-bottom: 100px; /* Extra spacing */
+}
+
+        /* Image Upload Section */
+.image-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.image-preview {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 5px; 
+    overflow: hidden;
+    position: relative;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
+}
+
+.delete-btn {
+    background: #e94e4e;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background: #c73b3b;
+}
+
+/* Modal Styling */
+#cropperModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px; /* Adjust modal width */
+    height: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 1000;
+}
+
+#cropperImage {
+    width: 100%;
+    max-height: 300px; /* Limit image size */
+    display: block;
+    margin: 0 auto;
+}
+
+.cropper-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.cropper-buttons button {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#cropSaveBtn {
+    background-color: #28a745;
+    color: white;
+}
+
+#cropCancelBtn {
+    background-color: #dc3545;
+    color: white;
+}
+.profile {
+    display: flex;
+    align-items: center; /* Align elements vertically in a row */
+    gap: 15px; /* Space between elements */
+    justify-content: space-between; /* Distribute space evenly */
+    max-width: 500px; /* Adjust width as needed */
+}
+
+.profile input {
+    flex: 1; /* Allow input to take available space */
+    min-width: 150px; /* Prevent shrinking too much */
+}
+
+.profile a {
+    white-space: nowrap; /* Prevent button text from breaking */
+    padding: 6px 12px; /* Adjust button padding */
+}
+
+
+    
+  </style>
+</head>
+
+<%-include("../../views/partials/user/header")%>
+
+<div class="container mt-5 con">
+    <div class="row">
+        <!-- Left Sidebar -->
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="/userProfile/edit/<%= user._id %>" class="list-group-item list-group-item-action">Edit Profile</a>
+                <a href="/profile/address" class="list-group-item list-group-item-action">Address Management</a>
+                <a href="/profile/orders" class="list-group-item list-group-item-action">My Orders</a>
+            </div>
+        </div>
+      
+        <!-- Right Side Content -->
+
+        <div id="profileDetailsForm" class="col-md-6" >
+           
+            <!-- Email (Readonly) -->
+            <div class="mb-3 profile">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" value="<%= user.email %>" readonly>
+                <a href="/profile/email-change" class="btn btn-secondary px-3 py-2">Change</a>
+
+            </div>
+
+            
+            <div class="mb-3 profile">
+                <label class="form-label">Username</label>
+                <input type="text" id="usernameInput" class="form-control" value="<%= user.username %>" readonly>
+                <button id="changeUsernameBtn" class="btn btn-secondary px-3 py-2">Change</button>
+            </div>
+            
+            <div class="mb-3 profile">
+                <label class="form-label">Phone</label>
+                <input type="text" id="phoneInput" class="form-control" value="<%= user.phone || '' %>" readonly>
+                <button id="changePhoneBtn" class="btn btn-secondary px-3 py-2">Change</button>
+            </div>
+            
+            <div class="mb-3 profile">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" value="<%= user.password || '' %>" required>
+                <a href="/profile/phone-change" class="btn btn-secondary px-3 py-2">Change</a>
+            </div>
+            
+
+        </div>
+        <div class="col-md-3">
+            <form action="/profile/upload-image" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+                <div class="image-upload-container">
+                  <% if (message) { %>
+                    <div  id="alerbox" class="alert alert-warning text-center">
+                        <%= message %>
+                    </div>
+                    
+                <% } %>
+                    <div class="image-container">
+                        <div class="image-preview" id="previewContainer">
+                            <% if (user.profileImage && user.profileImage.trim() !== "") { %>
+                                <img src="<%= user.profileImage %>" alt="Profile Image"
+                                     style="width: 150px; height: 150px; border-radius: 50%;">
+                            <% } else { %>
+                                <span>Add Image</span>
+                            <% } %>
+                        </div>
+                        
+                        <input type="file" id="profileInput" name="profilePicture" accept="image/*" style="display: none">
+                        <input type="hidden" name="croppedProfileImage" id="croppedProfileImage"> 
+                        <div class="button-group">
+                            <button type="button" class="delete-btn" onclick="deleteImage()">Delete</button>
+                            <button type="submit" class="btn btn-success btn-sm">Update</button>
+                        </div>
+                    </div>
+                </div>
+                
+                    
+                
+            </form>
+        
+            <!-- Cropper Modal -->
+            <div id="cropperModal">
+                <div class="modal-content">
+                    <img id="cropperImage" alt="Crop Image">
+                    <div class="modal-buttons">
+                        <button class="btn-primary" id="cropSaveBtn">Save</button>
+                        <button class="btn-primary" id="cropCancelBtn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        
+
+        
+        
+        </div>
+    </div>
+        
+    <%-include("../../views/partials/user/footer")%>
+          <script src="/js/jquery.min.js"></script>
+          <script src="/js/plugins.js"></script>
+          <script src="/js/SmoothScroll.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+            crossorigin="anonymous"></script>
+          <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+          <script src="/js/script.min.js"></script>
+          <script>
+         document.addEventListener("DOMContentLoaded", function () {
+    initClearSearch();
+    initCropper();
+    //initUsernameChange();
+
+    initEditableField("usernameInput", "changeUsernameBtn", "/profile/update-username", "username");
+    initEditableField("phoneInput", "changePhoneBtn", "/profile/update-phone", "phone");
+    
+
+});
+
+function initClearSearch() {
+    const clearBtn = document.getElementById("clear-search");
+    const searchInput = document.getElementById("search-form");
+    if (clearBtn && searchInput) {
+        clearBtn.addEventListener("click", function () {
+            searchInput.value = "";
+            window.location.href = "/shop";
+        });
+    }
+}
+
+function initCropper() {
+    let cropper;
+    const previewContainer = document.getElementById("previewContainer");
+    const profileInput = document.getElementById("profileInput");
+    const croppedProfileInput = document.getElementById("croppedProfileImage");
+    const cropperModal = document.getElementById("cropperModal");
+    const cropperImage = document.getElementById("cropperImage");
+    const cropSaveBtn = document.getElementById("cropSaveBtn");
+    const cropCancelBtn = document.getElementById("cropCancelBtn");
+
+    previewContainer.addEventListener("click", () => {
+        profileInput.click();
+    });
+
+    profileInput.addEventListener("change", handleFileChange);
+
+    function handleFileChange(event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropperImage.src = e.target.result;
+                openCropperModal();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function openCropperModal() {
+        if (!cropperImage || !cropperModal) {
+            console.error("Cropper elements not found!");
+            return;
+        }
+
+        cropperModal.style.display = "flex";
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: NaN,
+            viewMode: 1,
+            autoCropArea: 1,
+            background: false,
+        });
+    }
+
+    cropSaveBtn.addEventListener("click", () => {
+        const croppedCanvas = cropper.getCroppedCanvas();
+
+        if (!croppedCanvas) return;
+
+        croppedCanvas.toBlob((blob) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                croppedProfileInput.value = reader.result;
+                previewContainer.innerHTML = `<img src="${reader.result}" alt="Cropped Image">`;
+            };
+        }, "image/png");
+
+        closeCropperModal();
+    });
+
+    cropCancelBtn.addEventListener("click", closeCropperModal);
+
+    function closeCropperModal() {
+        cropperModal.style.display = "none";
+        if (cropper) cropper.destroy();
+    }
+}
+
+function validateForm() {
+    const fileInput = document.getElementById('profileInput');
+    const file = fileInput.files[0]; 
+
+    if (!file) {
+        alert("Please select an image to upload.");
+        return false; 
+    }
+
+    
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+        alert("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+        return false;
+    }
+
+    
+
+    return true; 
+}
+
+
+function deleteImage() {
+   
+   const profileInput = document.getElementById('profileInput').value;
+   
+   if (!profileInput) {
+       
+       console.log("Sending DELETE request...");
+       fetch('/profile/delete-image', {
+           method: 'DELETE',
+           headers: { 'Content-Type': 'application/json' }
+       })
+       .then(response => response.json())
+       .then(data => {
+           if (data.success) {
+             alert(data.message)
+             window.location.reload();
+           }
+       })
+       .catch(error => console.error('Error deleting profile picture:', error));
+   } else {
+       
+       handleDelete();
+   }
+}
+function handleDelete() {
+       
+       previewContainer.innerHTML = `<span>Add Image</span>`;
+       alert('deleted');
+   }
+
+   function initEditableField(inputId, buttonId, apiEndpoint, fieldName) {
+    const inputField = document.getElementById(inputId);
+    const actionBtn = document.getElementById(buttonId);
+
+    if (!inputField || !actionBtn) return;
+
+    let originalValue = inputField.value;
+
+    actionBtn.addEventListener("click", function () {
+        if (actionBtn.innerText === "Change") {
+            inputField.removeAttribute("readonly");
+            inputField.value = "";
+            inputField.focus();
+            actionBtn.innerText = "Submit";
+        } else {
+            let newValue = inputField.value.trim();
+            if (!newValue) {
+                alert(`${fieldName} cannot be empty!`);
+                resetField();
+                return;
+            }
+            updateField(newValue);
+        }
+    });
+
+    inputField.addEventListener("blur", function () {
+        if (actionBtn.innerText === "Submit" && !inputField.value.trim()) {
+            resetField();
+        }
+    });
+
+    function resetField() {
+        inputField.value = originalValue;
+        inputField.setAttribute("readonly", true);
+        actionBtn.innerText = "Change";
+    }
+
+    function updateField(newValue) {
+        fetch(apiEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ [fieldName]: newValue }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if(fieldName==="username"){
+                        alert(`${fieldName} updated successfully please login again!`);
+                    originalValue = newValue;
+                    }                   
+                    else{
+                        alert(`${fieldName} updated successfully!`);
+                        originalValue = newValue;
+                    }
+                } else {
+                    alert(data.message || "Something went wrong!");
+                    resetField();
+                }
+                inputField.setAttribute("readonly", true);
+                actionBtn.innerText = "Change";
+            })
+            .catch(error => {
+                console.error(`Error updating ${fieldName}:`, error);
+                alert("Server error. Try again later.");
+                resetField();
+            });
+    }
+}
+
+          </script>
+        
+        </body>
+        
+        </html>
+
+
+    

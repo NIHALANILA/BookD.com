@@ -11,8 +11,8 @@ const addressSchema=new Schema({
         ref:"User",
         required: true
     },
-    address:[{
-        addressType:{
+
+     address:{
             type:String,
             required:true
         },
@@ -40,7 +40,7 @@ const addressSchema=new Schema({
             type:String,
             required:true
         }
-    }] 
+    
 })
 
 const Address= mongoose.model("Address",addressSchema)

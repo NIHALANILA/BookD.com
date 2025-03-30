@@ -9,17 +9,13 @@ const checkUserSession = async (req) => {
 
     const user = await User.findOne({ username: req.session.user.username });
 
-    if (!user) {
+    if (!user||user.status === 'blocked') {
         
         delete req.session.user;
         return null;
     }
 
-    if (user.status === 'blocked') {
-        
-        delete req.session.user;
-        return null;
-    }
+    
 
     return user;
 };
