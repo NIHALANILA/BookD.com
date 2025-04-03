@@ -1,5 +1,7 @@
 const User=require('../models/userSchema')
-const { body, validationResult } = require("express-validator");
+const {checkUserSession} = require('../helpers/userDry')
+const Cart = require("../models/cartSchema");
+
 
 const userIn=async(req,res,next)=>{
     try {
@@ -31,28 +33,45 @@ const userNotIn=async(req,res,next)=>{
     }
 }
 
+ 
 
-const validateProfile = [
-    body("fullName").isLength({ min: 3 }).withMessage("Full name must be at least 3 characters long."),
-    body("phone").matches(/^\d{10}$/).withMessage("Enter a valid 10-digit phone number."),
-    body("city").notEmpty().withMessage("City is required."),
-    body("state").notEmpty().withMessage("State is required."),
-    body("place").notEmpty().withMessage("Place is required."),
-    body("pincode").matches(/^\d{6}$/).withMessage("Enter a valid 6-digit pincode."),
-    body("address").isLength({ min: 5 }).withMessage("Address must be at least 5 characters long."),
-];
+const loadCommonData = async (req, res, next) => {
+    try {
+        // Get User Data (if logged in)
+        const userData = await checkUserSession(req);
 
-// Middleware to check validation results
-const validate = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ success: false, errors: errors.array() });
+        // Get Cart Data (if user is logged in)
+        let cart = { items: [] }; // Default empty cart
+        if (userData) {
+            const cartData = await Cart.findOne({ userId: userData._id }).populate("items.bookId");
+            if (cartData) cart = cartData;
+        }
+
+        // Get Search Query (if any)
+        const searchQuery = req.query.search || "";
+
+        // Attach Data to `res.locals` (available in all EJS templates)
+        res.locals.user = userData;
+        res.locals.cart = cart;
+        res.locals.searchQuery = searchQuery;
+
+        next(); // Continue to next middleware or route handler
+    } catch (error) {
+        console.error("Error loading common data:", error);
+        next(); // Prevent errors from breaking the app
     }
-    next();
 };
 
 
 
 
 
-module.exports={userIn,userNotIn,validateProfile,validate}
+
+
+
+
+
+
+
+
+module.exports={userIn,userNotIn,loadCommonData}

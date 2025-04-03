@@ -399,6 +399,14 @@ body {
                     </div>
                 </div>
                 <div class="card">
+                    <h3>Sale Price</h3>
+                    <div class="form-group">
+                        <label for="salePrice"> Sale Price</label>
+                        <input type="number" id="salePrice" name="salePrice" value="<%= book.salePrice %>" placeholder="Enter the Sale price" >
+                        <div id="salepriceError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
                     <h3>Stock</h3>
                     <div class="form-group">
                         <label for="Stock"> Stock</label>
@@ -604,7 +612,7 @@ document.getElementById("editBookForm").addEventListener("submit", function (eve
 
 function validateForm() {
     let isValid = true;
-
+    let salePrice=document.getElementById('salePrice')
    
     document.querySelectorAll('.text-danger').forEach(error => error.innerText = '');
 
@@ -693,9 +701,15 @@ if (publishingDate.value.trim()==="") {
 
     
     let price = document.getElementById('price');
-    if (price.value.trim() === '' || price.value <= 0) {
-        document.getElementById('priceError').innerText = "Enter a valid price";
+    if (price.value.trim() === '' || price.value <= 0||salePrice.value>price.value) {
+        document.getElementById('priceError').innerText = "Enter a valid price and price should not be less than sale price ";
         isValid = false;
+    }
+    
+    if(salePrice.value.trim()===''||salePrice.value<=0||salePrice.value>price.value){
+        document.getElementById('salepriceError').innerText = "Enter a valid Sale price and it should not be greater than price";
+        isValid = false;
+
     }
 
    

@@ -63,6 +63,69 @@
     border: 2px solid #007bff; 
 }
 
+.book-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; /* Spacing between buttons */
+    padding: 15px;
+    background: #f8f9fa; /* Light background */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.book-actions form {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.book-actions input[type="number"] {
+    width: 100px;
+    padding: 5px;
+    text-align: center;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.book-actions button {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.book-actions .btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.book-actions .btn-outline-danger {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+}
+
+.book-actions .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.book-actions .btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .book-actions {
+        width: 100%;
+    }
+}
+
+
   </style>
 </head>
 
@@ -83,17 +146,17 @@
        <!-- Book Image Section -->
     <div class="col-md-3">
       <div class="main-image-container">
-          <img src="/<%= data.book_images[0] %>" 
-               alt="<%= data.title %>" 
+          <img src="/<%= book.book_images[0] %>" 
+               alt="<%= book.title %>" 
                class="img-fluid book-image" 
                id="bookImage">
       </div>
 
       <!-- Thumbnail Grid -->
       <div class="thumbnail-grid mt-2 d-flex">
-          <% for(let i = 0; i < data.book_images.length; i++) { %>
+          <% for(let i = 0; i < book.book_images.length; i++) { %>
               <div class="thumbnail me-2">
-                  <img src="/<%= data.book_images[i] %>" 
+                  <img src="/<%= book.book_images[i] %>" 
                        alt="Thumbnail" 
                        class="img-thumbnail" 
                        onclick="changeImage(this.src, this)">
@@ -104,14 +167,14 @@
 
         <!-- Book Details Section -->
         <div class="col-md-5">
-            <h5><%= data.title %></h5>
-            <p class="text-muted">By <strong><%= data.author %></strong></p>
+            <h5><%= book.title %></h5>
+            <p class="text-muted">By <strong><%= book.author %></strong></p>
 
             <!-- Stock Status -->
-            <% if (data.stock > 0) { %>
+            <% if (book.stock > 0) { %>
                 <p class="text-success"><strong>In Stock</strong></p>
                 
-            <% } else if (data.status === "unavailable") { %>
+            <% } else if (book.status === "unavailable") { %>
                 <p class="text-danger"><strong>Currently Unavailable</strong></p>
             <% } else { %>
                 <p class="text-warning"><strong>Sold Out</strong></p>
@@ -122,28 +185,36 @@
                 
                 <ul>
                     <li>Category: <%=categoryNames %></li>
-                    <li>Language: <%= data.language %></li>
-                    <li>ISBN: <%= data.isbn %></li>
-                    <li>Price: <strong><%= data.price %></strong></li>
-                    <li>Pages: <%= data.number_of_pages %></li>
-                    <li>Publisher: <%= data.publisher %></li>
-                    <li>Edition: <%= data.edition %></li>
+                    <li>Language: <%= book.language %></li>
+                    <li>ISBN: <%= book.isbn %></li>
+                    <li>Price: <strong><%= book.price %></strong></li>
+                    <li>Pages: <%= book.number_of_pages %></li>
+                    <li>Publisher: <%= book.publisher %></li>
+                    <li>Edition: <%= book.edition %></li>
                     
 
                 </ul>
             </div>
         </div>
         <div class="col-md-4">
-          <div class="text-center mt-5">
-            <button class="btn btn-outline-primary" >Add Cart</button>
-        </div>
-          <div class="text-center mt-5">
-            <button class="btn btn-outline-primary" >Add Wishlist</button>
-        </div>
-          <div class="text-center mt-5">
-            <button class="btn btn-outline-primary" >Buy Now</button>
-        </div>
-        </div>
+          <div class="book-actions">
+              <form id="addToCartForm" method="post" action="/cart">
+                  <input type="hidden" name="bookId" value="<%= book._id %>">
+                  <label>Quantity:</label>
+                  <input type="number" name="quantity" value="1" min="1">
+                  <button type="submit" class="btn btn-primary">Add to Cart</button>
+              </form>
+              <form id="addToWishlist">
+                  <input type="hidden" name="bookId" value="<%= book._id %>">
+                  <button type="submit" class="btn btn-outline-danger">❤️ Add to Wishlist</button>
+              </form>
+              <form id="buynow" method="post" action="/buynow">
+                  <input type="hidden" name="bookId" value="<%= book._id %>">    
+                  <button type="submit" class="btn btn-success">🛒 Buy Now</button>
+              </form>
+          </div>
+      </div>
+      
     </div>
 
     <!-- Related Products Section -->
@@ -169,112 +240,7 @@
 </div>
 
 
-  <footer id="footer" class="mt-5">
-    <div class="container">
-      <div class="row d-flex flex-wrap justify-content-between py-5">
-        <div class="col-md-4 col-sm-12">
-          <div class="footer-menu footer-menu-001">
-            <div class="footer-intro mb-4">
-              <div class="col-auto">
-                <a class="navbar-brand custom-brand" href="index.html">BookD.com</a>
-                <h5>Your Destination for Digitized Book Discovery & Delivery</h5>
-              </div>
-            </div>
-            
-            <div class="social-links">
-              <ul class="list-unstyled d-flex flex-wrap gap-3">
-                <li>
-                  <a href="#" class="text-secondary">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#facebook"></use>
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-secondary">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#twitter"></use>
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-secondary">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#youtube"></use>
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-secondary">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#pinterest"></use>
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" class="text-secondary">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#instagram"></use>
-                    </svg>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 col-sm-12">
-          <div class="footer-menu footer-menu-002">
-            <h5 class="widget-title text-uppercase mb-4">Quick Links</h5>
-            <ul class="menu-list list-unstyled text-uppercase border-animation-left fs-6">
-              <li class="menu-item">
-                <a href="index.html" class="item-anchor">Contact us</a>
-              </li>
-              <li class="menu-item">
-                <a href="index.html" class="item-anchor">About us</a>
-              </li>
-              <li class="menu-item">
-                <a href="blog.html" class="item-anchor">Terms & Conditions</a>
-              </li>
-              <li class="menu-item">
-                <a href="styles.html" class="item-anchor">Return & Replacement</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="col-md-4 col-sm-12">
-          <div class="footer-menu footer-menu-002">
-            <h5 class="widget-title text-uppercase mb-4">About the shop</h5>
-            <p>Discover. Dive In. Delight.  At BookD.com, we bring you bestsellers, timeless classics, and hidden gems.
-               Whether you're seeking adventure, knowledge, or inspiration, your next great read awaits!   </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="border-top py-4">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-6 d-flex flex-wrap">
-            <div class="shipping">
-              <span>We ship with:</span>
-              <img src="images/arct-icon.png" alt="icon">
-              <img src="images/dhl-logo.png" alt="icon">
-            </div>
-            <div class="payment-option">
-              <span>Payment Option:</span>
-              <img src="images/visa-card.png" alt="card">
-              <img src="images/paypal-card.png" alt="card">
-              <img src="images/master-card.png" alt="card">
-            </div>
-          </div>
-          <div class="col-md-6 text-end">
-            <p>© Copyright 2022 Kaira. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
-  
-
+<%-include("../../views/partials/user/footer")%>
   <script src="/js/jquery.min.js"></script>
   <script src="/js/plugins.js"></script>
   <script src="/js/SmoothScroll.js"></script>
@@ -334,6 +300,8 @@ mainImageContainer.addEventListener('mousemove', (e) => {
         mainImage.style.transformOrigin = `${x * 100}% ${y * 100}%`; 
     }
 });
+
+
 
   </script>
 </body>

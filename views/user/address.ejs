@@ -129,6 +129,8 @@ input, textarea {
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card address-box p-3">
                         <div class="card-body">
+                           
+                            <strong>Select this address</strong>
                             <p><strong>Name:</strong> <%= address.name %></p>
                             <p><strong>Phone:</strong> <%= address.phone %></p>
                             <p><strong>City:</strong> <%= address.city %></p>
@@ -148,6 +150,8 @@ input, textarea {
                 </div>
             <% }) %>
         </div>
+        
+        
     <% } else { %>
         <p class="text-center">No addresses found. Add a new one below.</p>
     <% } %>
@@ -193,15 +197,25 @@ input, textarea {
 <script src="/js/script.min.js"></script>
 <script>
  document.addEventListener('DOMContentLoaded',function(){
-  const clearBtn=document.getElementById('clear-search')
-  const searchInput=document.getElementById('search-form')
-  if(clearBtn&&searchInput){
-    clearBtn.addEventListener('click',function(){
-      searchInput.value="";
-      window.location.href="/shop"
-    })
-  }
+    initClearSearch();
+   
+    addressDelete()
+
+
+
+  
  })
+
+ function initClearSearch() {
+             const clearBtn = document.getElementById("clear-search");
+               const searchInput = document.getElementById("search-form");
+                if (clearBtn && searchInput) {
+              clearBtn.addEventListener("click", function () {
+              searchInput.value = "";
+            window.location.href = "/shop";
+                });
+             }
+        }
 
  function validate(){
     let fields = ["name", "phone", "city", "state", "place", "pincode", "address"];
@@ -241,8 +255,9 @@ input, textarea {
         return true;
 
  }
+function addressDelete(){
 
- document.querySelectorAll(".delete-address").forEach(button => {
+    document.querySelectorAll(".delete-address").forEach(button => {
     button.addEventListener("click", async function () {
         const addressId = this.getAttribute("data-address-id");
 
@@ -272,6 +287,11 @@ input, textarea {
     });
 });
 
+
+}
+
+
+ 
 
  
 </script>

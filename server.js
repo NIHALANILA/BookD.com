@@ -7,7 +7,7 @@ const session=require('express-session')
 const userRouter=require('./routes/userRouter');
 const adminRouter=require('./routes/adminRouter')
 const passport=require('./config/passport')
-
+const flash = require("express-flash");
 db()
 
 
@@ -22,6 +22,7 @@ app.use(session({
     saveUninitialized: false, 
     cookie: { secure: false, httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000 } 
 }));
+app.use(flash())
 
 app.use(passport.initialize());
 app.use(passport.session())

@@ -61,7 +61,7 @@ const addbook = async (req, res) => {
     
     try {
         
-        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock } = req.body;
+        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price,salePrice, stock, } = req.body;
 
         const categories = await Category.find({ isListed: true,isDeleted:false });
 
@@ -74,8 +74,13 @@ const addbook = async (req, res) => {
             return res.json({ exists: false });
         }
 
-        if (!title || !author || !category_ids || !price || !stock) {
+        
+
+        if (!title || !author || !category_ids || !price || !stock||!salePrice) {
             return res.status(400).json({ message: "enter all required fields." });
+        }
+        if(salePrice>price){
+            return res.status(400).json({message:"salePrice should be less than or equal to price"})
         }
 
         
@@ -101,6 +106,7 @@ const addbook = async (req, res) => {
             edition,
             number_of_pages,
             price,
+            salePrice,
             stock,            
             book_images:req.processedImages,
             isListed:stock>0
@@ -142,7 +148,7 @@ const editbook = async (req, res) => {
             return res.status(400).json({ error: "Invalid Book ID" });
         }
         const bookId = req.params.id;
-        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock } = req.body;
+        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock ,salePrice} = req.body;
         
         
         const book = await Book.findById(bookId);
@@ -179,6 +185,7 @@ const editbook = async (req, res) => {
             edition,
             number_of_pages,
             price,
+            salePrice,
             stock,
             isListed: stock > 0, 
             book_images: updatedImages, 

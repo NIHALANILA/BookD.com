@@ -73,25 +73,11 @@ const userSchema=new Schema ({
         type:Schema.Types.ObjectId,
         ref:"User"
     }],
-    SearchHistory: [{
-        category: {
-            type: Schema.Types.ObjectId,
-            ref: "Category"
-        },
-        author: {
-            type: String  
-        },
-        publisher: {
-            type: String  
-        },
-        language: {
-            type: String  
-        },
-        searchOn: {
-            type: Date,
-            default: Date.now
-        }
-    }]
+    selectedAddress: {
+        type: Schema.Types.ObjectId,
+        ref: "Address",
+        default: null  // Initially, no address is selected
+    }
     
 
 

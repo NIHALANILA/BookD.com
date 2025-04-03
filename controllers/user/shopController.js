@@ -210,7 +210,7 @@ if (categoryArray.length > 0) {
 }
 
         
-  res.render('book-view', { user: userData,data: bookData,  relatedBooks: relatedBooks||[], searchQuery: search || "",categoryNames });
+  res.render('book-view', { user: userData,book: bookData,  relatedBooks: relatedBooks||[], searchQuery: search || "",categoryNames });
 } catch (err) {
   console.error("Error fetching book details:", err);
   res.status(500).send("Internal Server Error");

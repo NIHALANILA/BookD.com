@@ -7,6 +7,8 @@ const auth=require('../middleware/auth')
 const profileController=require('../controllers/user/profileController')
 const addressController=require('../controllers/user/addressController')
 const { uploadProfile,processProfileImage } = require("../helpers/multerHelper");
+const cartController=require('../controllers/user/cartController')
+const orderController=require('../controllers/user/orderController')
 
 
 
@@ -36,9 +38,9 @@ router.post('/login',userController.login)
 router.get('/logout',userController.logout)
 
 
-router.get('/',shopController.loadHome)
-router.get('/shop',shopController.loadShopage)
-router.get('/book/:id',shopController.viewBookDetails)
+router.get('/',auth.loadCommonData,shopController.loadHome)
+router.get('/shop',auth.loadCommonData,shopController.loadShopage)
+router.get('/book/:id',auth.loadCommonData,shopController.viewBookDetails)
 
 
 
@@ -50,7 +52,7 @@ router.get('/book/:id',shopController.viewBookDetails)
 
 
 // Route for uploading profile image
-router.get('/userProfile',profileController.loadprofile)
+router.get('/userProfile',auth.loadCommonData,profileController.loadprofile)
 router.post("/profile/upload-image", uploadProfile, processProfileImage, profileController.updateProfileImage);
 router.delete('/profile/delete-image',profileController.deleteProfileImage)
 router.get('/profile/email-change',profileController.loadChangemail)
@@ -60,12 +62,27 @@ router.post('/resend-emailotp',profileController.resendEmailOtp)
 router.post("/profile/update-username",profileController.Changeusername )
 router.post("/profile/update-phone",profileController.changephone)
 
-
-router.get('/profile/address',addressController.loadAddressPage)
+//address
+router.get('/profile/address',auth.loadCommonData,addressController.loadAddressPage)
 router.post('/profile/address',addressController.addNewaddress)
-router.get('/profile/address/:id',addressController.loadeditaddress)
+router.get('/profile/address/:id',auth.loadCommonData,addressController.loadeditaddress)
 router.patch("/profile/address", addressController.editaddress);
 router.delete('/profile/address/:id',addressController.deleteAddress)
+
+
+//cart
+router.post('/cart',cartController.addcart)
+router.get('/cart',auth.loadCommonData,cartController.viewCart)
+router.post('/cart/update',cartController.updateCart)
+//
+ router.post('/cart/remove',cartController.removecart)
+ 
+
+
+ router.post('/profile/address/select')
+
+ router.post('/checkout',auth.loadCommonData,orderController.loadcheckout)
+ router.post('/buynow',auth.loadCommonData,orderController.buynow)
 
 
 

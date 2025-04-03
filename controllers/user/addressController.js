@@ -1,9 +1,7 @@
 const User=require('../../models/userSchema')
 const Address=require('../../models/addressSchema')
 const {checkUserSession} = require('../../helpers/userDry')
-const path = require("path");
-const fs=require('fs')
-const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
+
 
 
 const loadAddressPage = async (req, res) => {

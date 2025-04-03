@@ -391,6 +391,14 @@ body {
                     </div>
                 </div>
                 <div class="card">
+                    <h3>SalePrice</h3>
+                    <div class="form-group">
+                        <label for="salePrice"> Sale Price</label>
+                        <input type="number" id="salePrice" name="salePrice" placeholder="Enter the sale price" >
+                        <div id="salePriceError" class="text-danger"></div>
+                    </div>
+                </div>
+                <div class="card">
                     <h3>Stock</h3>
                     <div class="form-group">
                         <label for="Stock"> Stock</label>
@@ -682,6 +690,11 @@ function validateForm() {
     let price = document.getElementById('price');
     if (price.value.trim() === '' || price.value <= 0) {
         document.getElementById('priceError').innerText = "Enter a valid price";
+        isValid = false;
+    }
+    let salePrice = document.getElementById('salePrice');
+    if (salePrice.value.trim() === '' || salePrice.value <= 0||salePrice.value>price.value) {
+        document.getElementById('salePriceError').innerText = "Enter a valid  slae price and it should not be greater than price";
         isValid = false;
     }
 
