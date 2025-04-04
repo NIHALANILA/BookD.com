@@ -61,7 +61,7 @@ const addbook = async (req, res) => {
     
     try {
         
-        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price,salePrice, stock, } = req.body;
+        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price,limitPrice, stock, } = req.body;
 
         const categories = await Category.find({ isListed: true,isDeleted:false });
 
@@ -76,11 +76,11 @@ const addbook = async (req, res) => {
 
         
 
-        if (!title || !author || !category_ids || !price || !stock||!salePrice) {
+        if (!title || !author || !category_ids || !price || !stock||!limitPrice) {
             return res.status(400).json({ message: "enter all required fields." });
         }
-        if(salePrice>price){
-            return res.status(400).json({message:"salePrice should be less than or equal to price"})
+        if(limitPrice>price){
+            return res.status(400).json({message:"limitPrice should be less than or equal to price"})
         }
 
         
@@ -106,7 +106,7 @@ const addbook = async (req, res) => {
             edition,
             number_of_pages,
             price,
-            salePrice,
+            limitPrice,
             stock,            
             book_images:req.processedImages,
             isListed:stock>0
@@ -131,15 +131,6 @@ const loadeditbook=async(req,res)=>{
 }
 
 
-const deleteOldImages = (imagePaths) => {
-    imagePaths.forEach(imagePath => {
-        const fullPath = path.join(__dirname, "../../public", imagePath); 
-        if (fs.existsSync(fullPath)) {
-            fs.unlinkSync(fullPath); 
-        }
-    });
-};
-
 const editbook = async (req, res) => {
    
     try {
@@ -148,7 +139,7 @@ const editbook = async (req, res) => {
             return res.status(400).json({ error: "Invalid Book ID" });
         }
         const bookId = req.params.id;
-        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock ,salePrice} = req.body;
+        const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock ,limitPrice} = req.body;
         
         
         const book = await Book.findById(bookId);
@@ -185,7 +176,7 @@ const editbook = async (req, res) => {
             edition,
             number_of_pages,
             price,
-            salePrice,
+            limitPrice,
             stock,
             isListed: stock > 0, 
             book_images: updatedImages, 

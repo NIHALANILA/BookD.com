@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="author" content="TemplatesJungle">
+  <meta name="keywords" content="ecommerce,fashion,store">
+  <meta name="description" content="Bootstrap 5 Fashion Store HTML CSS Template">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
+    rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    <style>
+      div.swiper-wrapper {
+  height: 80%;
+}
+/* General Container */
+.containerA {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* Order Box */
+.containerB {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.success-box h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.success-box p {
+    color: #555;
+    margin-bottom: 5px;
+}
+
+/* Status Badges */
+.badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.bg-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+.bg-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.bg-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Buttons */
+.buttons {
+    margin-top: 15px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #b02a37;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+    height: 60px;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.closeModal {
+    background: gray;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.closeModal:hover {
+    background: darkgray;
+}
+
+  </style>
+</head>
+<%-include("../../views/partials/user/header")%>
+
+<div class="containerA">
+    <h2 class="mb-3">My Orders</h2>
+
+    <% if (orders.length > 0) { %>
+        <% orders.forEach(order => { %>
+            <div class="containerB">
+                <div class="success-box">
+                    <h5>Order ID: <%= order.orderId %></h5>
+                    <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                    <p><strong>Status:</strong> 
+                        <% if (order.status === 'processing') { %> 
+                            <span class="badge bg-warning">Processing</span> 
+                        <% } else if (order.status === 'delivered') { %> 
+                            <span class="badge bg-success">Delivered</span> 
+                        <% } else { %> 
+                            <span class="badge bg-danger">Cancelled</span> 
+                        <% } %>
+                    </p>
+                    <p><strong>Total Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
+
+                    <h5>Items:</h5>
+                    <ul>
+                        <% order.orderItems.forEach(item => { %>
+                            <li>
+                                <strong><%= item.bookId.title %></strong> - Quantity: <%= item.quantity %>
+                            </li>
+                        <% }) %>
+                    </ul>
+
+                    <!-- View Order Details -->
+                    <div class="buttons">
+                        <a href="/orders/view/<%= order._id %>" class="btn btn-primary btn-sm">View Details</a>
+                        <% if (order.status === 'processing') { %>
+                            <button class="btn btn-danger btn-sm cancel-order" data-orderid="<%= order._id %>">Cancel Order</button>
+                        <% } %>
+    
+                        <!-- Return Order (If Delivered) -->
+                        <% if (order.status === 'delivered') { %>
+                            <button class="btn btn-warning btn-sm return-order" data-orderid="<%= order._id %>">Return Order</button>
+                        <% } %>
+                    </div>
+
+                    <!-- Cancel Order (If Not Delivered) -->
+                   
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p>No orders found.</p>
+    <% } %>
+</div>
+
+<!-- Cancel Order Modal -->
+<div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <h3>Cancel Order</h3>
+        <input type="hidden" id="cancelOrderId">
+        <textarea id="cancelReason" placeholder="Enter reason (optional)"></textarea>
+        <button id="confirmCancel" class="btn btn-danger">Confirm Cancel</button>
+        <button class="closeModal">Close</button>
+    </div>
+</div>
+
+<!-- Return Order Modal -->
+<div id="returnModal" class="modal">
+    <div class="modal-content">
+        <h3>Return Order</h3>
+        <input type="hidden" id="returnOrderId">
+        <textarea id="returnReason" placeholder="Enter return reason (mandatory)"></textarea>
+        <button id="confirmReturn" class="btn btn-warning">Confirm Return</button>
+        <button class="closeModal">Close</button>
+    </div>
+</div>
+
+
+<%-include("../../views/partials/user/footer")%>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/SmoothScroll.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="js/script.min.js"></script>
+  <script>
+   document.addEventListener('DOMContentLoaded',function(){
+    initClearSearch()
+   })
+
+   function initClearSearch() {
+             const clearBtn = document.getElementById("clear-search");
+               const searchInput = document.getElementById("search-form");
+                if (clearBtn && searchInput) {
+              clearBtn.addEventListener("click", function () {
+              searchInput.value = "";
+            window.location.href = "/shop";
+                });
+             }
+        }
+
+        document.querySelectorAll(".cancel-order").forEach(button => {
+    button.addEventListener("click", function () {
+        document.getElementById("cancelOrderId").value = this.dataset.orderid;
+        document.getElementById("cancelModal").style.display = "block";
+    });
+});
+
+document.getElementById("confirmCancel").addEventListener("click", function () {
+    const orderId = document.getElementById("cancelOrderId").value;
+    const reason = document.getElementById("cancelReason").value;
+
+    fetch(`/orders/cancel/${orderId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason })
+    }).then(response => response.json())
+      .then(data=>{
+        
+
+       if(data.success){
+        alert('order canceled succefully')
+        location.reload()
+       }
+       else{
+        alert('failed to cancel') 
+       }
+
+
+      })
+      .catch(error => {
+    console.error(" Cancel error:", error);
+    alert("Something went wrong.");
+});})
+
+document.querySelectorAll(".return-order").forEach(button => {
+    button.addEventListener("click", function () {
+        document.getElementById("returnOrderId").value = this.dataset.orderid;
+        document.getElementById("returnModal").style.display = "block";
+    });
+});
+
+document.getElementById("confirmReturn").addEventListener("click", function () {
+    const orderId = document.getElementById("returnOrderId").value;
+    const reason = document.getElementById("returnReason").value;
+
+    if (!reason.trim()) {
+        alert("Return reason is required.");
+        return;
+    }
+
+    fetch(`/orders/return/${orderId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason })
+    }).then(() => location.reload());
+});
+
+document.querySelectorAll(".closeModal").forEach(button => {
+    button.addEventListener("click", function () {
+        document.getElementById("cancelModal").style.display = "none";
+        document.getElementById("returnModal").style.display = "none";
+    });
+});
+
+   
+   
+  </script>
+  
+</body>
+
+</html>

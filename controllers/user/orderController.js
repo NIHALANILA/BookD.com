@@ -1,127 +1,13 @@
 //const Order=require('../../models/orderSchema')
 const User=require('../../models/userSchema')
 const Address=require('../../models/addressSchema')
+const Order=require('../../models/orderSchema')
 const {checkUserSession} = require('../../helpers/userDry')
 const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const Cart=require('../../models/cartSchema');
 const { session } = require( 'passport' );
 
-/*const loadcheckout=async(req,res)=>{
-    try {
-        const user=await checkUserSession(req)
-        if(!user) return res.redirect('/login')
-
-    const addresses=await Address.find({userId:user._id})
-
-     // Extract product IDs from request body
-     const bookIds = req.body.books;
-     // Fetch selected products
-     const cartItems = await Books.find({ _id: { $in: bookIds} });
-     console.log("Cart Items in Checkout:", cartItems);
-
-     // Calculate total price
-     let subtotal = 0;
-     cartItems.forEach(item => {
-        console.log(`Book: ${item.title}, Price: ${item.price}, Quantity: ${item.quantity}`);
-         item.totalPrice = item.price * item.quantity; 
-         subtotal += item.totalPrice;
-     });
-
-     // Tax, discount, and final total
-     const tax = subtotal * 0.05;  
-     const discount = 50;  
-     const finalTotal = subtotal + tax - discount;
-
-     // Render checkout page
-     res.render('checkout', { 
-        user, 
-        cartItems, 
-        addresses, 
-        subtotal, 
-        tax, 
-        discount, 
-        finalTotal, 
-        session: req.session 
-    });
-
-        
-    } catch (error) {
-        
-    }
-}
-
-const loadcheckout = async (req, res) => {
-    try {
-        const user = await checkUserSession(req);
-        if (!user) return res.redirect('/login');
-
-        const addresses = await Address.find({ userId: user._id });
-
-        // Fetch cart details with book info using aggregation
-        const cart = await Cart.aggregate([
-            {
-                $match: { userId: user._id, status: 'active' } // Match the active cart for the user
-            },
-            {
-                $unwind: "$items" // Unwind the items array
-            },
-            {
-                $lookup: {
-                    from: 'books', // Name of the collection in MongoDB
-                    localField: 'items.bookId',
-                    foreignField: '_id',
-                    as: 'bookData' // Fetch book details
-                }
-            },
-            {
-                $unwind: "$bookData" // Unwind the bookDetails array to have one object per item
-            },
-            {
-                $project: {
-                    'bookData._id': 1,
-                    'bookData.title': 1,
-                    'bookData.price': 1,
-                    'bookData.book_images[0]':1,
-                    'items.quantity': 1,
-                    'items.totalPrice': { $multiply: ['$items.quantity', '$bookData.price'] }, // Calculate total price for each item
-                }
-            }
-        ]);
-
-        // If cart is empty
-        if (!cart || cart.length === 0) {
-            req.flash("error", "Your cart is empty.");
-            return res.redirect('/books');
-        }
-
-        // Calculate subtotal, tax, and discount
-        let subtotal = 0;
-        cart.forEach(item => {
-            subtotal += item.items.totalPrice; // Summing up total price of all items
-        });
-
-        const tax = subtotal * 0.05; // Tax
-        const discount = 50; // Example discount
-        const finalTotal = subtotal + tax - discount;
-
-        // Render checkout page with the data
-        res.render('checkout', {
-            user,
-            cartItems: cart,
-            addresses,
-            subtotal,
-            tax,
-            discount,
-            finalTotal,
-            session: req.session
-        });
-
-    } catch (error) {
-        req.flash("error", "Something went wrong.");
-        res.redirect('/cart');
-    }
-};*/
 
 const loadcheckout = async (req, res) => {
     try {
@@ -205,7 +91,7 @@ const buynow=async(req,res)=>{
          const addresses= await Address.find({userId:user._id})
 
          const item={
-            booId:book.id,
+            bookId:book.id,
             title:book.title,
             price:book.price,
             quantity:1,
@@ -238,4 +124,192 @@ const buynow=async(req,res)=>{
 }
 
 
-module.exports={loadcheckout,buynow}
+
+const placeOrder = async (req, res) => {    
+    try {
+        
+        const { book, quantity, addressId, paymentId} = req.body;
+        
+        const userId = await checkUserSession(req);
+        if (!userId) return res.redirect('/login');
+
+        if (!addressId || !paymentId) {
+            return res.status(400).json({ message: 'Address and payment details are required' });
+        }
+
+        // Validate paymentId
+        let validPaymentId = paymentId;
+        if (paymentId !== "cod" && !mongoose.Types.ObjectId.isValid(paymentId)) {
+            return res.status(400).json({ message: 'Invalid payment method' });
+        }
+
+        let orderItems = [];
+        let subtotal = 0;
+        let totalDiscount = 50; 
+        let shippingCharge = 50; 
+        let tax = 0;
+        let netAmount = 0;
+
+        if (book) {
+            /*** HANDLE "BUY NOW" SINGLE BOOK CHECKOUT ***/
+            const bookDetails = await Books.findById(book); 
+            if (!bookDetails) {
+                return res.status(404).json({ message: 'Book not found' });
+            }
+
+            const bookQuantity = quantity ? parseInt(quantity) : 1;
+            const totalPrice = bookQuantity * bookDetails.price;
+            subtotal = totalPrice;
+            tax = subtotal * 0.05; // 5% tax
+            netAmount = subtotal + tax - totalDiscount + shippingCharge;
+
+            orderItems.push({
+                bookId: bookDetails._id,
+                bookTitle: bookDetails.title,
+                bookImage: bookDetails.image,
+                quantity: bookQuantity,
+                price: bookDetails.price,
+                totalPrice: totalPrice,
+                discount: bookDetails.discount || 0
+            });
+
+        } else {
+            /*** HANDLE "ADD TO CART" CHECKOUT ***/
+            const cartItems = await Cart.findOne({ userId }).populate('items.bookId');  
+            if (!cartItems || !cartItems.items.length) {
+                return res.status(400).json({ message: 'Cart is empty' });
+            }
+
+            orderItems = cartItems.items.map(item => {
+                if (!item.bookId) {
+                    console.error("Missing bookId for item:", item);
+                    return null; 
+                }
+                const totalPrice = item.quantity * item.price;
+                subtotal += totalPrice;
+                totalDiscount += item.discount || 0;
+
+                return {
+                    bookId: item.bookId._id,
+                    bookTitle: item.bookId.title,
+                    bookImage: item.bookId.image,
+                    quantity: item.quantity,
+                    price: item.price,
+                    totalPrice: totalPrice,            
+                    discount: item.discount || 0,
+                };
+            }).filter(item => item !== null);
+
+            tax = subtotal * 0.05; // 5% tax
+            netAmount = subtotal + tax - totalDiscount + shippingCharge;
+        }
+
+       
+
+        // Create and Save Order
+        const newOrder = new Order({
+            userId,
+            orderItems,
+            status: "processing",
+            paymentId: validPaymentId,
+            addressId,
+            total: subtotal,
+            netAmount
+        });
+
+        const savedOrder = await newOrder.save();
+        console.log(" Order Saved:", savedOrder);
+
+        for (const item of orderItems) {
+            await Books.findByIdAndUpdate(item.bookId, {
+                $inc: { stock: -item.quantity }
+            });
+        }
+        
+
+        // If order placed via cart, clear cart
+        if (!book) {
+            await Cart.deleteMany({ userId });
+        }
+        res.redirect(`/orders/success/${savedOrder._id}`);
+        
+
+    } catch (error) {
+        console.error(' Error placing order:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+const orderSuccess= async(req,res,next)=>{
+    try {
+
+        const userId = await checkUserSession(req);
+        if (!userId) return res.redirect('/login');
+        
+        const { orderId } = req.params;
+
+
+         
+         const order = await Order.findOne({ _id: orderId, userId })
+         .populate('orderItems.bookId') 
+         .populate('addressId') 
+         .populate('paymentId'); 
+
+     if (!order) {
+         return res.status(404).render('error', { message: 'Order not found' });
+     }
+     res.locals.order=order;
+     next();
+    // res.render('ordSuccess', { order }); 
+
+        
+    } catch (error) {
+
+        console.error(' Error loading order success page:', error);
+        res.status(500).render('error', { message: 'Internal Server Error' });
+        
+    }
+}
+
+const orderList=async(req,res)=>{
+    try {
+        const user=await checkUserSession(req);
+        if(!user) return res.redirect('/login')
+        
+        const orders= await Order.find({userId:user._id}).populate("orderItems.bookId", "title").sort({createdAt:-1})
+        res.render('orderListing',{orders})
+    } catch (error) {
+        console.error("error fetching order",err)
+
+        res.status(500).send('internal server error')
+    }
+}
+
+const orderCancel=async(req,res)=>{
+    try {
+        
+        const order= await Order.findById(req.params.id)
+        if(!order||order.status!=='processing'){
+            return res.status(400).json({ message: "Cannot cancel this order." });  
+
+        }
+        order.status="cancelled";
+        order.cancelReason = req.body.reason;
+        await order.save()
+
+        for (let item of order.orderItems) {
+            await Books.findByIdAndUpdate(item.bookId, { $inc: { stock: item.quantity } });
+        }
+        res.json({ success: true });
+        
+    } catch (error) {
+        console.error(" Error in orderCancel:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+
+
+
+
+module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel}

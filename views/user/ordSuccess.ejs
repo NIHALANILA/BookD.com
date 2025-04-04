@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="author" content="TemplatesJungle">
+  <meta name="keywords" content="ecommerce,fashion,store">
+  <meta name="description" content="Bootstrap 5 Fashion Store HTML CSS Template">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="/css/vendor.css">
+  <link rel="stylesheet" href="/https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+  <link rel="stylesheet" type="text/css" href="/style.css">
+
+  <link rel="preconnect" href="/https://fonts.googleapis.com">
+  <link rel="preconnect" href="/https://fonts.gstatic.com" crossorigin>
+  <link href="/https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link
+    href="/https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
+    rel="stylesheet">
+    <link rel="stylesheet" href="/https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    <style>
+      div.swiper-wrapper {
+  height: 80%;
+}
+
+.containerB {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    padding: 20px;
+}
+
+.success-box {
+    border: 2px solid #28a745;
+    border-radius: 10px;
+    padding: 20px;
+    background: #f0fff4;
+}
+
+.icon {
+    font-size: 50px;
+    color: #28a745;
+}
+
+.order-details, .address-box, .items-box {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #fff;
+    text-align: left;
+}
+
+.items-box .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.items-box img {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    color: white;
+    margin: 5px;
+}
+
+.btn-dark {
+    background: #343a40;
+}
+
+.btn-success {
+    background: #28a745;
+}
+  </style>
+</head>
+<%-include("../../views/partials/user/header")%>
+
+    <div class="containerB">
+        <div class="success-box">
+            <% if (isOrderSuccess) { %>
+            <div class="icon">&#9989;</div> <!-- Success check icon -->
+            <h2>Order Placed Successfully!</h2>
+            <p>Thank you for your purchase. Your order has been confirmed.</p>
+            <% } %>
+            <!-- Order Details -->
+            <div class="order-details">
+                <h3>Order Details</h3>
+                <p><strong>Order ID:</strong> #<%= order.orderId %></p>
+                <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                <p><strong>Payment Method:</strong> 
+                    <% if (order.paymentId === 'cod') { %> Cash on Delivery <% } else { %> Paid Online <% } %>
+                </p>
+                <p><strong>Total Quantity:</strong> <%= order.orderItems.length %></p>
+                <p><strong>Total Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="address-box">
+                <h3>Shipping Address</h3>
+                <p><strong>Name:</strong> <%= order.addressId.name %></p>
+                <p><strong>Address:</strong> <%= order.addressId.address %>, <%= order.addressId.city %></p>
+                <p><strong>PinCode:</strong> <%= order.addressId.pincode %></p>
+                <p><strong>Phone:</strong> <%= order.addressId.phone %></p>
+            </div>
+
+            <!-- Items Ordered -->
+            <div class="items-box">
+                <h3>Items Ordered</h3>
+                <% order.orderItems.forEach(item => { %>
+                    <div class="item">
+                        <img src="/<%= item.bookId.book_images[0] %>" alt="Book Image">
+                        <p><strong><%= item.bookId.title %></strong></p>
+                        <p>Quantity: <%= item.quantity %></p>
+                        <p>Price: ₹<%= item.price.toFixed(2) %></p>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- Buttons -->
+            <div class="buttons">
+                <a href="/orders" class="btn btn-dark">View All Orders</a>
+                <a href="/" class="btn btn-success">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+
+    <%-include("../../views/partials/user/footer")%>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/SmoothScroll.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+    <script src="/js/script.min.js"></script>
+    <script>
+     document.addEventListener('DOMContentLoaded',function(){
+      const clearBtn=document.getElementById('clear-search')
+      const searchInput=document.getElementById('search-form')
+      if(clearBtn&&searchInput){
+        clearBtn.addEventListener('click',function(){
+          searchInput.value="";
+          window.location.href="/shop"
+        })
+      }
+     })
+     
+    </script>
+    
+  </body>
+  
+  </html>
+  
+
+</body>
+</html>

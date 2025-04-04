@@ -9,6 +9,7 @@ const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/
 
 const loadHome=async(req,res)=>{
     try{
+        console.log("User in / route:", req.user); 
               
        const userData = await checkUserSession(req)
 

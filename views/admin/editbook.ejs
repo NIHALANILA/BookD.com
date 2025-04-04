@@ -399,10 +399,10 @@ body {
                     </div>
                 </div>
                 <div class="card">
-                    <h3>Sale Price</h3>
+                    <h3>Limit Price</h3>
                     <div class="form-group">
-                        <label for="salePrice"> Sale Price</label>
-                        <input type="number" id="salePrice" name="salePrice" value="<%= book.salePrice %>" placeholder="Enter the Sale price" >
+                        <label for="Limit Price"> Limit Price</label>
+                        <input type="number" id="limitPrice" name="limitPrice" value="<%= book.limitPrice %>" placeholder="Enter the Limit price" >
                         <div id="salepriceError" class="text-danger"></div>
                     </div>
                 </div>
@@ -612,7 +612,7 @@ document.getElementById("editBookForm").addEventListener("submit", function (eve
 
 function validateForm() {
     let isValid = true;
-    let salePrice=document.getElementById('salePrice')
+    let limitPrice=document.getElementById('limitPrice')
    
     document.querySelectorAll('.text-danger').forEach(error => error.innerText = '');
 
@@ -701,13 +701,13 @@ if (publishingDate.value.trim()==="") {
 
     
     let price = document.getElementById('price');
-    if (price.value.trim() === '' || price.value <= 0||salePrice.value>price.value) {
-        document.getElementById('priceError').innerText = "Enter a valid price and price should not be less than sale price ";
+    if (price.value.trim() === '' || price.value <= 0||limitPrice.value>price.value) {
+        document.getElementById('priceError').innerText = "Enter a valid price and price should not be less than limit price ";
         isValid = false;
     }
     
-    if(salePrice.value.trim()===''||salePrice.value<=0||salePrice.value>price.value){
-        document.getElementById('salepriceError').innerText = "Enter a valid Sale price and it should not be greater than price";
+    if(limitPrice.value.trim()===''||limitPrice.value<=0||limitPrice.value>price.value){
+        document.getElementById('salepriceError').innerText = "Enter a valid limit price and it should not be greater than price";
         isValid = false;
 
     }

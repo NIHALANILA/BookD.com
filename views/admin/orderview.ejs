@@ -1,0 +1,65 @@
+<%- include("../../views/partials/admin/header") %>
+
+
+<h2>Order Details</h2>
+
+<hr>
+<h4> General Info</h4>
+<p><strong>Order ID:</strong> <%= order.orderId %></p>
+<p><strong>Status:</strong> <%= order.status %></p>
+<p><strong>Order Date:</strong> <%= order.orderDate.toLocaleString() %></p>
+<% if (order.deliveryDate) { %>
+  <p><strong>Delivery Date:</strong> <%= order.deliveryDate.toLocaleString() %></p>
+<% } %>
+
+<hr>
+<h4> User Info</h4>
+<p><strong>Name:</strong> <%= order.userId.username %></p>
+<p><strong>Email:</strong> <%= order.userId.email %></p>
+<p><strong>Phone:</strong> <%= order.userId.phone %></p>
+
+<hr>
+<h4> Shipping Address</h4>
+<p>
+  <%= order.addressId.house %>, <%= order.addressId.street %>, 
+  <%= order.addressId.city %> - <%= order.addressId.pincode %><br>
+  <%= order.addressId.state %>, <%= order.addressId.country %>
+</p>
+
+<hr>
+<h4> Ordered Items</h4>
+<table border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Book Name</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Discount</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% order.orderItems.forEach(item => { %>
+      <tr>
+        <td><%= item.bookId.title %></td>
+        <td><%= item.quantity %></td>
+        <td>₹<%= item.price %></td>
+        <td>₹<%= item.discount %></td>
+        <td>₹<%= item.totalPrice %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<hr>
+<h4> Payment Summary</h4>
+<p><strong>Subtotal:</strong> ₹<%= order.total %></p>
+<p><strong>Shipping:</strong> ₹<%= order.shippingCharge %></p>
+<p><strong>Tax:</strong> ₹<%= order.tax %></p>
+<p><strong>Discount:</strong> ₹<%= order.discount %></p>
+<hr>
+<p><strong>Net Amount:</strong> ₹<%= order.netAmount %></p>
+
+<a href="/admin/orders"><button>⬅ Back</button></a>
+</body>
+</html>

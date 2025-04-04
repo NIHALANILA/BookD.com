@@ -45,11 +45,7 @@ const userSchema=new Schema ({
         type: String,  
         default: ""    
     },
-    cart:[{
-        type:Schema.Types.ObjectId,
-        ref:"Cart"
-
-    }],
+    
     wallet:[{
         type:Schema.Types.ObjectId,
         ref:"Wallet"
@@ -76,7 +72,7 @@ const userSchema=new Schema ({
     selectedAddress: {
         type: Schema.Types.ObjectId,
         ref: "Address",
-        default: null  // Initially, no address is selected
+        default: null  
     }
     
 

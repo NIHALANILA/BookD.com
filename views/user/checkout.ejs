@@ -174,7 +174,7 @@ h3, h4, h5 {
         <div class="col-md-4">
             <div class="card p-3">
                 <h4>Price Summary</h4>
-                <p><strong>Subtotal:</strong> ₹<%= subtotal %></p>
+                <p ><strong>Subtotal:</strong> ₹<%= subtotal %></p>
                 <p><strong>Tax (5%):</strong> ₹<%= tax %></p>
                 <p><strong>Discount:</strong> ₹<%= discount %></p>
                 <hr>
@@ -183,14 +183,20 @@ h3, h4, h5 {
                 <!-- 📌 Place Order Form -->
                
                 <form id="placeOrderForm" method="POST" action="/place-order">
-                  <input type="hidden" name="selectedAddress" id="selectedAddressInput">
-                  <input type="hidden" name="selectedPayment" id="selectedPaymentInput">
+                  <input type="hidden" name="addressId" id="selectedAddressInput">
+                  <input type="hidden" name="paymentId" id="selectedPaymentInput">
                   
-                  <% cartItems.forEach(item => { %>
-                      <input type="hidden" name="books[]" value="<%= item._id %>">
-                  <% }) %>
-              
-                  <button type="submit" class="btn btn-primary w-100">Place Order</button>
+                  <% if (cartItems.length === 1 && cartItems[0].quantity === 1) { %>
+                    <!-- ✅ For "Buy Now" Orders -->
+                    <input type="hidden" name="book" value="<%= cartItems[0].bookId %>">
+                    <input type="hidden" name="quantity" value="1">
+                <% } else { %>
+                    <!-- ✅ For "Cart Checkout" Orders -->
+                    <% cartItems.forEach(item => { %>
+                        <input type="hidden" name="books[]" value="<%= item.bookId %>">
+                    <% }) %>
+                <% } %>
+                  <button type="submit" class="btn btn-primary w-100" id="placeOrderBtn" disabled>Place Order</button>
               </form>
               
             </div>
@@ -302,6 +308,12 @@ window.location.href="/shop"
     const addressInput = document.getElementById("selectedAddressInput");
     const paymentInput = document.getElementById("selectedPaymentInput");
     const cartItems = document.querySelectorAll("input[name='books[]']");
+    const buyNowItem = document.querySelector("input[name='book']");
+    const placeOrderBtn = document.getElementById("placeOrderBtn");
+   //placeOrderBtn.disabled = cartItems.length === 0;
+   //placeOrderBtn.disabled = cartItems.length === 0 && !document.querySelector("input[name='book']");
+   placeOrderBtn.disabled = (cartItems.length === 0 && !buyNowItem);
+
 
     orderForm.addEventListener('submit',function(event){
       let addressSelected = false;
@@ -321,7 +333,7 @@ window.location.href="/shop"
             }
         });
       
-        if (cartItems.length === 0) {
+        if (cartItems.length === 0&&!buyNowItem) {
             alert("Your cart is empty. Please add books before placing an order.");
             event.preventDefault();
             return;

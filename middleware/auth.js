@@ -62,6 +62,17 @@ const loadCommonData = async (req, res, next) => {
     }
 };
 
+const success=async(req,res)=>{
+
+    res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:true})
+
+}
+
+const view=async(req,res)=>{
+
+    res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:false})
+
+}
 
 
 
@@ -73,5 +84,4 @@ const loadCommonData = async (req, res, next) => {
 
 
 
-
-module.exports={userIn,userNotIn,loadCommonData}
+module.exports={userIn,userNotIn,loadCommonData,success,view}

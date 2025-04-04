@@ -1,0 +1,83 @@
+<%- include("../../views/partials/admin/header") %>
+
+<section class="content">
+    <h2>Order Management</h2>
+
+    <% if (successMessage.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <%= successMessage[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+      
+      <% if (errorMessage.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= errorMessage[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+
+    <!-- Search Form -->
+    <form class="user-search-form" action="/admin/orders" method="GET">
+        <input type="text" name="search" value="<%= search %>" placeholder="Search by Order ID or User Email">
+        <select name="status" class="form-select d-inline-block w-auto me-2">
+            <option value="">All</option>
+            <option value="processing" <%= status === "processing" ? "selected" : "" %>>Processing</option>
+            <option value="delivered" <%= status === "delivered" ? "selected" : "" %>>Delivered</option>
+            <option value="cancelled" <%= status === "cancelled" ? "selected" : "" %>>Cancelled</option>
+            <option value="returned" <%= status === 'returned' ? 'selected' : '' %>>Returned</option>
+        </select>
+        <button type="submit">Submit</button>
+        <% if (search || status) { %>
+            <a href="/admin/orders"><button type="button">Reset</button></a>
+        <% } %>
+        <% if (message) { %>
+            <p class="alert alert-warning"><%= message %></p>
+        <% } %>
+    </form>
+
+    <table class="book-table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Order ID</th>
+                <th>User Email</th>                
+                <th>Order Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.forEach((order, index) => { %>
+                <tr>
+                    <td><%= (currentPage - 1) * perPage + index + 1 %></td>
+                    <td><%= order.orderId %></td>
+                    <td><%= order.userId.email %></td>                    
+                    <td><%= order.orderDate.toDateString() %></td>
+                    <td><form action="/admin/orders/<%= order._id %>" method="POST">
+                        <select name="status" class="form-select d-inline-block w-auto me-2">
+                          <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
+                          <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                          <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                          <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                          <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
+                        </select>
+                        <button type="submit" class="edit-btn" style="background-color: blue;">Update</button>
+                      </form></td>
+                    <td>
+                        <a href="/admin/orders/view/<%= order._id %>"><button class="edit-btn">View</button></a>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <% for(let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/orders?page=<%= i %>&search=<%= search %>&status=<%= status %>">
+                <button <%= currentPage === i ? "disabled" : "" %>><%= i %></button>
+            </a>
+        <% } %>
+    </div>
+</section>

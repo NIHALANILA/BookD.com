@@ -14,7 +14,7 @@ const bookSchema = new Schema({
   edition: { type: Number },
   number_of_pages: { type: Number },
   price: { type: Number, required: true },
-  salePrice: { type: Number, required: true },
+  limitPrice: { type: Number, required: true },
   stock: { type: Number, default: 0 },
   book_images: [{ type: String, required: true }], 
   isDeleted: { type: Boolean, default: false },   

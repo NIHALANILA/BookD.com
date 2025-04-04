@@ -7,6 +7,7 @@ const categoryController = require('../controllers/admin/categoryController');
 const offerController=require('../controllers/admin/offerController')
 const bookController= require('../controllers/admin/bookController')
 const { upload, processImages } = require("../helpers/multerHelper");
+const orderController=require('../controllers/admin/orderController')
 
 
 
@@ -45,7 +46,7 @@ router.post("/offers/add", offerController.addOffer);
 router.get("/offers/edit/:id",offerController.loadupdateoffer)
 router.put("/offers/edit/:id",offerController.updateOffers)
 
-//books-not completed
+//books manage
 
 router.get("/books",adminAuth.adminIn, bookController.listbooks);
 router.get("/books/add",adminAuth.adminIn, bookController.loadaddbook);
@@ -57,7 +58,11 @@ router.post('/books/edit/:id',adminAuth.adminIn,upload.array("images", 5), proce
 router.post('/books/delete/:id',adminAuth.adminIn,bookController.softDeletebook)
 router.patch('/books/toggle/:id',adminAuth.adminIn,bookController.toggleBook)
 
+//ordermanage
 
+router.get('/orders',orderController.listOrders)
+router.get('/orders/view/:id',orderController.orderview)
+router.post('/orders/:id',orderController.statusEdit)
 
 
 

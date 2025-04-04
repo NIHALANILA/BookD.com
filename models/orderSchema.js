@@ -1,22 +1,23 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require('uuid'); 
+
 
 const orderSchema = new Schema({
     orderId: {
         type: String,
-        default: () => uuidv4(), 
-        unique: true
-    },
+        unique: true,
+        required: true,
+        default: function () {
+            return `BKD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    }},
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     paymentId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Payment',
-        required: true
+        type: mongoose.Schema.Types.Mixed,
+    required: true
     },
     couponId: {
         type: Schema.Types.ObjectId,
@@ -37,12 +38,21 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["processing", "delivered", "cancelled"],
+        enum: ["processing", "delivered", "cancelled","shipped","returned"],
         default: "processing"
     },
     shippingCharge: {
         type: Number,
         default: 0
+    },
+
+    cancelReason: {
+        type: String,
+        default: null
+    },
+    returnReason: {
+        type: String,
+        default: null
     },
     tax: {
         type: Number,

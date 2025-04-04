@@ -26,10 +26,16 @@ router.post('/forgot-password', userController.forgotPassword);
 router.post('/resend-passotp',auth.userNotIn,userController.resendPassOtp) 
 router.post('/reset-password',userController.resetPassword)
 
-//router.post('/reset-password', resetPassword); 
+ 
 
 router.get('/auth/google',auth.userNotIn,passport.authenticate('google',{scope:['profile','email']})  )
 router.get('/auth/google/callback',auth.userNotIn,passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
+    req.session.user = {
+        _id: req.user._id,
+        username: req.user.username
+      };
+  
+     
     res.redirect('/')
 })
 
@@ -83,6 +89,12 @@ router.post('/cart/update',cartController.updateCart)
 
  router.post('/checkout',auth.loadCommonData,orderController.loadcheckout)
  router.post('/buynow',auth.loadCommonData,orderController.buynow)
+ router.post('/place-order',orderController.placeOrder)
+ router.get('/orders/success/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.success)
+
+router.get('/orders',auth.loadCommonData,orderController.orderList)
+router.post('/orders/cancel/:id',orderController.orderCancel)
+router.get('/orders/view/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.view)
 
 
 
