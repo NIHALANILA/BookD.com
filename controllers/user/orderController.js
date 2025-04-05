@@ -1,4 +1,4 @@
-//const Order=require('../../models/orderSchema')
+
 const User=require('../../models/userSchema')
 const Address=require('../../models/addressSchema')
 const Order=require('../../models/orderSchema')
@@ -6,7 +6,6 @@ const {checkUserSession} = require('../../helpers/userDry')
 const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const Cart=require('../../models/cartSchema');
-const { session } = require( 'passport' );
 
 
 const loadcheckout = async (req, res) => {
@@ -151,7 +150,7 @@ const placeOrder = async (req, res) => {
         let netAmount = 0;
 
         if (book) {
-            /*** HANDLE "BUY NOW" SINGLE BOOK CHECKOUT ***/
+            
             const bookDetails = await Books.findById(book); 
             if (!bookDetails) {
                 return res.status(404).json({ message: 'Book not found' });
@@ -160,7 +159,7 @@ const placeOrder = async (req, res) => {
             const bookQuantity = quantity ? parseInt(quantity) : 1;
             const totalPrice = bookQuantity * bookDetails.price;
             subtotal = totalPrice;
-            tax = subtotal * 0.05; // 5% tax
+            tax = subtotal * 0.05; 
             netAmount = subtotal + tax - totalDiscount + shippingCharge;
 
             orderItems.push({
@@ -174,7 +173,7 @@ const placeOrder = async (req, res) => {
             });
 
         } else {
-            /*** HANDLE "ADD TO CART" CHECKOUT ***/
+            
             const cartItems = await Cart.findOne({ userId }).populate('items.bookId');  
             if (!cartItems || !cartItems.items.length) {
                 return res.status(400).json({ message: 'Cart is empty' });
@@ -200,7 +199,7 @@ const placeOrder = async (req, res) => {
                 };
             }).filter(item => item !== null);
 
-            tax = subtotal * 0.05; // 5% tax
+            tax = subtotal * 0.05; 
             netAmount = subtotal + tax - totalDiscount + shippingCharge;
         }
 
@@ -214,7 +213,10 @@ const placeOrder = async (req, res) => {
             paymentId: validPaymentId,
             addressId,
             total: subtotal,
-            netAmount
+            netAmount,
+            shippingCharge,
+            tax,
+            discount:totalDiscount,
         });
 
         const savedOrder = await newOrder.save();
@@ -308,8 +310,37 @@ const orderCancel=async(req,res)=>{
     }
 }
 
+const returnOrder=async(req,res)=>{
+    try {
+        console.log("Session in return order:", req.session); 
+
+        const { returnReason } = req.body;
+        console.log("Return Reason:", returnReason);
+
+        if (!returnReason) {
+            return res.status(400).json({ success: false, message: "Return reason is required" });
+        }
+
+        const order= await Order.findById(req.params.id)
+        if(!order||order.status!=="delivered"){
+            return res.status(400).json({ success: false, message: "Only delivered orders can be returned" });
+        }
+
+        order.status = "requested";
+        order.returnReason = returnReason;
+        
+
+        await order.save();
+
+        res.json({ success: true, message: "Return request submitted" });
+                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    } catch (error) {
+        console.error("Error processing return request:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+}
 
 
 
 
-module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel}
+module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder}

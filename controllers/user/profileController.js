@@ -34,7 +34,7 @@ const updateProfileImage = async (req, res) => {
             return res.status(404).json({ message: "User not found!" });
         }
 
-        // Delete old profile picture if it exists (and is not the default)
+        // Delete old profile picture if it exists 
         if (user.profileImage && user.profileImage !== "/images/default-avatar.png") {
             const oldImagePath = path.join(__dirname,"../public/uploads/profiles", user.profileImage);
             if (fs.existsSync(oldImagePath)) {
@@ -153,8 +153,7 @@ const verifyChangEmail=async(req,res)=>{
         const user= await User.findById(userId);
         if (!user) return res.status(404).send("User not found");
 
-         // Debugging: Check OTP values
-         console.log("Stored OTP in Session:", req.session.emailOtp);
+        
          console.log("Received OTP from User:", otp);
          // Check OTP from session
          if (!req.session.emailOtp || !req.session.newEmail) {

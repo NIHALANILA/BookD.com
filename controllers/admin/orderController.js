@@ -1,9 +1,6 @@
 const Order=require('../../models/orderSchema')
 const Book = require("../../models/bookSchema");
-const Category = require("../../models/categorySchema");
 const mongoose = require('mongoose');
-const path = require("path");
-const fs=require('fs')
 const User=require('../../models/userSchema')
 const Address=require('../../models/addressSchema')
 
@@ -54,7 +51,6 @@ const listOrders = async (req, res) => {
             totalPages,
             search,
             status,
-            message: totalOrders === 0 ? 'No orders found.' : null,
             perPage,
             successMessage: req.flash('success'),
             errorMessage: req.flash('error')

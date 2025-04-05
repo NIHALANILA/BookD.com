@@ -54,7 +54,7 @@ const addcart = async (req, res) => {
                 quantity,
                 price: book.price,
                 totalPrice: book.price * quantity,
-                stock: book.stock // 🔹 Store stock info in cart
+                
             });
         }
 
@@ -94,7 +94,7 @@ const viewCart = async (req, res) => {
                 quantity: item.quantity,
                 totalPrice: item.price * item.quantity,
                 stock: item.bookId.stock,
-                imageUrl: item.bookId.book_images[0] || "/images/default-book.jpg" // Use default image if none provided
+                imageUrl: item.bookId.book_images[0] 
             };
         });
 
@@ -121,6 +121,8 @@ const updateCart=async(req,res)=>{
         if(action==="increase"&&item.quantity<item.bookId.stock){
             item.quantity+=1
         }
+       
+        
         else if(action==="decrease"&&item.quantity>1){
             item.quantity-=1
         }

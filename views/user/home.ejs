@@ -82,9 +82,15 @@
                   <h5 class="element-title text-uppercase fs-5 mt-3">                   
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>                 
-                 <a href="/cart/add/<%= newArrivals[i]._id %>" class="text-decoration-none" data-after="Add to cart">
-                  <span>Rs<%= newArrivals[i].price %></span>
-              </a>
+                  <form action="/cart" method="POST" style="display: inline;">
+                    <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
+                    <button type="submit"
+                            style="all: unset; cursor: pointer;"
+                            title="Add to cart">
+                      <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                    </button>
+                    <span>Rs<%= newArrivals[i].price %></span>
+                  </form>
                </div>
               </div>
             </div>
@@ -114,9 +120,20 @@
                   <h5 class="element-title text-uppercase fs-5 mt-3">
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>
-                  <a href="/cart/add/<%= newArrivals[i]._id %>" class="text-decoration-none" data-after="Add to cart">
+                <!--  <a href="/cart/add/<%= newArrivals[i]._id %>" class="text-decoration-none" data-after="Add to cart">
                     <span>Rs<%= newArrivals[i].price %></span>
-                </a>
+                </a>-->
+                <form action="/cart" method="POST" style="display: inline;">
+                  <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
+                  <button type="submit"
+                          style="all: unset; cursor: pointer;"
+                          title="Add to cart">
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                  </button>
+                  <span>Rs<%= newArrivals[i].price %></span>
+                </form>
+                
+
                 </div>
               </div>
             </div>
@@ -170,10 +187,15 @@
                   <h5 class="text-uppercase fs-5 mt-3">
                     <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>
                   </h5>
-                  <a href="/cart/add/<%= bestSellers[i]._id %>" class="text-decoration-none" data-after="Add to cart">                  
+                  <form action="/cart" method="POST" style="display: inline;">
+                    <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
+                    <button type="submit"
+                            style="all: unset; cursor: pointer;"
+                            title="Add to cart">
+                      <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                    </button>
                     <span>Rs<%= bestSellers[i].price %></span>
-                   
-                </a>
+                  </form>
                 </div>
               </div>
             </div>
@@ -206,9 +228,18 @@
                     <h5 class="text-uppercase fs-5 mt-3">
                       <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>
                     </h5>
-                    <a href="/cart/add/<%= bestSellers[i]._id %>" class="text-decoration-none" data-after="Add to cart">
-                      <span>Rs<%= bestSellers[i].price %></span>
-                  </a>
+                  
+                  <form action="/cart" method="POST" style="display: inline;">
+                    <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
+                    <button type="submit"
+                            style="all: unset; cursor: pointer;"
+                            title="Add to cart">
+                      <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                    </button>
+                    <span>Rs<%= bestSellers[i].price %></span>
+                  </form>
+                  
+                  
                   </div>
                 </div>
               </div>

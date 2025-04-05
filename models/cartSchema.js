@@ -23,7 +23,8 @@ const cartSchema = new Schema(
         price: {
           type: Number,
           required: true
-        }
+        },
+        totalPrice: { type: Number }
         
       }
     ],

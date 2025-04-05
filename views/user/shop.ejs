@@ -102,11 +102,15 @@
                                     <h5 class="card-title"><%= book.title %></h5>
                                     <p class="card-text">Author: <%= book.author %></p>
                                     <p class="card-text">Price: ₹<%= book.price %></p>
-                                     <!-- View Details Button -->
-                            
-                                     <a href="/cart/add/<%= book._id %>" class="text-decoration-none">
-                                        <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
-                                    </a>
+                                    
+                                    
+                                    <form action="/cart" method="POST" style="display: inline;">
+                                        <input type="hidden" name="bookId" value="<%= book._id %>">
+                                        <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                          <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                                        </button>
+                                      </form>
+                                      
                                     <a href="/wishlist/<%= book._id %>" class="text-decoration-none">
                                         <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f; float: right;">favorite</span>
                                     </a>

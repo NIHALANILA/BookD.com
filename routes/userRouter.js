@@ -95,7 +95,7 @@ router.post('/cart/update',cartController.updateCart)
 router.get('/orders',auth.loadCommonData,orderController.orderList)
 router.post('/orders/cancel/:id',orderController.orderCancel)
 router.get('/orders/view/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.view)
-
+router.post('/orders/return/:id',orderController.returnOrder)
 
 
 

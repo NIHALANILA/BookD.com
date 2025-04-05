@@ -33,40 +33,41 @@ const userNotIn=async(req,res,next)=>{
     }
 }
 
- 
+ //for sharing user,search,cart datas in every pages
 
 const loadCommonData = async (req, res, next) => {
     try {
-        // Get User Data (if logged in)
+        
         const userData = await checkUserSession(req);
 
-        // Get Cart Data (if user is logged in)
-        let cart = { items: [] }; // Default empty cart
+
+        let cart = { items: [] }; 
         if (userData) {
             const cartData = await Cart.findOne({ userId: userData._id }).populate("items.bookId");
             if (cartData) cart = cartData;
         }
 
-        // Get Search Query (if any)
+        
         const searchQuery = req.query.search || "";
 
-        // Attach Data to `res.locals` (available in all EJS templates)
+       
         res.locals.user = userData;
         res.locals.cart = cart;
         res.locals.searchQuery = searchQuery;
 
-        next(); // Continue to next middleware or route handler
+        next(); 
     } catch (error) {
         console.error("Error loading common data:", error);
-        next(); // Prevent errors from breaking the app
+        next(); 
     }
 };
-
+//success message after order place
 const success=async(req,res)=>{
 
     res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:true})
 
 }
+//to load the same success page as view details without success message
 
 const view=async(req,res)=>{
 

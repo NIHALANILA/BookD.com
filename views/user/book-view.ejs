@@ -200,8 +200,7 @@
           <div class="book-actions">
               <form id="addToCartForm" method="post" action="/cart">
                   <input type="hidden" name="bookId" value="<%= book._id %>">
-                  <label>Quantity:</label>
-                  <input type="number" name="quantity" value="1" min="1">
+                  
                   <button type="submit" class="btn btn-primary">Add to Cart</button>
               </form>
               <form id="addToWishlist">

@@ -8,10 +8,16 @@
 <p><strong>Order ID:</strong> <%= order.orderId %></p>
 <p><strong>Status:</strong> <%= order.status %></p>
 <p><strong>Order Date:</strong> <%= order.orderDate.toLocaleString() %></p>
+
 <% if (order.deliveryDate) { %>
   <p><strong>Delivery Date:</strong> <%= order.deliveryDate.toLocaleString() %></p>
 <% } %>
-
+<% if (order.status=="requested") { %>
+  <p><strong>Request Reason:</strong> <%= order. returnReason %></p>
+<% } %>
+<% if (order.status=="cancelled") { %>
+  <p><strong>Request Reason:</strong> <%= order. cancelReason %></p>
+<% } %>
 <hr>
 <h4> User Info</h4>
 <p><strong>Name:</strong> <%= order.userId.username %></p>

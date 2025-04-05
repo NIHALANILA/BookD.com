@@ -26,14 +26,13 @@
             <option value="delivered" <%= status === "delivered" ? "selected" : "" %>>Delivered</option>
             <option value="cancelled" <%= status === "cancelled" ? "selected" : "" %>>Cancelled</option>
             <option value="returned" <%= status === 'returned' ? 'selected' : '' %>>Returned</option>
+            <option value="requested" <%= status === 'requested' ? 'selected' : '' %>>Requested</option>
         </select>
         <button type="submit">Submit</button>
         <% if (search || status) { %>
             <a href="/admin/orders"><button type="button">Reset</button></a>
         <% } %>
-        <% if (message) { %>
-            <p class="alert alert-warning"><%= message %></p>
-        <% } %>
+       
     </form>
 
     <table class="book-table">
@@ -61,8 +60,9 @@
                           <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
                           <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
                           <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
+                          <option value="requested" <%= order.status === 'requested' ? 'selected' : '' %>>Requested</option>
                         </select>
-                        <button type="submit" class="edit-btn" style="background-color: blue;">Update</button>
+                        <button type="submit" class="edit-btn" style="background-color: #3498db;">Update</button>
                       </form></td>
                     <td>
                         <a href="/admin/orders/view/<%= order._id %>"><button class="edit-btn">View</button></a>
