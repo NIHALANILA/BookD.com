@@ -120,9 +120,6 @@
                   <h5 class="element-title text-uppercase fs-5 mt-3">
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>
-                <!--  <a href="/cart/add/<%= newArrivals[i]._id %>" class="text-decoration-none" data-after="Add to cart">
-                    <span>Rs<%= newArrivals[i].price %></span>
-                </a>-->
                 <form action="/cart" method="POST" style="display: inline;">
                   <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
                   <button type="submit"
@@ -194,7 +191,14 @@
                             title="Add to cart">
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
-                    <span>Rs<%= bestSellers[i].price %></span>
+                    
+                      <p>
+                        <span style="text-decoration: line-through; color: grey;">Rs <%= bestSellers[i].price %></span>
+                        <span style="color: red;">Rs <%= bestSellers[i].salePrice %></span>
+                      </p>
+                    
+                    
+                    
                   </form>
                 </div>
               </div>

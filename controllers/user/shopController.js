@@ -4,6 +4,7 @@ const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const {checkUserSession} = require('../../helpers/userDry')
 const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
+const {getBestOffer}=require('../../helpers/offerHelper')
 
 
 
@@ -11,13 +12,9 @@ const loadHome=async(req,res)=>{
     try{
         
               
-       const userData = await checkUserSession(req)
-
-
+       const userData = await checkUserSession(req)        
         
-        const { search } = req.query;
-        
-        const newArrivals= await Books.find({isDeleted:false,isListed:true}).sort({createdAt: -1})
+        const newArrivals= await Books.find({isDeleted:false,isListed:true}).sort({createdAt: -1}).lean()
     
        let bestSellers = [];
        const bestSellerCategory = await Category.findOne({ name: "Best Seller" });
@@ -27,10 +24,21 @@ const loadHome=async(req,res)=>{
         isDeleted: false,
         isListed: true,
         category_ids: { $in: [bestSellerCategory._id] } 
-       }).sort({ edition: -1 });
+       }).sort({ edition: -1 }).lean()
+
+       
 }
+
+for (let book of bestSellers) {
+    const offer = await getBestOffer(book._id);
+    if (offer) {
+      book.salePrice = offer.finalPrice;
+      book.offerApplied = offer.offerApplied;
+      book.discount = offer.discount;
+    }
+  }
  
-        return res.render('home',{user:userData,newArrivals,bestSellers, searchQuery: search || "" })
+        return res.render('home',{user:userData,newArrivals,bestSellers})
     
     }
     catch(error){
