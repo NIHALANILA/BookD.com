@@ -85,10 +85,10 @@
     <div class="row">
         
         <div  class="profile-container">
-        <form id="profileDetailsForm" action="/profile/update" method="POST">
+        <form id="profileDetailsForm" >
             <div class="mb-3">
                 <label class="form-label">Full Name</label>
-                <input type="text" name="fullName" class="form-control" value="<%= user.name || '' %>" required>
+                <input type="text" name="fullName" class="form-control" value="<%= user.name || '' %>" >
             </div>
 
             <!-- Email (Readonly) -->
@@ -100,27 +100,27 @@
             <!-- Phone -->
             <div class="mb-3">
                 <label class="form-label">Phone</label>
-                <input type="text" name="phone" class="form-control" value="<%= user.phone || '' %>" required>
+                <input type="text" name="phone" class="form-control" value="<%= user.phone || '' %>" >
             </div>
             <!-- City -->
             <div class="mb-3">
                 <label class="form-label">City</label>
-                <input type="text" name="city" id="city" class="form-control" value="<%= user.city || '' %>" required>
+                <input type="text" name="city" id="city" class="form-control" value="<%= user.city || '' %>" >
             </div>
             <!-- State -->
             <div class="mb-3">
                 <label class="form-label">State</label>
-                <input type="text" name="state" id="state" class="form-control" value="<%= user.state || '' %>" required>
+                <input type="text" name="state" id="state" class="form-control" value="<%= user.state || '' %>" >
             </div>
             <!-- Place -->
             <div class="mb-3">
                 <label class="form-label">Place</label>
-                <input type="text" name="place" id="place" class="form-control" value="<%= user.place || '' %>" required>
+                <input type="text" name="place" id="place" class="form-control" value="<%= user.place || '' %>" >
             </div>
             <!-- Pincode -->
             <div class="mb-3">
                 <label class="form-label">PIN</label>
-                <input type="number" name="pincode" id="pincode" class="form-control" value="<%= user.pincode || '' %>" required>
+                <input type="number" name="pincode" id="pincode" class="form-control" value="<%= user.pincode || '' %>" >
             </div>
 
             <!-- Address -->
@@ -148,6 +148,9 @@
             crossorigin="anonymous"></script>
           <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
           <script src="/js/script.min.js"></script>
+          <!-- SweetAlert2 CDN -->
+          
+
           <script>
            document.addEventListener('DOMContentLoaded',function(){
             initClearSearch()
@@ -168,9 +171,37 @@
             const form = document.getElementById("profileDetailsForm");
 
     form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault(); 
 
-        // Step 1: Collect form data
+
+        
+        const phone = form.phone.value.trim();
+        const pincode = form.pincode.value.trim();
+        const fullName = form.fullName.value.trim();
+        const city = form.city.value.trim();
+        const state = form.state.value.trim();
+        const place = form.place.value.trim();
+        const address = form.address.value.trim();
+
+        const phoneRegex = /^[6-9]\d{9}$/; 
+        const pincodeRegex = /^\d{6}$/;
+
+        if (!fullName || !city || !state || !place || !address) {
+            alert("Please fill in all required fields.");
+            return;
+        }
+
+        if (!phoneRegex.test(phone)) {
+            alert("Please enter a valid 10-digit phone number.");
+            return;
+        }
+
+        if (!pincodeRegex.test(pincode)) {
+            alert("Please enter a valid 6-digit PIN code.");
+            return;
+        }
+
+        
         const formData = new FormData(form);
         const jsonData = {};
         
@@ -188,8 +219,9 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.redirectTo) {
                 alert("Profile updated successfully!");
+                window.location.href = data.redirectTo;
             } else {
                 alert("Error updating profile. Please try again.");
             }

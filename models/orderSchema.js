@@ -15,9 +15,10 @@ const orderSchema = new Schema({
         ref: 'User',
         required: true
     },
-    paymentId: {
-        type: mongoose.Schema.Types.Mixed,
-    required: true
+    paymentMethod: {
+        type: String,
+        enum: ['cod', 'online', 'wallet'],
+        required: true
     },
     couponId: {
         type: Schema.Types.ObjectId,

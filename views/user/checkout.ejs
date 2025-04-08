@@ -180,18 +180,17 @@ h3, h4, h5 {
                 <hr>
                 <h5><strong>Final Total:</strong> ₹<%= finalTotal %></h5>
 
-                <!-- 📌 Place Order Form -->
                
                 <form id="placeOrderForm" method="POST" action="/place-order">
                   <input type="hidden" name="addressId" id="selectedAddressInput">
-                  <input type="hidden" name="paymentId" id="selectedPaymentInput">
+                  <input type="hidden" name="paymentMethod" id="selectedPaymentInput">
                   
                   <% if (cartItems.length === 1 && cartItems[0].quantity === 1) { %>
-                    <!-- ✅ For "Buy Now" Orders -->
+                    
                     <input type="hidden" name="book" value="<%= cartItems[0].bookId %>">
                     <input type="hidden" name="quantity" value="1">
                 <% } else { %>
-                    <!-- ✅ For "Cart Checkout" Orders -->
+                    
                     <% cartItems.forEach(item => { %>
                         <input type="hidden" name="books[]" value="<%= item.bookId %>">
                     <% }) %>
@@ -206,7 +205,7 @@ h3, h4, h5 {
 
    <div class="">
     <h3>Select a Delivery Address</h3>
-    <a href="/profile/address" class="btn btn-success mb-2 w-auto ">Add New Address</a>
+    <a href="/profile/address?from=checkout" class="btn btn-success mb-2 w-auto ">Add New Address</a>
    </div>
      
     <% if (addresses.length > 0) { %>
@@ -230,9 +229,7 @@ h3, h4, h5 {
                     <p><strong>Full Address:</strong> <%= address.address %></p>
 
                     <div class="text-center mt-auto">
-                        <form action="/profile/address/<%= address._id %>" method="get">
-                          <button type="submit" class="btn btn-primary btn-sm">Edit</button>
-                        </form>
+                        <a  class="btn btn-primary btn-sm" href="/profile/address/<%= address._id %>?from=checkout">Edit</a>
                       </div>
 
                 </div>
@@ -310,8 +307,7 @@ window.location.href="/shop"
     const cartItems = document.querySelectorAll("input[name='books[]']");
     const buyNowItem = document.querySelector("input[name='book']");
     const placeOrderBtn = document.getElementById("placeOrderBtn");
-   //placeOrderBtn.disabled = cartItems.length === 0;
-   //placeOrderBtn.disabled = cartItems.length === 0 && !document.querySelector("input[name='book']");
+   
    placeOrderBtn.disabled = (cartItems.length === 0 && !buyNowItem);
 
 

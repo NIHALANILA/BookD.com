@@ -4,7 +4,9 @@ const Address=require('../../models/addressSchema')
 const {checkUserSession} = require('../../helpers/userDry')
 const path = require("path");
 const fs=require('fs')
-const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
+const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper');
+const { success } = require( '../../middleware/auth' );
+const bcrypt= require('bcryptjs')
 
 
 const loadprofile=async(req,res)=>{
@@ -199,8 +201,8 @@ const resendEmailOtp= async(req,res)=>{
 
 const Changeusername=async(req,res)=>{
     try {
-        const userId = await checkUserSession(req);
-        if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+        const user = await checkUserSession(req);
+        if (!user) return res.status(401).json({ success: false, message: "Unauthorized" });
 
         const { username } = req.body;
         if (!username) return res.status(400).json({ success: false, message: "Username is required" });
@@ -212,9 +214,10 @@ const Changeusername=async(req,res)=>{
         }
 
         
-        await User.findByIdAndUpdate(userId, { username });
+        await User.findByIdAndUpdate(user, { username });
+        req.session.user.username = username;
 
-       return res.json({ success: true, message: "Username updated successfully please login again " });
+       return res.json({ success: true, message: "Username updated successfully" });
        
 
 
@@ -248,5 +251,41 @@ const changephone=async(req,res)=>{
     }
 }
 
+const passwordChange=async(req,res)=>{
+    try {
+        const userId=await checkUserSession(req);
+        if(!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
-module.exports={loadprofile,updateProfileImage,deleteProfileImage,loadChangemail,changEmail,verifyChangEmail,resendEmailOtp,Changeusername,changephone}
+        res.render('changepass',{message:null})
+    } catch (error) {
+        console.log(error)
+        
+    }
+}
+
+const confirmPassword=async(req,res)=>{
+    try {
+        const user= await checkUserSession(req);
+        if(!user) return res.status(401).json({success:false,message:'Unauthorised'})
+        
+            const {password,Npassword,cnpassword}=req.body;
+
+            const match= await bcrypt.compare(password,user.password)
+            if(!match) return res.status(400).json({success:false,message:'Incorrect password'})
+
+            if(Npassword!==cnpassword) return res.status(400).json({success:false,message:"new password does not math"})
+
+            const hashed=await bcrypt.hash(Npassword,10)
+            await User.findByIdAndUpdate(user._id,{password:hashed})
+
+            res.json({success:true,message:'password changed succefully'})
+    } catch (error) {
+
+        console.error(error)
+        res.status(500).json({success:false,message:'server error'})
+        
+    }
+}
+
+
+module.exports={loadprofile,updateProfileImage,deleteProfileImage,loadChangemail,changEmail,verifyChangEmail,resendEmailOtp,Changeusername,changephone,passwordChange,confirmPassword}

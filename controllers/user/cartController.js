@@ -4,6 +4,7 @@ const {checkUserSession} = require('../../helpers/userDry')
 const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const Cart=require('../../models/cartSchema')
+const Wishlist=require('../../models/wishlistSchema')
 
 
 
@@ -59,6 +60,7 @@ const addcart = async (req, res) => {
         }
 
         await cart.save();
+        await Wishlist.findOneAndDelete({ user_id: user._id, book_id: bookId });
         req.flash("success", "Item added to cart.");
         res.redirect("/cart");
 
@@ -161,4 +163,62 @@ const removecart=async(req,res)=>{
     }
 }
 
-module.exports={addcart,viewCart,updateCart,removecart}
+const loadWishlist = async (req, res) => {
+    try {
+        
+        const user= await checkUserSession(req)
+        if(!user) return res.redirect('/login')
+        
+
+        const wishlistItems = await Wishlist.find({ user_id:user }).populate('book_id');
+
+        res.render('wishlist', { wishlistItems });
+    } catch (error) {
+        console.error('Error fetching wishlist:', error);
+        res.status(500).send('Something went wrong!');
+    }
+};
+
+const addWishlist=async(req,res)=>{
+    try {
+        console.log("Wishlist Form Submitted")
+        const user= await checkUserSession(req)
+        if(!user) return res.redirect('/login')
+            const { bookId } = req.body;
+        console.log("Book ID Received:", bookId);
+
+        const existing = await Wishlist.findOne({ user_id:user, book_id: bookId });
+        if (existing) {
+            return res.status(409).json({ message: 'Already in wishlist' });
+            console.log("Book already in wishlist"); 
+        }
+
+        const wishlistItem = new Wishlist({
+            user_id:user,
+            book_id: bookId
+        });
+
+        await wishlistItem.save();
+        console.log("Wishlist Item Saved ✅");
+        res.redirect('/wishlist'); 
+        
+
+    } catch (error) {
+
+        console.error('Error adding to wishlist:', error);
+    res.status(500).send('Internal Server Error');
+        
+    }
+}
+
+const deleteWishlist=async(req,res)=>{
+    try {
+        await Wishlist.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Error deleting wishlist item:', error);
+    res.status(500).json({ success: false });
+    }
+}
+
+module.exports={addcart,viewCart,updateCart,removecart,loadWishlist,addWishlist,deleteWishlist}

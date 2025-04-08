@@ -8,9 +8,11 @@ const adminIn= async(req,res,next)=>{
         }
         else{
             res.redirect("/admin/login")
+            
         }
     } catch (error) {
         console.log(error.message)
+        res.redirect('/admin/login');
     }
 
 }
@@ -25,6 +27,7 @@ const adminNotIn=async(req,res,next)=>{
     } catch (error) {
 
         console.log(error.message)
+        res.redirect('/admin/dashboard');
         
     }
 }

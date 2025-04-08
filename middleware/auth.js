@@ -21,7 +21,7 @@ const userIn=async(req,res,next)=>{
 
 const userNotIn=async(req,res,next)=>{
     try {
-        if(!req.session.user){
+        if(!req.session.user&&!req.user){
             next()
         }
         else{

@@ -75,8 +75,7 @@ button:hover {
         <% if (message) { %>
             <p class="error-message"><%= message %></p>
         <% } %>
-        <form action="/change-password" method="POST">
-            <input type="hidden" name="email" value="<%= email %>"> 
+        <form id="changePasswordForm">
             <label for="curpassword">Current Password:</label>
             <input type="password" name="password" required>
             <label for="newpassword">New Password:</label>
@@ -88,5 +87,56 @@ button:hover {
             <button type="submit">Reset Password</button>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('changePasswordForm').addEventListener('submit',async function(e){
+            e.preventDefault();
+
+            const formData= new FormData(this);
+            const data={
+                password: formData.get('password'),
+                Npassword:formData.get('Npassword'),
+                cnpassword:formData.get('cnpassword')
+            };
+
+            try{
+                const response= await fetch('/profile/change/password',{
+                    method:'PATCH',
+                    headers:{
+                        'Content-Type':'application/json'
+                    },
+                    body:JSON.stringify(data)
+                })
+                const result=await response.json()
+                if(result.success){
+
+                    Swal.fire({
+                        icon:'success',
+                        title:'password changed',
+                        text:result.message||'your password has been updated succefully'
+                    }).then(() => {
+                    window.location.href = '/userProfile'; 
+                    });
+                    
+                }
+                else{
+                    Swal.fire({
+                    icon: 'error',
+                   title: 'Oops!',
+                  text: result.message || 'Something went wrong!'
+                })
+            }}
+            catch(err){
+                Swal.fire({
+                        icon:'success',
+                        title:'password changed',
+                        text:data.message||'your password has been updated succefully'
+                    })
+            }
+        })
+        
+        
+    </script>
 </body>
+
 </html>

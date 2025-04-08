@@ -6,6 +6,10 @@ const {checkUserSession} = require('../../helpers/userDry')
 const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const Cart=require('../../models/cartSchema');
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const { refundToWallet } =require('../../helpers/walletHelper')
+
 
 
 const loadcheckout = async (req, res) => {
@@ -86,6 +90,9 @@ const buynow=async(req,res)=>{
             req.flash("error","Book not found")
             return res.redirect('/shop')
          }
+         if(book.stock===0){
+            return res.redirect(`/book/${book._id}`)
+         }
 
          const addresses= await Address.find({userId:user._id})
 
@@ -127,18 +134,19 @@ const buynow=async(req,res)=>{
 const placeOrder = async (req, res) => {    
     try {
         
-        const { book, quantity, addressId, paymentId} = req.body;
+        const { book, quantity, addressId, paymentMethod} = req.body;
+        console.log(paymentMethod)
         
         const userId = await checkUserSession(req);
         if (!userId) return res.redirect('/login');
 
-        if (!addressId || !paymentId) {
+        if (!addressId || !paymentMethod) {
             return res.status(400).json({ message: 'Address and payment details are required' });
         }
 
         // Validate paymentId
-        let validPaymentId = paymentId;
-        if (paymentId !== "cod" && !mongoose.Types.ObjectId.isValid(paymentId)) {
+        let validPaymentId = paymentMethod;
+        if (paymentMethod !== "cod" && paymentMethod!=="online"&& paymentMethod!=="wallet") {
             return res.status(400).json({ message: 'Invalid payment method' });
         }
 
@@ -210,7 +218,7 @@ const placeOrder = async (req, res) => {
             userId,
             orderItems,
             status: "processing",
-            paymentId: validPaymentId,
+            paymentMethod: validPaymentId,
             addressId,
             total: subtotal,
             netAmount,
@@ -255,7 +263,7 @@ const orderSuccess= async(req,res,next)=>{
          const order = await Order.findOne({ _id: orderId, userId })
          .populate('orderItems.bookId') 
          .populate('addressId') 
-         .populate('paymentId'); 
+         .populate('paymentMethod'); 
 
      if (!order) {
          return res.status(404).render('error', { message: 'Order not found' });
@@ -302,6 +310,12 @@ const orderCancel=async(req,res)=>{
         for (let item of order.orderItems) {
             await Books.findByIdAndUpdate(item.bookId, { $inc: { stock: item.quantity } });
         }
+       
+        // Refund only if prepaid
+      if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
+        await refundToWallet(order.userId, order.totalAmount);
+      }
+
         res.json({ success: true });
         
     } catch (error) {
@@ -340,7 +354,60 @@ const returnOrder=async(req,res)=>{
     }
 }
 
+const downloadInvoice = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId)
+            .populate("orderItems.bookId")
+            .populate("addressId");
+
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+        const doc = new PDFDocument();
+        const filename = `invoice-${orderId}.pdf`;
+
+        // Set headers
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+        // Pipe the PDF into response
+        doc.pipe(res);
+
+        // Create PDF content
+        doc.fontSize(20).text("Order Invoice", { align: "center" });
+        doc.moveDown();
+        doc.fontSize(14).text(`Order ID: ${order.orderId}`);
+        doc.text(`Status: ${order.status}`);
+        doc.text(`Date: ${order.createdAt.toDateString()}`);
+        doc.moveDown();
+
+        doc.text(`Shipping Address:`);
+        doc.text(`${order.addressId.name}`);
+        doc.text(`${order.addressId.place}, ${order.addressId.city}`);
+        doc.text(`${order.addressId.state} - ${order.addressId.pincode}`);
+        doc.moveDown();
+
+        doc.text(`Items:`);
+        order.orderItems.forEach((item, index) => {
+            doc.text(`${index + 1}. ${item.bookId.title} - Qty: ${item.quantity} - ₹${item.bookId.price}`);
+        });
+
+        doc.moveDown();
+        doc.text(`Total: ₹${order.netAmount}`, { align: "right" });
+
+        // Finalize
+        doc.end();
+
+    } catch (err) {
+        console.error("PDF error:", err);
+        res.status(500).send("Could not generate invoice");
+    }
+};
 
 
 
-module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder}
+
+
+module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice}

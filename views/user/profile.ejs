@@ -172,6 +172,7 @@
             <div class="list-group">                
                 <a href="/profile/address" class="list-group-item list-group-item-action">Address Management</a>
                 <a href="/orders" class="list-group-item list-group-item-action">My Orders</a>
+                <a href="/wallet" class="list-group-item list-group-item-action">My Wallet</a>
             </div>
         </div>
       
@@ -199,14 +200,10 @@
                 <input type="text" id="phoneInput" class="form-control" value="<%= user.phone || '' %>" readonly>
                 <button id="changePhoneBtn" class="btn btn-secondary px-3 py-2">Change</button>
             </div>
-            
-            <div class="mb-3 profile">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" value="<%= user.password || '' %>" required>
-                <a href="/profile/phone-change" class="btn btn-secondary px-3 py-2">Change</a>
-            </div>
-            
-
+          
+            <div class="mb-3 profile d-flex justify-content-center">
+                <a href="/profile/change/password" class="btn btn-secondary px-4 py-2">Change Password</a>
+            </div>                       
         </div>
         <div class="col-md-3">
             <form action="/profile/upload-image" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
@@ -413,7 +410,7 @@ function handleDelete() {
        previewContainer.innerHTML = `<span>Add Image</span>`;
        alert('deleted');
    }
-
+//both for username and password updation
    function initEditableField(inputId, buttonId, apiEndpoint, fieldName) {
     const inputField = document.getElementById(inputId);
     const actionBtn = document.getElementById(buttonId);
@@ -461,8 +458,9 @@ function handleDelete() {
             .then(data => {
                 if (data.success) {
                     if(fieldName==="username"){
-                        alert(`${fieldName} updated successfully please login again!`);
+                        alert(`${fieldName} updated successfully !`);                       
                     originalValue = newValue;
+                    window.location.reload();
                     }                   
                     else{
                         alert(`${fieldName} updated successfully!`);
@@ -482,6 +480,8 @@ function handleDelete() {
             });
     }
 }
+
+
 
           </script>
         

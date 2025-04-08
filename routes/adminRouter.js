@@ -38,13 +38,7 @@ router.patch("/categories/toggle/:id",adminAuth.adminIn, categoryController.togg
 
 
 
-//offermanage--need to work more-no need to do in this week
 
-router.get("/offers", offerController.getOffers);
-router.get("/offers/add", offerController.addOfferForm);
-router.post("/offers/add", offerController.addOffer);
-router.get("/offers/edit/:id",offerController.loadupdateoffer)
-router.put("/offers/edit/:id",offerController.updateOffers)
 
 //books manage
 
@@ -62,8 +56,15 @@ router.patch('/books/toggle/:id',adminAuth.adminIn,bookController.toggleBook)
 
 router.get('/orders',orderController.listOrders)
 router.get('/orders/view/:id',orderController.orderview)
-router.post('/orders/:id',orderController.statusEdit)
+router.patch('/orders/:id',orderController.statusEdit)
 
+//offermanage--need to work more-no need to do in this week
 
+router.get("/offers", offerController.getOffers);
+router.get("/offers/add", offerController.addOfferForm);
+router.post("/offers/add", offerController.addOffer);
+router.get("/offers/edit/:id",offerController.loadupdateoffer)
+router.patch("/offers/edit/:id",offerController.editOffers)
+router.delete('/offers/delete/:id',offerController.deleteOffer)
 
 module.exports=router

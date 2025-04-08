@@ -1,3 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+   
+
+
+        .btn.success {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        float:right;
+        margin-bottom: 15px;
+    }
+
+    .btn.success:hover {
+        background-color: #218838;
+    }
+    </style>
+
 <%-include("../../views/partials/admin/header")%>
             <!-- Book Management Section -->
             <section class="content">
@@ -12,15 +41,15 @@
 
     <% } %>
 </form>
+<a href="/admin/offers/add" class="btn success">Add Offer</a>
 
 <table class="book-table">
     <thead>
         <tr>
-            <th>Offer Name</th>
-            <th>Category</th>
-            <th>Books</th>
-            <th>Min Amount</th>
+            <th>Offer Name</th>           
+            <th>Applied To</th>           
             <th>Discount</th>
+            <th>Status</th>
             <th>Start Date</th>
             <th>Expire Date</th>
             <th>Actions</th>
@@ -30,21 +59,15 @@
         <% offers.forEach(offer => { %>
             <tr>
                 <td><%= offer.name %></td>
-                <td><%= offer.category_id ? offer.category_id.name : "N/A" %></td>
-                <td>
-                    <% offer.book_ids.forEach(book => { %>
-                        <span><%= book.title %></span>
-                    <% }) %>
-                </td>
-                <td><%= offer. min_purchase_amount %></td>
-                <td><%= offer.discount_type %> - <%= offer.discount_value %></td>
+                <td></td>
+                <td><%= offer.discount_value %></td>
+                <td><%= offer.status %></td>
                 <td><%= offer.start_date.toDateString() %></td>
                 <td><%= offer.expire_date.toDateString() %></td>
                 <td>
-                    <a href="/admin/offers/edit/<%= offer._id %>">Edit</a>
-                    <form action="/admin/offers/delete/<%= offer._id %>" method="POST" style="display:inline;">
-                        <button type="submit">Delete</button>
-                    </form>
+                    <a href="/admin/offers/edit/<%= offer._id %>" class="edit-btn" style="text-decoration: none;">Edit</a>
+                    <button class="delete-offer-btn edit-btn" data-offer-id="<%= offer._id %>" style="background-color: red;">Delete</button>
+
                 </td>
             </tr>
         <% }) %>
@@ -52,11 +75,69 @@
 </table>
 
 <!-- Pagination -->
+
 <div class="pagination-container">
-<% if (totalPages > 1) { %>
-    <nav>
-        <% for(let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/offers?page=<%= i %>&search=<%= search %>"><%= i %></a>
-        <% } %>
-    </nav>
-<% } %></div>
+  <% for(let i = 1; i <= totalPages; i++) { %>
+      <a href="/admin/offers?page=<%= i %>&search=<%= search %>">
+          <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
+      </a>
+  <% } %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+  const deleteButtons = document.querySelectorAll(".delete-offer-btn");
+
+  deleteButtons.forEach(button => {
+    button.addEventListener("click", async function () {
+      const offerId = this.dataset.offerId;
+
+      const confirm = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      });
+
+      if (confirm.isConfirmed) {
+        try {
+          const res = await fetch(`/admin/offers/delete/${offerId}`, {
+            method: 'DELETE',
+          });
+
+          const result = await res.json();
+
+          if (res.ok) {
+            Swal.fire({
+              title: 'Deleted!',
+              text: result.message || 'Offer has been deleted.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              // Refresh or remove the row from the DOM
+              window.location.reload();
+            });
+          } else {
+            throw new Error(result.message || 'Failed to delete offer');
+          }
+        } catch (err) {
+          Swal.fire({
+            title: 'Error!',
+            text: err.message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      }
+    });
+  });
+});
+
+</script>
+    
+</body>
+</html>

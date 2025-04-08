@@ -8,6 +8,11 @@ const offerSchema = new Schema({
         required: true,
         trim: true,
     },
+    applyTo: {
+        type: String,
+        enum: ["book", "category"],
+        required: true
+      },
 
 
     category_id: {
@@ -21,10 +26,10 @@ const offerSchema = new Schema({
             ref: "Book",
         }
     ],
-    min_purchase_amount: { type: Number, default: 0 },
+    
     discount_type: {
         type: String, 
-        enum: ["percentage", "fixed"],
+        enum: ["percentage"],
         required: true,
     },
     discount_value: {
@@ -35,11 +40,29 @@ const offerSchema = new Schema({
         type: Date,
         required: true,
     },
+    status: { 
+        type: String,
+        enum: ["active", "blocked"], 
+        default: "active"
+    },
     expire_date: {
         type: Date,
         required: true,
-    }
+    },
 }, { timestamps: true });
+
+offerSchema.pre('save', function (next) {
+    if (this.applyTo === 'product' && (!this.book_ids || this.book_ids.length === 0)) {
+        return next(new Error("Offer is applied to products, but no book_ids provided."));
+    }
+    if (this.applyTo === 'category' && !this.category_id) {
+        return next(new Error("Offer is applied to a category, but no category_id provided."));
+    }
+    if (this.book_ids && this.book_ids.length > 0 && this.category_id) {
+        return next(new Error("Offer cannot be applied to both category and individual books."));
+    }
+    next();
+});
 
 
 const Offer = mongoose.model("Offer", offerSchema);

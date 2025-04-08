@@ -3,6 +3,7 @@ const Book = require("../../models/bookSchema");
 const mongoose = require('mongoose');
 const User=require('../../models/userSchema')
 const Address=require('../../models/addressSchema')
+const { refundToWallet } =require('../../helpers/walletHelper')
 
 
 
@@ -88,9 +89,25 @@ const statusEdit=async(req,res)=>{
     try {
        const {id} =req.params;
        const {status}=req.body
-       await Order.findByIdAndUpdate(id,{status})
-       req.flash('success', 'Order status updated successfully!');
-       res.redirect('/admin/orders')
+
+       const order = await Order.findById(id);
+
+       if(status==="returned"&& order.status!=="returned"){
+
+        for (const item of order.orderItems){
+            await Book.findByIdAndUpdate(item.bookId,{
+                $inc:{stock:item.quantity}
+            })
+        }
+        await refundToWallet(order.userId, order.total);
+
+       }
+      
+       order.status=status;
+
+       await order.save();
+       res.json({ success: true, message: 'Order status updated' });
+      
     } catch (error) {
 
         console.error('Failed to update order status:', error);

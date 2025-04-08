@@ -9,6 +9,7 @@ const addressController=require('../controllers/user/addressController')
 const { uploadProfile,processProfileImage } = require("../helpers/multerHelper");
 const cartController=require('../controllers/user/cartController')
 const orderController=require('../controllers/user/orderController')
+const walletController=require('../controllers/user/walletController')
 
 
 
@@ -63,10 +64,13 @@ router.post("/profile/upload-image", uploadProfile, processProfileImage, profile
 router.delete('/profile/delete-image',profileController.deleteProfileImage)
 router.get('/profile/email-change',profileController.loadChangemail)
 router.post('/profile/change-email',profileController.changEmail)
+router.get('/profile/password')
 router.post('/profile/verify-email',profileController.verifyChangEmail)
 router.post('/resend-emailotp',profileController.resendEmailOtp) 
 router.post("/profile/update-username",profileController.Changeusername )
 router.post("/profile/update-phone",profileController.changephone)
+router.get('/profile/change/password',profileController.passwordChange)
+router.patch('/profile/change/password',profileController.confirmPassword)
 
 //address
 router.get('/profile/address',auth.loadCommonData,addressController.loadAddressPage)
@@ -76,17 +80,19 @@ router.patch("/profile/address", addressController.editaddress);
 router.delete('/profile/address/:id',addressController.deleteAddress)
 
 
-//cart
+//cartController-cart and wishlist
 router.post('/cart',cartController.addcart)
 router.get('/cart',auth.loadCommonData,cartController.viewCart)
 router.post('/cart/update',cartController.updateCart)
 //
  router.post('/cart/remove',cartController.removecart)
  
+ router.get('/wishlist',auth.loadCommonData,cartController.loadWishlist)
+ router.post('/wishlist',auth.loadCommonData,cartController.addWishlist)
+ router.delete('/wishlist/:id',cartController.deleteWishlist)
 
-
- router.post('/profile/address/select')
-
+ //orderController
+ router.get('/checkout',auth.loadCommonData,orderController.loadcheckout)
  router.post('/checkout',auth.loadCommonData,orderController.loadcheckout)
  router.post('/buynow',auth.loadCommonData,orderController.buynow)
  router.post('/place-order',orderController.placeOrder)
@@ -96,6 +102,12 @@ router.get('/orders',auth.loadCommonData,orderController.orderList)
 router.post('/orders/cancel/:id',orderController.orderCancel)
 router.get('/orders/view/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.view)
 router.post('/orders/return/:id',orderController.returnOrder)
+router.get('/orders/invoice/:id', orderController.downloadInvoice);
+
+//wallet
+
+router.get('/wallet',auth.loadCommonData,walletController.getWalletPage)
+
 
 
 

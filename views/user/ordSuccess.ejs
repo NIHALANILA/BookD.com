@@ -95,6 +95,9 @@
 </head>
 <%-include("../../views/partials/user/header")%>
 
+
+
+
     <div class="containerB">
         <div class="success-box">
             <% if (isOrderSuccess) { %>
@@ -105,6 +108,9 @@
             <!-- Order Details -->
             <div class="order-details">
                 <h3>Order Details</h3>
+                <a href="/orders/invoice/<%= order._id %>" class="btn btn-primary" download>
+                    Download Invoice
+                </a>
                 <p><strong>Order ID:</strong> #<%= order.orderId %></p>
                 <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
                 <p><strong>Payment Method:</strong> 

@@ -53,8 +53,10 @@
                     <td><%= order.orderId %></td>
                     <td><%= order.userId.email %></td>                    
                     <td><%= order.orderDate.toDateString() %></td>
-                    <td><form action="/admin/orders/<%= order._id %>" method="POST">
-                        <select name="status" class="form-select d-inline-block w-auto me-2">
+                    <td>
+                        <select name="status"
+                                class="form-select d-inline-block w-auto me-2 status-select"
+                                data-id="<%= order._id %>">
                           <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
                           <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
                           <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
@@ -62,8 +64,9 @@
                           <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
                           <option value="requested" <%= order.status === 'requested' ? 'selected' : '' %>>Requested</option>
                         </select>
-                        <button type="submit" class="edit-btn" style="background-color: #3498db;">Update</button>
-                      </form></td>
+                        <button type="button" class="edit-btn btn-update" style="background-color: #3498db;">Update</button>
+                      </td>
+                      
                     <td>
                         <a href="/admin/orders/view/<%= order._id %>"><button class="edit-btn">View</button></a>
                     </td>
@@ -81,3 +84,50 @@
         <% } %>
     </div>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelectorAll('.btn-update').forEach(button => {
+      button.addEventListener('click', async function () {
+        const select = this.previousElementSibling;
+        const orderId = select.dataset.id;
+        const newStatus = select.value;
+  
+        // SweetAlert confirmation
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: `You are about to change the order status to "${newStatus}".`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, update it!'
+        });
+  
+        if (result.isConfirmed) {
+          try {
+            const response = await fetch(`/admin/orders/${orderId}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ status: newStatus })
+            });
+  
+            const data = await response.json();
+  
+            if (data.success) {
+              Swal.fire('Updated!', 'Order status has been updated.', 'success');
+            } else {
+              Swal.fire('Error!', 'Failed to update status.', 'error');
+            }
+          } catch (err) {
+            console.error('Error:', err);
+            Swal.fire('Oops!', 'Something went wrong.', 'error');
+          }
+        }
+      });
+    });
+  </script>
+  
+</body>
+</html>
