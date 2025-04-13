@@ -184,6 +184,14 @@
             <h5><%= book.title %></h5>
             <p class="text-muted">By <strong><%= book.author %></strong></p>
 
+            <p class="mt-1 mb-1">
+                <span style="text-decoration: line-through;">₹<%= book.price %></span>
+                        
+                        <span style="color: green; font-size: 1.1rem;">₹<%= book.salePrice %></span>
+                        
+            </p>
+            <h3 style="color: green; font-size: 1.1rem; font-weight: bold;"><%= book.discountPercent %>% OFF</h3>
+
             <!-- Stock Status -->
             <% if (book.stock > 0) { %>
                 <p class="text-success"><strong>In Stock</strong></p>
@@ -237,14 +245,14 @@
                 <strong>Radhika </strong>
                 <div class="review-rating">★★★★★</div>
             </div>
-            <p>Great product! Exactly what I was looking for. The quality is excellent and it arrived quickly.</p>
+            <p>Great Book! Exactly what I was looking for. The page quality is excellent and it arrived quickly.</p>
         </div>
         <div class="review">
             <div class="review-header">
                 <strong>KrishnaPriya</strong>
                 <div class="review-rating">★★★☆☆</div>
             </div>
-            <p>Good product overall, but the delivery was a bit slow. The packaging could be improved.</p>
+            <p>Good .</p>
         </div>
     </div>
 
@@ -262,7 +270,11 @@
                             <img src="/<%= book.book_images[0] %>" class="img-fluid" alt="<%= book.title %>">
                             <p class="mt-1 mb-1"><%= book.title %></p>
                             <p class="mt-1 mb-1"><%= book.author %></p>
-                            <p class="mt-1 mb-1"><%= book.price %></p>
+                            <p class="mt-1 mb-1">
+                                <span style="text-decoration: line-through;">₹<%= book.price %></span>
+                                        
+                                        <span style="color: green; font-size: 1.1rem;">₹<%= book.salePrice %></span>
+                            </p>
                         </a>
                     </div>
                 <% }); %>

@@ -9,6 +9,9 @@ const Cart=require('../../models/cartSchema');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const { refundToWallet } =require('../../helpers/walletHelper')
+const {getBestOffer}=require('../../helpers/offerHelper')
+const Coupon=require('../../models/couponSchema')
+const {applyCoupon}=require('../../helpers/couponHelper')
 
 
 
@@ -19,8 +22,8 @@ const loadcheckout = async (req, res) => {
 
         const addresses = await Address.find({ userId: user._id });
 
-        let cartItems = [];
-        let subtotal = 0;
+        
+        
 
             const cart = await Cart.aggregate([
                 { $match: { userId: user._id, status: 'active' } },
@@ -51,32 +54,66 @@ const loadcheckout = async (req, res) => {
                 return res.redirect('/books');
             }
 
-            cartItems = cart;
-            console.log("Aggregated Cart:", cart);
-            subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+            
+          const cartItems = await Promise.all(cart.map(async (item) => {
+              const fullBook = await Books.findById(item.bookData._id);  
+              const offerData = await getBestOffer(fullBook);
+
+                 return {
+                 ...item,
+               discount: offerData?.discount || 0,
+               discountedPrice: offerData?.finalPrice || item.totalPrice
+                  };
+                       }));
+
+                const subtotal = cartItems.reduce((sum, item) => sum + item.discountedPrice*item.quantity, 0);
+                req.session.subtotal = subtotal;
+
+            
+        
+            
         
 
         const tax = subtotal * 0.05;
-        const discount = 50;
-        const finalTotal = subtotal + tax - discount;
+        
         console.log("Cart Items:", cartItems);
 
+        const userId = new mongoose.Types.ObjectId(user._id);
+
+        
+        const coupons = await Coupon.find({
+            isActive: "yes",
+            expireDate: { $gte: new Date() },
+            minimumPrice: { $lte: subtotal },
+            isDeleted: false,
+            usersUsed:  { $nin: [userId] }
+        });
+        
+        const finalTotal=subtotal+tax
+
+        console.log("Eligible Coupons:", coupons.map(c => c.code));
+        
+        
         res.render('checkout', {
             user,
             cartItems,
             addresses,
             subtotal,
-            tax,
-            discount,
+            tax,            
             finalTotal,
+            coupons,
             session: req.session
         });
 
     } catch (error) {
+        console.error("Checkout error:", error);  //
         req.flash("error", "Something went wrong.");
+        
         res.redirect('/cart');
     }
 };
+
+
 
 const buynow=async(req,res)=>{
     try {
@@ -94,21 +131,39 @@ const buynow=async(req,res)=>{
             return res.redirect(`/book/${book._id}`)
          }
 
+         const offer=await getBestOffer(bookId);
+
+         const discountedPrice=  offer.finalPrice;
+
+
          const addresses= await Address.find({userId:user._id})
 
          const item={
             bookId:book.id,
             title:book.title,
             price:book.price,
+            discountedPrice,
             quantity:1,
-            totalPrice:book.price,
+            totalPrice:discountedPrice,
             bookImage:book.book_images[0]
 
          }
-         const subtotal=book.price;
+
+      
+
+         const subtotal=discountedPrice;
          const tax=subtotal*0.05;
-         const discount=50;
-         const finalTotal=subtotal+tax-discount;
+         
+         const finalTotal=subtotal+tax
+         req.session.subtotal = subtotal;
+             
+        const coupons = await Coupon.find({
+            isActive: "yes",
+            expireDate: { $gte: new Date() },
+            minimumPrice: { $lte: subtotal },
+            isDeleted: false,
+            usersUsed: { $ne: user._id }
+        });
 
          res.render('checkout',{
             user,
@@ -116,8 +171,8 @@ const buynow=async(req,res)=>{
             addresses,
             subtotal,
             tax,
-            discount,
             finalTotal,
+            coupons,
             session:req.session
          })
     } catch (error) {
@@ -128,6 +183,106 @@ const buynow=async(req,res)=>{
         
     }
 }
+
+const couponDiscount=async(req,res)=>{
+
+    console.log('coupon called')
+    try {
+        const user = await checkUserSession(req);
+        const { couponCode } = req.body;
+        const subtotal = req.session.subtotal;
+
+        if (!subtotal) {
+            return res.json({ success: false, error: "Subtotal missing." });
+        }
+
+        const result = await applyCoupon({
+            couponCode,
+            userId: user._id,
+            subtotal
+        });
+
+        if (!result.valid) {
+            return res.json({ success: false, error: result.message });
+        }
+
+        const tax = subtotal * 0.05;
+        const finalTotal = subtotal + tax - result.discount;
+
+    
+        req.session.appliedCoupon = {
+            code: couponCode,
+            discount: result.discount,
+            finalTotal
+        };
+        res.status(200).json({
+            success: true,
+            discount: result.discount,
+            tax,
+            finalTotal
+        });
+
+    } catch (error) {
+        console.error("Apply Coupon Error:", error);
+        res.json({ success: false, error: "Something went wrong." });
+    }
+}
+/*
+const removeCoupon=async(req,res)=>{
+console.log('remove called')
+    try {
+        delete req.session.appliedCoupon;
+
+    // Recalculate totals
+    const subtotal = req.session.subtotal || 0;
+    const tax = subtotal * 0.05;
+    const finalTotal = subtotal + tax;
+
+    // Send the updated totals back to the client
+    res.json({
+      success: true,
+       subtotal,
+      tax,
+      finalTotal
+    });
+    } catch (error) {
+
+        console.error("Remove Coupon Error:", error);
+    res.status(500).json({ success: false, error: "Failed to remove coupon." });
+        
+    }
+}
+*/
+
+const removeCoupon = async (req, res) => {
+    try {
+        delete req.session.appliedCoupon;
+
+        // Explicitly save the session after modification
+        req.session.save(err => {
+            if (err) {
+                console.error("Session save error:", err);
+                return res.status(500).json({ success: false, error: "Failed to save session." });
+            }
+
+            // Recalculate totals
+            const subtotal = req.session.subtotal || 0;
+            const tax = subtotal * 0.05;
+            const finalTotal = subtotal + tax;
+
+            // Send the updated totals back to the client
+            res.json({
+                success: true,
+                subtotal,
+                tax,
+                finalTotal
+            });
+        });
+    } catch (error) {
+        console.error("Remove Coupon Error:", error);
+        res.status(500).json({ success: false, error: "Failed to remove coupon." });
+    }
+};
 
 
 
@@ -410,4 +565,4 @@ const downloadInvoice = async (req, res) => {
 
 
 
-module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice}
+module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,couponDiscount,removeCoupon}

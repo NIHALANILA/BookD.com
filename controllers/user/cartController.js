@@ -5,6 +5,8 @@ const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const Cart=require('../../models/cartSchema')
 const Wishlist=require('../../models/wishlistSchema')
+const {getBestOffer}=require('../../helpers/offerHelper')
+
 
 
 
@@ -31,6 +33,10 @@ const addcart = async (req, res) => {
             return res.redirect("/cart");
         }
 
+        const offer = await getBestOffer(book._id);
+
+        const salePrice = offer.finalPrice; 
+
         let cart = await Cart.findOne({ userId: user._id });
         if (!cart) {
             cart = new Cart({ userId: user._id, items: [] });
@@ -44,7 +50,7 @@ const addcart = async (req, res) => {
                 return res.redirect("/cart");
             }
             existingItem.quantity += quantity;
-            existingItem.totalPrice = existingItem.quantity * book.price;
+            existingItem.totalPrice = existingItem.quantity * salePrice;
         } else {
             if (quantity > book.stock) {
                 req.flash("error", `Only ${book.stock} copies are available.`);
@@ -53,8 +59,8 @@ const addcart = async (req, res) => {
             cart.items.push({
                 bookId,
                 quantity,
-                price: book.price,
-                totalPrice: book.price * quantity,
+                price: salePrice,
+                totalPrice: salePrice * quantity,
                 
             });
         }
@@ -85,7 +91,7 @@ const viewCart = async (req, res) => {
         let totalPrice = 0;
         let outOfStock = false;
 
-        const cartItems = cart.items.map(item => {
+       /* const cartItems =  cart.items.map(item => {
             totalPrice += item.price * item.quantity;
             if (item.bookId.stock < item.quantity) outOfStock = true;
 
@@ -98,7 +104,32 @@ const viewCart = async (req, res) => {
                 stock: item.bookId.stock,
                 imageUrl: item.bookId.book_images[0] 
             };
-        });
+        });*/
+
+        const cartItems = await Promise.all(cart.items.map(async (item) => {
+            const book = item.bookId;
+            const offer = await getBestOffer(book._id);
+            const finalPrice = offer?.finalPrice || item.price;
+            const discountPercent = offer?.discountPercent || 0;
+
+            const itemTotal = finalPrice * item.quantity;
+            totalPrice += itemTotal;
+
+            if (book.stock < item.quantity) outOfStock = true;
+
+            return {
+                _id: book._id,
+                title: book.title,
+                price: finalPrice,
+                originalPrice: book.price,
+                discountPercent,
+                quantity: item.quantity,
+                totalPrice: itemTotal,
+                stock: book.stock,
+                imageUrl: book.book_images[0]
+            };
+        }));
+
 
         res.render("cart", { cartItems, totalPrice, outOfStock });
     } catch (error) {
@@ -132,9 +163,20 @@ const updateCart=async(req,res)=>{
             return res.json({success:false,message:"Invalid action"})
         }
 
+         // 
+         const offer = await getBestOffer(bookId);
+         const salePrice = offer ? offer.finalPrice : item.bookId.price;
+
+          // Update item's price and total price
+        item.price = salePrice;
+        item.totalPrice = item.quantity * salePrice;
+
+        const totalPrice = cart.items.reduce((sum, i) => sum + i.totalPrice, 0);
+ 
+
         await cart.save()
-        let totalPrice = cart.items.reduce((sum, item) => sum + item.bookId.price * item.quantity, 0);
-        res.json({ success: true, newQuantity: item.quantity, totalPrice, stock: item.bookId.stock });
+        
+        res.json({ success: true, newQuantity: item.quantity, totalPrice, stock: item.bookId.stock, });
         
     } catch (error) {
 
@@ -153,7 +195,12 @@ const removecart=async(req,res)=>{
 
         cart.items=cart.items.filter(item=>item.bookId.toString()!==bookId)
         await cart.save()
-        let totalPrice=cart.items.reduce((sum,item)=>sum+item.price*item.quantity,0)
+        const offer = await getBestOffer(bookId);
+        const salePrice = offer ? offer.finalPrice : item.bookId.price;
+
+        const totalPrice = cart.items.reduce((sum, i) => sum + i.totalPrice, 0);
+
+       
         res.json({ success: true, totalPrice });
     } catch (error) {
 

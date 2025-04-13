@@ -20,7 +20,7 @@ const loadHome=async(req,res)=>{
        const bestSellerCategory = await Category.findOne({ name: "Best Seller" });
 
       if (bestSellerCategory) {
-     bestSellers = await Books.find({
+        bestSellers = await Books.find({
         isDeleted: false,
         isListed: true,
         category_ids: { $in: [bestSellerCategory._id] } 
@@ -33,11 +33,16 @@ for (let book of bestSellers) {
     const offer = await getBestOffer(book._id);
     if (offer) {
       book.salePrice = offer.finalPrice;
-      book.offerApplied = offer.offerApplied;
-      book.discount = offer.discount;
+      
     }
   }
  
+  for(let book of newArrivals){
+    const offer= await getBestOffer(book._id);
+    if(offer){
+        book.salePrice=offer.finalPrice
+    }
+  }
         return res.render('home',{user:userData,newArrivals,bestSellers})
     
     }
@@ -141,9 +146,17 @@ const loadShopage = async (req, res) => {
         const books = await Books.find(booksQuery)
             .sort(sortQuery)
             .skip((currentPage - 1) * pageSize)
-            .limit(pageSize);
+            .limit(pageSize)
+            .lean();
 
-        
+            for (let book of books) {
+                const offer = await getBestOffer(book._id);
+                if (offer) {
+                  book.salePrice = offer.finalPrice;
+                  
+                }
+              }
+
         res.render('shop', { 
             user: userData, 
             books, 
@@ -177,7 +190,15 @@ const viewBookDetails = async (req, res) => {
       return res.status(400).send("Invalid Book ID");
   }
 
-  const bookData = await Books.findOne({ _id: bookId });
+  const bookData = await Books.findOne({ _id: bookId }).lean()
+  const offer= await getBestOffer(bookData._id)
+  if(offer){
+    bookData.salePrice= offer.finalPrice;
+    bookData.discountPercent = offer.discountPercent;
+  }
+  
+
+
 
   if (!bookData) {
       return res.status(404).send("Book not found");
@@ -200,7 +221,7 @@ if (categoryArray.length > 0) {
         _id: { $ne: bookId }, 
         isDeleted: false, 
         isListed: true
-    }).limit(maxRelatedBooks);
+    }).lean().limit(maxRelatedBooks);
 
     // If not enough books found by author, fill with books from same category
     if (relatedBooks.length < maxRelatedBooks) {
@@ -211,12 +232,21 @@ if (categoryArray.length > 0) {
             isDeleted: false, 
             isListed: true,
             author: { $ne: bookData.author } // Avoid duplicates
-        })
+        }).lean()
         .limit(maxRelatedBooks - relatedBooks.length);
 
         relatedBooks = [...relatedBooks, ...additionalBooks]; 
     }
 }
+
+for (const book of relatedBooks) {
+    const offer = await getBestOffer(book._id);
+    if (offer) {
+      book.salePrice = offer.finalPrice;
+      book.discountPercent = offer.discountPercent;
+    }
+  }
+  
 
         
   res.render('book-view', { user: userData,book: bookData,  relatedBooks: relatedBooks||[], searchQuery: search || "",categoryNames });

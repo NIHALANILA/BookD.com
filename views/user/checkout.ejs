@@ -143,13 +143,28 @@ h3, h4, h5 {
     flex: 0 0 100%;
   }
 }
+
+#couponModal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#couponModal > div {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
   </style>
 </head>
 <%-include("../../views/partials/user/header")%>
 
 <div class="container">
 
-     <!-- 📌 Display Books in Checkout -->
+     <!--  Display Books in Checkout -->
      <h3>Order Summary</h3>
      <div class="row">
          <div class="col-md-8">
@@ -161,24 +176,28 @@ h3, h4, h5 {
                          </div>
                          <div class="col-md-6">
                              <h5><%= item.bookData ? item.bookData.title : item.title %></h5>
-                             <p><strong>Price:</strong> ₹<%= item.bookData ? item.bookData.price : 
-                              item.price %></p>
+                             <p ><strong>Price:</strong>  <span style="text-decoration: line-through;">₹<%= item.bookData ? item.bookData.price : 
+                              item.price %></span></p>            
+                                <span style="color: green; font-size: 1.6rem;">₹<%= item.discountedPrice %></span>
+                            
+
                              <p><strong>Quantity:</strong> <%= item.quantity %></p>
-                             <p><strong>Total:</strong> ₹<%= item.totalPrice %></p>
+                             <p><strong>Total:</strong> ₹<%= item.discountedPrice*item.quantity %></p>
                          </div>
                      </div>
                  </div>
              <% }) %>
          </div>
-          <!-- 📌 Order Summary & Final Price -->
+          <!--  Order Summary & Final Price -->
         <div class="col-md-4">
             <div class="card p-3">
                 <h4>Price Summary</h4>
-                <p ><strong>Subtotal:</strong> ₹<%= subtotal %></p>
-                <p><strong>Tax (5%):</strong> ₹<%= tax %></p>
-                <p><strong>Discount:</strong> ₹<%= discount %></p>
+                <p id="subtotal" ><strong>Total:</strong> ₹<%= subtotal %></p>
+                <p id="tax"><strong>Tax (5%):</strong> ₹<%= tax %></p>
+                
                 <hr>
-                <h5><strong>Final Total:</strong> ₹<%= finalTotal %></h5>
+                
+                <h5><strong>Final Total:</strong> <span id="final-total">₹<%= finalTotal.toFixed(2) %></span></h5>
 
                
                 <form id="placeOrderForm" method="POST" action="/place-order">
@@ -203,9 +222,12 @@ h3, h4, h5 {
         </div>
  <div class="row ">
 
-   <div class="">
+  <div class="col-md-8">
     <h3>Select a Delivery Address</h3>
     <a href="/profile/address?from=checkout" class="btn btn-success mb-2 w-auto ">Add New Address</a>
+   </div>
+   <div class="col-md-4">
+    
    </div>
      
     <% if (addresses.length > 0) { %>
@@ -267,6 +289,41 @@ h3, h4, h5 {
   </div>
 </div>
 
+<!-- Coupon Selection -->
+
+<form id="couponForm">
+  <label for="couponInput">Enter Coupon Code:</label>
+  <input type="text" id="couponInput" name="couponCode" placeholder="Enter your code">
+  <button  class="btn btn-success mb-2 w-auto" type="submit">Apply Coupon</button>
+
+  
+  <button  class="btn btn-primary mb-2 w-auto"  type="button" onclick="openCouponModal()">View Available Coupons</button>
+</form>
+
+<div id="appliedCouponSection" style="display: none;">
+  <p>Coupon <strong id="appliedCouponCode"></strong> applied!</p>
+  <button class="btn btn-danger mb-2 w-auto" onclick="removeCoupon()">Remove Coupon</button>
+</div>
+
+
+<!-- Coupon Modal -->
+<div id="couponModal" style="display: none;">
+  <div style="background: white; padding: 20px;">
+    <h3>Available Coupons</h3>
+    <ul>
+      <% coupons.forEach(coupon => { %>
+        <li>
+          <strong><%= coupon.code %></strong> - 
+          <%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %>
+        </li>
+      <% }); %>
+    </ul>
+    <button class="btn btn-secondary  mb-2 w-auto"  onclick="closeCouponModal()">Close</button>
+  </div>
+</div>
+
+
+
    
 </div>
 
@@ -280,10 +337,17 @@ h3, h4, h5 {
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
   <script src="js/script.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <script>
    document.addEventListener('DOMContentLoaded',function(){
     initClearSearch()
     select()
+    applyCoupon()
+    openCouponModal()
+    closeCouponModal()
+    
+    
    })
 
    function initClearSearch(){
@@ -353,6 +417,98 @@ window.location.href="/shop"
 
     
    }
+
+   function applyCoupon(){
+    
+    document.getElementById('couponForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const couponCode = document.getElementById('couponInput').value.trim();
+    if (!couponCode) return;
+
+    try {
+        const response = await fetch('/apply-coupon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ couponCode })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('tax').innerHTML = `₹${result.tax.toFixed(2)}`;
+            document.getElementById('final-total').innerHTML = `₹${result.finalTotal.toFixed(2)}`;
+
+
+            // Show applied coupon section
+            document.getElementById('appliedCouponCode').textContent = couponCode;
+             document.getElementById('appliedCouponSection').style.display = 'block';
+
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Coupon Applied!',
+                text: `Discount Applied: ₹${result.discount.toFixed(2)}`
+            });
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Coupon',
+                text: result.error
+            });
+        }
+
+    } catch (err) {
+        console.error("AJAX Error:", err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong.'
+        });
+    }
+});
+
+   }
+
+   function openCouponModal() {
+    document.getElementById('couponModal').style.display = 'block';
+}
+
+function closeCouponModal() {
+    document.getElementById('couponModal').style.display = 'none';
+}
+
+function removeCoupon() {
+  fetch('/remove-coupon', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Hide the applied coupon section
+      document.getElementById('appliedCouponSection').style.display = 'none';
+      // Optionally, update the totals displayed on the page
+      updateTotals(data.subtotal, data.tax, data.finalTotal);
+    } else {
+      alert('Failed to remove coupon: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+function updateTotals(subtotal, tax, finalTotal) {
+  // Update the DOM elements displaying the totals
+  document.getElementById('subtotal').textContent = '₹' + subtotal.toFixed(2);
+  document.getElementById('tax').textContent = '₹' + tax.toFixed(2);
+  document.getElementById('final-total').textContent = '₹' + finalTotal.toFixed(2);
+}
+
    
   </script>
   

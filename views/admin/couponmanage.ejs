@@ -1,0 +1,98 @@
+<%-include("../../views/partials/admin/header")%>
+
+<section class="content">
+    <h2>Coupon Management</h2>
+
+    <a href="/admin/coupons/add"><button class="edit-btn mb-3 " style="background-color: #2ecc71; float: right; margin-bottom: 5px;">Add Coupon</button></a>
+
+
+    
+    <table class="book-table ">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Discount</th>
+                <th>Min Price</th>
+                <th>Limit</th>
+                <th>Expire Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% coupons.forEach((coupon, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= coupon.code %></td>
+                    <td><%= coupon.discountType %></td>
+                    <td>
+                        <% if (coupon.discountType === 'percentage') { %>
+                            <%= coupon.discountValue %>%
+                        <% } else { %>
+                            ₹<%= coupon.discountValue %>
+                        <% } %>
+                    </td>
+                    <td>₹<%= coupon.minimumPrice %></td>
+                    <td><%= coupon.limit %></td>
+                    <td><%= new Date(coupon.expireDate).toLocaleDateString() %></td>
+                    <td><%= coupon.isActive %></td>
+                    <td>
+                        <button class="edit-btn" style="background-color: #e74c3c;" onclick="deleteCoupon('<%= coupon._id %>')">Delete</button>
+
+
+                        <a href="/admin/coupons/<%= coupon._id %>">
+                            <button class="edit-btn" style="background-color:orange;">Edit</button>
+                        </a>
+                    </td>
+                    
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <div class="pagination-container">
+      <% for(let i = 1; i <= totalPages; i++) { %>
+          <a href="/admin/coupons?page=<%= i %>">
+              <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
+          </a>
+      <% } %>
+  </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    async function deleteCoupon(id) {
+      const confirm = await Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!"
+      });
+  
+      if (confirm.isConfirmed) {
+        try {
+          const res = await fetch(`/admin/coupons/${id}`, {
+            method: "DELETE"
+          });
+  
+          const result = await res.json();
+  
+          if (res.ok) {
+            Swal.fire("Deleted!", result.message || "Coupon deleted.", "success").then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire("Error", result.message || "Could not delete.", "error");
+          }
+        } catch (error) {
+          Swal.fire("Error", "Something went wrong!", "error");
+        }
+      }
+    }
+  </script>
+   
+</body>
+</html>

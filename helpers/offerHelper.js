@@ -30,22 +30,30 @@ const getBestOffer = async (bookId) => {
         ? Math.round((offer.discount_value / 100) * price)
         : 0;
 
-      // Ensure discount doesn't go below limit price
+      // discount shouldn't go beyond limit price  
       if ((price - discount) >= limitPrice && discount > maxDiscount) {
         maxDiscount = discount;
         appliedOffer = offer;
       }
     }
 
-    // If no valid discount found, apply max possible discount till limit price
-    if (maxDiscount === 0) {
-      maxDiscount = price - limitPrice;
+    if (!appliedOffer) {
+      // default percent is 5% and it violates limit price then there is no offer
+      const defaultDiscount = Math.round(price * 0.05);
+      if (price - defaultDiscount >= limitPrice) {
+        maxDiscount = defaultDiscount;
+      } else {
+        maxDiscount = 0;
+      }
     }
+
+    const finalPrice = price - maxDiscount;
 
     return {
       originalPrice: price,
       limitPrice,
       discount: maxDiscount,
+      discountPercent: appliedOffer ? appliedOffer.discount_value : (maxDiscount > 0 ? 5 : 0),
       finalPrice: price - maxDiscount,
       offerId: appliedOffer ? appliedOffer._id : null
     };

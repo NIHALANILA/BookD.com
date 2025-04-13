@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+<%-include("../../views/partials/admin/header")%>
+
+<section class="content">
+    <h2>Add Coupon</h2>
+  
+  
+    <form  id="couponForm" class="form-group">
+      <label for="code">Coupon Code:</label>
+      <input type="text" name="code" required class="form-control">
+  
+      <label for="discountType">Discount Type:</label>
+      <select name="discountType" class="form-select" required>
+        <option value="percentage">Percentage</option>
+        <option value="fixed">Fixed Amount</option>
+      </select>
+  
+      <label for="discountValue">Discount Value:</label>
+      <input type="number" name="discountValue" required class="form-control">
+  
+      <label for="minimumPrice">Minimum Purchase Price </label>
+      <input type="number" name="minimumPrice" class="form-control">
+  
+      <label for="limit">Usage Limit </label>
+      <input type="number" name="limit"  class="form-control">
+  
+      <label for="expireDate">Expiry Date:</label>
+      <input type="date" name="expireDate" required class="form-control">
+      <label for="expireDate">Is Active:</label>
+      <select name="isActive" id="isActive">
+        <option value="yes">yes</option>
+        <option value="no">no</option>
+      </select>
+  
+      <button type="submit" class="btn btn-primary mt-3">Add Coupon</button>
+    </form>
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+      
+    document.getElementById("couponForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Basic client-side validation
+    if (!data.code || !data.discountType || !data.discountValue || !data.expireDate) {
+      return Swal.fire("Error", "Please fill in all required fields.", "error");
+    }
+
+    // Convert numbers from string to number type
+    data.discountValue = Number(data.discountValue);
+    if (data.minimumPrice) data.minimumPrice = Number(data.minimumPrice);
+    if (data.limit) data.limit = Number(data.limit);
+
+    try {
+      const res = await fetch("/admin/coupons/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        Swal.fire({
+          title: "Success",
+          text: result.message || "Coupon added successfully!",
+          icon: "success",
+          confirmButtonText: "OK"
+        }).then(() => {
+          window.location.href = "/admin/coupons";
+        });
+      } else {
+        Swal.fire("Error", result.message || "Something went wrong.", "error");
+      }
+    } catch (error) {
+      Swal.fire("Error", "Network error or server issue.", "error");
+    }
+  });
+
+
+    })
+
+
+  </script>
+    
+  </body>
+  </html>
+  

@@ -8,6 +8,7 @@ const offerController=require('../controllers/admin/offerController')
 const bookController= require('../controllers/admin/bookController')
 const { upload, processImages } = require("../helpers/multerHelper");
 const orderController=require('../controllers/admin/orderController')
+const couponController=require('../controllers/admin/couponController')
 
 
 
@@ -66,5 +67,15 @@ router.post("/offers/add", offerController.addOffer);
 router.get("/offers/edit/:id",offerController.loadupdateoffer)
 router.patch("/offers/edit/:id",offerController.editOffers)
 router.delete('/offers/delete/:id',offerController.deleteOffer)
+
+
+//coupon
+
+router.get('/coupons',couponController.listCoupons)
+router.get('/coupons/add',couponController.loadaddCoupon)
+router.post('/coupons/add',couponController.addCoupon)
+router.get('/coupons/:id',couponController.loadEditCoupon)
+router.patch('/coupons/:id',couponController.editCoupon)
+router.delete('/coupons/:id',couponController.deleteCoupon)
 
 module.exports=router

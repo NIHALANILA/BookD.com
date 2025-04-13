@@ -13,10 +13,7 @@ const couponSchema = new Schema({
         required: true,
         trim: true
     },
-    couponType: {
-        type: String,
-        required: true
-    },
+    
     discountValue: {
         type: Number,
         required: true
@@ -28,17 +25,33 @@ const couponSchema = new Schema({
     },
     limit: {
         type: Number,
-        default: 1 // Limits the number of times a coupon can be used
+        required: true,
+        min: 1
+    },
+    usedCount: {
+        type: Number,
+        default: 0
     },
     minimumPrice: {
         type: Number,
-        default: 0 // Minimum order price required to apply the coupon
+        default: 0
     },
     expireDate: {
         type: Date,
         required: true
-    }
+    },
+    usersUsed: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "User",
+        default: []
+      },
+
+    isDeleted: {
+        type: Boolean,
+        default: false
+      }
 }, { timestamps: true });
 
 const Coupon = mongoose.model('Coupon', couponSchema);
 module.exports = Coupon;
+ 

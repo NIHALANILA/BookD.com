@@ -109,6 +109,10 @@ router.get('/orders/invoice/:id', orderController.downloadInvoice);
 router.get('/wallet',auth.loadCommonData,walletController.getWalletPage)
 
 
+router.post('/apply-coupon',orderController.couponDiscount)
+router.post('/remove-coupon',orderController.removeCoupon)
+
+
 
 
 

@@ -89,7 +89,8 @@
                             title="Add to cart">
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
-                    <span>Rs<%= newArrivals[i].price %></span>
+                    <span style="text-decoration: line-through; color: grey;">Rs <%= newArrivals[i].price %></span>
+                   <span style="color:green;">Rs <%= newArrivals[i].salePrice %></span>
                   </form>
                </div>
               </div>
@@ -127,7 +128,9 @@
                           title="Add to cart">
                     <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                   </button>
-                  <span>Rs<%= newArrivals[i].price %></span>
+                  
+                  <span style="text-decoration: line-through; color: grey;">Rs <%= newArrivals[i].price %></span>
+                   <span style="color:green;">Rs <%= newArrivals[i].salePrice %></span>
                 </form>
                 
 
@@ -194,7 +197,7 @@
                     
                       <p>
                         <span style="text-decoration: line-through; color: grey;">Rs <%= bestSellers[i].price %></span>
-                        <span style="color: red;">Rs <%= bestSellers[i].salePrice %></span>
+                        <span style="color:green;">Rs <%= bestSellers[i].salePrice %></span>
                       </p>
                     
                     
@@ -240,7 +243,11 @@
                             title="Add to cart">
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
-                    <span>Rs<%= bestSellers[i].price %></span>
+                    <p>
+                      <span style="text-decoration: line-through; color: grey;">Rs <%= bestSellers[i].price %></span>
+                      <span style="color: green;">Rs <%= bestSellers[i].salePrice %></span>
+                    </p>
+                  
                   </form>
                   
                   

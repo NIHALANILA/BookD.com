@@ -1,0 +1,117 @@
+<%-include("../../views/partials/admin/header")%>
+
+<section class="content">
+  <h2>Edit Coupon</h2>
+
+  <form id="editCouponForm" class="form-group">
+    <label>Coupon Code:</label>
+    <input type="text" name="code" value="<%= coupon.code %>" required class="form-control" />
+
+    <label>Discount Type:</label>
+    <select name="discountType" class="form-select" required>
+      <option value="percentage" <%= coupon.discountType === "percentage" ? "selected" : "" %>>Percentage</option>
+      <option value="fixed" <%= coupon.discountType === "fixed" ? "selected" : "" %>>Fixed</option>
+    </select>
+
+    <label>Discount Value:</label>
+    <input type="number" name="discountValue" value="<%= coupon.discountValue %>" required class="form-control" />
+
+    <label>Minimum Purchase Price:</label>
+    <input type="number" name="minimumPrice" value="<%= coupon.minimumPrice %>" class="form-control" />
+
+    <label>Usage Limit:</label>
+    <input type="number" name="limit" value="<%= coupon.limit %>" class="form-control" />
+
+    <label>Expiry Date:</label>
+    <input type="date" name="expireDate" value="<%= coupon.expireDate.toISOString().split('T')[0] %>" class="form-control" required />
+
+    <label>Status:</label>
+    <select name="isActive" class="form-select">
+      <option value="yes" <%= coupon.isActive === "yes" ? "selected" : "" %>>Yes</option>
+      <option value="no" <%= coupon.isActive === "no" ? "selected" : "" %>>No</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary mt-3">Update Coupon</button>
+  </form>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.getElementById("editCouponForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+  
+      const form = e.target;
+      const couponId = "<%= coupon._id %>";
+  
+      // Get values
+      const code = form.code.value.trim();
+      const discountType = form.discountType.value;
+      const discountValue = Number(form.discountValue.value);
+      const minimumPrice = form.minimumPrice.value ? Number(form.minimumPrice.value) : 0;
+      const limit = form.limit.value ? Number(form.limit.value) : 0;
+      const expireDate = form.expireDate.value;
+      const isActive = form.isActive.value;
+  
+      // 🔍 Client-side validation
+      if (!code || !discountType || !discountValue || !expireDate) {
+        return Swal.fire("Validation Error", "Please fill in all required fields.", "warning");
+      }
+  
+      if (discountValue <= 0) {
+        return Swal.fire("Invalid Discount", "Discount value must be greater than 0.", "warning");
+      }
+  
+      if (minimumPrice < 0) {
+        return Swal.fire("Invalid Price", "Minimum price must be 0 or more.", "warning");
+      }
+  
+      if (limit < 0) {
+        return Swal.fire("Invalid Limit", "Limit cannot be negative.", "warning");
+      }
+  
+      // All validation passed
+      const formData = {
+        code,
+        discountType,
+        discountValue,
+        minimumPrice,
+        limit,
+        expireDate,
+        isActive
+      };
+  
+      try {
+        const res = await fetch(`/admin/coupons/${couponId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+  
+        const data = await res.json();
+  
+        if (res.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Coupon Updated!',
+            text: data.message || 'Coupon updated successfully.',
+            confirmButtonColor: '#3085d6'
+          }).then(() => {
+            window.location.href = "/admin/coupons";
+          });
+        } else {
+          Swal.fire("Error", data.message || "Something went wrong.", "error");
+        }
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Network or server error.", "error");
+      }
+    });
+  </script>
+  
+
+    
+</body>
+</html>

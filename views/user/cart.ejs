@@ -209,7 +209,11 @@
                                     </div>
                                     <div class="col-md-6">
                                         <h5><%= item.title %></h5>
-                                        <p class="text-muted">Price: ₹<%= item.price %></p>
+                                        <p class="text-muted">Price:
+                                            <span style="text-decoration: line-through;">₹<%= item.originalPrice %></span>
+                        
+                                            <span style="color: green; font-size: 1.1rem;">₹<%= item.price %></span>
+                                        </p>
     
                                         <% if (item.stock === 0) { %>
                                             <p class="text-danger fw-bold">Out of Stock</p>
@@ -243,6 +247,8 @@
                     <div class="col-md-4">
                         <div class="card shadow p-3">
                             <h4>Order Summary</h4>
+                           
+                            
                             <p>Total Items: <%= cartItems.length %></p>
                             <h5 id="totalPrice">Total Price: ₹<%= totalPrice %></h5>
                             <form method="POST" action="/checkout">
