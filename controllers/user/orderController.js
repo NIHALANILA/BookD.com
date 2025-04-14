@@ -76,7 +76,7 @@ const loadcheckout = async (req, res) => {
 
         const tax = subtotal * 0.05;
         
-        console.log("Cart Items:", cartItems);
+    
 
         const userId = new mongoose.Types.ObjectId(user._id);
 
@@ -91,7 +91,7 @@ const loadcheckout = async (req, res) => {
         
         const finalTotal=subtotal+tax
 
-        console.log("Eligible Coupons:", coupons.map(c => c.code));
+    
         
         
         res.render('checkout', {
@@ -227,18 +227,18 @@ const couponDiscount=async(req,res)=>{
         res.json({ success: false, error: "Something went wrong." });
     }
 }
-/*
+
 const removeCoupon=async(req,res)=>{
 console.log('remove called')
     try {
         delete req.session.appliedCoupon;
 
-    // Recalculate totals
+    
     const subtotal = req.session.subtotal || 0;
     const tax = subtotal * 0.05;
     const finalTotal = subtotal + tax;
 
-    // Send the updated totals back to the client
+    
     res.json({
       success: true,
        subtotal,
@@ -252,38 +252,6 @@ console.log('remove called')
         
     }
 }
-*/
-
-const removeCoupon = async (req, res) => {
-    try {
-        delete req.session.appliedCoupon;
-
-        // Explicitly save the session after modification
-        req.session.save(err => {
-            if (err) {
-                console.error("Session save error:", err);
-                return res.status(500).json({ success: false, error: "Failed to save session." });
-            }
-
-            // Recalculate totals
-            const subtotal = req.session.subtotal || 0;
-            const tax = subtotal * 0.05;
-            const finalTotal = subtotal + tax;
-
-            // Send the updated totals back to the client
-            res.json({
-                success: true,
-                subtotal,
-                tax,
-                finalTotal
-            });
-        });
-    } catch (error) {
-        console.error("Remove Coupon Error:", error);
-        res.status(500).json({ success: false, error: "Failed to remove coupon." });
-    }
-};
-
 
 
 const placeOrder = async (req, res) => {    

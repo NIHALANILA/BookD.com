@@ -4,7 +4,7 @@ const Category = require("../../models/categorySchema")
 const mongoose = require('mongoose');
 
 
-//offer management
+
 const getOffers = async (req, res) => {
     try {
         let search = req.query?.search || "";
@@ -130,7 +130,7 @@ const editOffers = async (req, res) => {
       const offerId = req.params.id;
       const updatedData = req.body;
   
-      // Update logic
+      
       const result = await Offer.findByIdAndUpdate(offerId, updatedData, { new: true });
   
       if (!result) {
@@ -144,10 +144,10 @@ const editOffers = async (req, res) => {
     }
 };
 
-// Delete Offer
+
 const deleteOffer = async (req, res) => {
   try {
-    console.log('delete function called',req.params.id)
+    
     await Offer.findByIdAndDelete(req.params.id);
     res.json({ message: 'Offer deleted successfully' })
   } catch (error) {

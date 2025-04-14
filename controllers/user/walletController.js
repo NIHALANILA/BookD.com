@@ -3,7 +3,7 @@ const {checkUserSession} = require('../../helpers/userDry')
 
 const getWalletPage = async (req, res) => {
     const user = await checkUserSession(req);
-    console.log("Session userId:", req.session.userId);
+    
     const wallet = await Wallet.findOne({ userId:user._id });
 
     if (!wallet) {

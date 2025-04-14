@@ -91,20 +91,7 @@ const viewCart = async (req, res) => {
         let totalPrice = 0;
         let outOfStock = false;
 
-       /* const cartItems =  cart.items.map(item => {
-            totalPrice += item.price * item.quantity;
-            if (item.bookId.stock < item.quantity) outOfStock = true;
-
-            return {
-                _id: item.bookId._id,
-                title: item.bookId.title,
-                price: item.price,
-                quantity: item.quantity,
-                totalPrice: item.price * item.quantity,
-                stock: item.bookId.stock,
-                imageUrl: item.bookId.book_images[0] 
-            };
-        });*/
+       
 
         const cartItems = await Promise.all(cart.items.map(async (item) => {
             const book = item.bookId;
@@ -246,7 +233,7 @@ const addWishlist=async(req,res)=>{
         });
 
         await wishlistItem.save();
-        console.log("Wishlist Item Saved ✅");
+        
         res.redirect('/wishlist'); 
         
 
