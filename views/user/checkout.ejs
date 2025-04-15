@@ -203,6 +203,8 @@ h3, h4, h5 {
                 <form id="placeOrderForm" method="POST" action="/place-order">
                   <input type="hidden" name="addressId" id="selectedAddressInput">
                   <input type="hidden" name="paymentMethod" id="selectedPaymentInput">
+                  <input type="hidden" name="couponCode" id="couponCodeInput" value="">
+
                   
                   <% if (cartItems.length === 1 && cartItems[0].quantity === 1) { %>
                     
@@ -382,14 +384,14 @@ window.location.href="/shop"
       addressRadios.forEach((radio) => {
             if (radio.checked) {
                 addressSelected = true;
-                addressInput.value = radio.value; // Store selected address
+                addressInput.value = radio.value; //storing  selected address
             }
         });
 
         paymentRadios.forEach((radio) => {
-            if (radio.checked) {
+            if (radio.checked) {                  //storing selected payment method
                 paymentSelected = true;
-                paymentInput.value = radio.value; // Store selected payment method
+                paymentInput.value = radio.value; 
             }
         });
       
@@ -437,6 +439,9 @@ window.location.href="/shop"
         if (result.success) {
             document.getElementById('tax').innerHTML = `₹${result.tax.toFixed(2)}`;
             document.getElementById('final-total').innerHTML = `₹${result.finalTotal.toFixed(2)}`;
+
+            document.getElementById('couponCodeInput').value = couponCode;
+
 
 
             // Show applied coupon section
@@ -489,9 +494,9 @@ function removeCoupon() {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      // Hide the applied coupon section
+      
       document.getElementById('appliedCouponSection').style.display = 'none';
-      // Optionally, update the totals displayed on the page
+      
       updateTotals(data.subtotal, data.tax, data.finalTotal);
     } else {
       alert('Failed to remove coupon: ' + data.error);
@@ -503,7 +508,7 @@ function removeCoupon() {
 }
 
 function updateTotals(subtotal, tax, finalTotal) {
-  // Update the DOM elements displaying the totals
+  
   document.getElementById('subtotal').textContent = '₹' + subtotal.toFixed(2);
   document.getElementById('tax').textContent = '₹' + tax.toFixed(2);
   document.getElementById('final-total').textContent = '₹' + finalTotal.toFixed(2);

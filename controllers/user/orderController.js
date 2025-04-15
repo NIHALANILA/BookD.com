@@ -86,7 +86,13 @@ const loadcheckout = async (req, res) => {
             expireDate: { $gte: new Date() },
             minimumPrice: { $lte: subtotal },
             isDeleted: false,
-            usersUsed:  { $nin: [userId] }
+            $or: [
+                { limitPerUser: false }, 
+                {                              //unlimited coupns always need to show but onetime used never show if it is used
+                  limitPerUser: true,
+                  usersUsed: { $nin: [userId] } 
+                }
+              ]
         });
         
         const finalTotal=subtotal+tax
@@ -156,13 +162,21 @@ const buynow=async(req,res)=>{
          
          const finalTotal=subtotal+tax
          req.session.subtotal = subtotal;
+
+         const userId = new mongoose.Types.ObjectId(user._id);
              
         const coupons = await Coupon.find({
             isActive: "yes",
             expireDate: { $gte: new Date() },
             minimumPrice: { $lte: subtotal },
             isDeleted: false,
-            usersUsed: { $ne: user._id }
+            $or: [
+                { limitPerUser: false }, 
+                {                              //unlimited coupns always need to show but onetime used never show if it is used
+                  limitPerUser: true,
+                  usersUsed: { $nin: [userId] } 
+                }
+              ]
         });
 
          res.render('checkout',{
@@ -186,7 +200,7 @@ const buynow=async(req,res)=>{
 
 const couponDiscount=async(req,res)=>{
 
-    console.log('coupon called')
+    
     try {
         const user = await checkUserSession(req);
         const { couponCode } = req.body;
@@ -195,6 +209,13 @@ const couponDiscount=async(req,res)=>{
         if (!subtotal) {
             return res.json({ success: false, error: "Subtotal missing." });
         }
+
+        if (
+            req.session.appliedCoupon &&
+            req.session.appliedCoupon.code === couponCode
+          ) {
+            return res.json({ success: false, error: "Coupon already applied." });
+          }
 
         const result = await applyCoupon({
             couponCode,
@@ -213,7 +234,8 @@ const couponDiscount=async(req,res)=>{
         req.session.appliedCoupon = {
             code: couponCode,
             discount: result.discount,
-            finalTotal
+            finalTotal,
+            couponId: result.couponId,
         };
         res.status(200).json({
             success: true,
@@ -257,8 +279,9 @@ console.log('remove called')
 const placeOrder = async (req, res) => {    
     try {
         
-        const { book, quantity, addressId, paymentMethod} = req.body;
-        console.log(paymentMethod)
+        const { book, quantity, addressId, paymentMethod,couponCode} = req.body;
+        console.log(couponCode)
+        
         
         const userId = await checkUserSession(req);
         if (!userId) return res.redirect('/login');
@@ -267,7 +290,7 @@ const placeOrder = async (req, res) => {
             return res.status(400).json({ message: 'Address and payment details are required' });
         }
 
-        // Validate paymentId
+        
         let validPaymentId = paymentMethod;
         if (paymentMethod !== "cod" && paymentMethod!=="online"&& paymentMethod!=="wallet") {
             return res.status(400).json({ message: 'Invalid payment method' });
@@ -275,10 +298,12 @@ const placeOrder = async (req, res) => {
 
         let orderItems = [];
         let subtotal = 0;
-        let totalDiscount = 50; 
+        let totalDiscount =0;
         let shippingCharge = 50; 
         let tax = 0;
         let netAmount = 0;
+        let appliedCoupon = null;
+
 
         if (book) {
             
@@ -288,10 +313,14 @@ const placeOrder = async (req, res) => {
             }
 
             const bookQuantity = quantity ? parseInt(quantity) : 1;
-            const totalPrice = bookQuantity * bookDetails.price;
+            const offer = await getBestOffer(bookDetails._id);
+            const finalPrice=offer?offer.finalPrice:bookDetails.price
+            const totalPrice = bookQuantity * finalPrice; 
+            const discount=offer? offer.discount:0;
+            const offerId=offer?offer.offerId:null;
             subtotal = totalPrice;
             tax = subtotal * 0.05; 
-            netAmount = subtotal + tax - totalDiscount + shippingCharge;
+            
 
             orderItems.push({
                 bookId: bookDetails._id,
@@ -300,43 +329,54 @@ const placeOrder = async (req, res) => {
                 quantity: bookQuantity,
                 price: bookDetails.price,
                 totalPrice: totalPrice,
-                discount: bookDetails.discount || 0
+                discount,
+                offerId
             });
 
         } else {
             
-            const cartItems = await Cart.findOne({ userId }).populate('items.bookId');  
-            if (!cartItems || !cartItems.items.length) {
-                return res.status(400).json({ message: 'Cart is empty' });
+            const cart=await Cart.findOne({userId}).populate('items.bookId');
+            if(!cart||!cart.items.length){
+                return res.status(400).json({message:'cart empty'});
+
             }
 
-            orderItems = cartItems.items.map(item => {
-                if (!item.bookId) {
-                    console.error("Missing bookId for item:", item);
-                    return null; 
-                }
-                const totalPrice = item.quantity * item.price;
-                subtotal += totalPrice;
-                totalDiscount += item.discount || 0;
+            for(const item of cart.items){
+                if(!item.bookId) continue;
+                const offer=await getBestOffer(item.bookId._id);
+                const finalPrice=offer ? offer.finalPrice:item.bookId.price;
+                const offerId=offer?offer.offerId:null;
+                const totalPrice=item.quantity*finalPrice;
+                const discount=offer ? offer.discount:0
+            
 
-                return {
-                    bookId: item.bookId._id,
-                    bookTitle: item.bookId.title,
-                    bookImage: item.bookId.image,
-                    quantity: item.quantity,
-                    price: item.price,
-                    totalPrice: totalPrice,            
-                    discount: item.discount || 0,
-                };
-            }).filter(item => item !== null);
+            orderItems.push({
+                bookId: item.bookId._id,
+                bookTitle: item.bookId.title,
+                bookImage: item.bookId.image,
+                quantity: item.quantity,
+                price: item.bookId.price,
+                totalPrice,
+                discount,
+                offerId
+              });
+      
+              subtotal += totalPrice;
+              
+            }
 
-            tax = subtotal * 0.05; 
-            netAmount = subtotal + tax - totalDiscount + shippingCharge;
         }
 
+        tax=subtotal*0.05;
+        if (req.session.appliedCoupon) {
+            totalDiscount = req.session.appliedCoupon.discount;
+            appliedCoupon = req.session.appliedCoupon.couponId;
+        }
        
 
-        // Create and Save Order
+       netAmount=subtotal+tax+shippingCharge-totalDiscount
+
+        
         const newOrder = new Order({
             userId,
             orderItems,
@@ -348,10 +388,23 @@ const placeOrder = async (req, res) => {
             shippingCharge,
             tax,
             discount:totalDiscount,
+            couponId:appliedCoupon
         });
 
         const savedOrder = await newOrder.save();
         console.log(" Order Saved:", savedOrder);
+
+        if (appliedCoupon) {
+            await Coupon.updateOne(
+                { _id: appliedCoupon },
+                {
+                    $push: { usersUsed: userId },
+                    $inc: { usedCount: 1 }
+                }
+            );
+        }
+        
+        delete req.session.appliedCoupon;
 
         for (const item of orderItems) {
             await Books.findByIdAndUpdate(item.bookId, {
@@ -359,11 +412,13 @@ const placeOrder = async (req, res) => {
             });
         }
         
-
-        // If order placed via cart, clear cart
+       
+        
         if (!book) {
             await Cart.deleteMany({ userId });
         }
+       
+
         res.redirect(`/orders/success/${savedOrder._id}`);
         
 
@@ -393,7 +448,7 @@ const orderSuccess= async(req,res,next)=>{
      }
      res.locals.order=order;
      next();
-    // res.render('ordSuccess', { order }); 
+    
 
         
     } catch (error) {
@@ -434,7 +489,7 @@ const orderCancel=async(req,res)=>{
             await Books.findByIdAndUpdate(item.bookId, { $inc: { stock: item.quantity } });
         }
        
-        // Refund only if prepaid
+        
       if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
         await refundToWallet(order.userId, order.totalAmount);
       }
@@ -491,7 +546,7 @@ const downloadInvoice = async (req, res) => {
         const doc = new PDFDocument();
         const filename = `invoice-${orderId}.pdf`;
 
-        // Set headers
+        
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
@@ -520,7 +575,7 @@ const downloadInvoice = async (req, res) => {
         doc.moveDown();
         doc.text(`Total: ₹${order.netAmount}`, { align: "right" });
 
-        // Finalize
+        
         doc.end();
 
     } catch (err) {

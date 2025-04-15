@@ -3,7 +3,7 @@
 
 <h2>Category Management</h2>
 
-<!-- Search Form -->
+
 <form class="user-search-form"   action="/admin/categories" method="GET">
     <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search categories">
     <button type="submit">Search</button>
@@ -15,7 +15,7 @@
     <p class="alert alert-warning"><%= message %></p>
 <% } %>
 
-<!-- Category Table -->
+
 <table class="book-table">
     <thead>
         <tr>
@@ -45,7 +45,7 @@
     </tbody>
 </table>
 
-<!-- Add Category Form -->
+
 <form class="user-search-form" action="/admin/categories" method="POST">
     <input type="text" name="name" required placeholder="Category Name">
     <button type="submit">Add Category</button>
@@ -59,7 +59,7 @@
     <% } %>
 </div>
 
-<!-- for Edit and Status Toggle -->
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     async function editCategory(id, name) {
@@ -82,7 +82,7 @@
 
             if (response.ok) {
                 await Swal.fire("Success",data.message,"success")
-                location.reload();
+            
             } else {
                 await Swal.fire("Error!",data.message||"failed to update category");
             }

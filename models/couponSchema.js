@@ -40,6 +40,10 @@ const couponSchema = new Schema({
         type: Date,
         required: true
     },
+    limitPerUser: {
+        type: Boolean,  // true = only once per user, false = unlimited
+        default: true
+      },
     usersUsed: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: "User",

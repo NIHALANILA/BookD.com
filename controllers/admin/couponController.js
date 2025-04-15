@@ -41,13 +41,13 @@ const loadaddCoupon=(req,res)=>{
 const addCoupon=async(req,res)=>{
     try {
         console.log('add function called')
-        const{code,discountType,discountValue,minimumPrice,limit,expireDate,isActive}=req.body
+        const{code,discountType,discountValue,minimumPrice,limit,expireDate,isActive,limitPerUser}=req.body
         const existcoupon= await Coupon.findOne({code:code.trim()})
         if(existcoupon){
             res.status(400).json({ message: "already existing coupon" }); 
         }
 
-        const coupon=new Coupon({code:code.trim().toUpperCase(),discountType,discountValue,minimumPrice,limit,expireDate,isActive})
+        const coupon=new Coupon({code:code.trim().toUpperCase(),discountType,discountValue,minimumPrice,limit,expireDate,isActive,limitPerUser})
         await coupon.save()
 
         res.status(200).json({ message: "Coupon saved successfully!" });
@@ -77,7 +77,8 @@ const editCoupon=async(req,res)=>{
       minimumPrice,
       limit,
       expireDate,
-      isActive
+      isActive,
+      limitPerUser
     } = req.body;
 
     const updatedCoupon = await Coupon.findByIdAndUpdate(
@@ -89,7 +90,8 @@ const editCoupon=async(req,res)=>{
           minimumPrice,
           limit,
           expireDate,
-          isActive
+          isActive,
+          limitPerUser
         },
         { new: true, runValidators: true }
       );

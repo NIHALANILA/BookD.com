@@ -33,6 +33,13 @@
   
       <label for="limit">Usage Limit </label>
       <input type="number" name="limit"  class="form-control">
+      <label for="limitPerUser"> Limit Per User </label>
+      <select name="limitPerUser" id="limitPerUser">
+        <option value="true">Only once</option>
+        <option value="false">unlimited</option>
+      </select>
+  
+      
   
       <label for="expireDate">Expiry Date:</label>
       <input type="date" name="expireDate" required class="form-control">
@@ -58,12 +65,12 @@
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    // Basic client-side validation
+    
     if (!data.code || !data.discountType || !data.discountValue || !data.expireDate) {
       return Swal.fire("Error", "Please fill in all required fields.", "error");
     }
 
-    // Convert numbers from string to number type
+    
     data.discountValue = Number(data.discountValue);
     if (data.minimumPrice) data.minimumPrice = Number(data.minimumPrice);
     if (data.limit) data.limit = Number(data.limit);
