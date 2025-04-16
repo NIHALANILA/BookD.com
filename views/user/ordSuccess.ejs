@@ -117,7 +117,11 @@
                     <% if (order.paymentId === 'cod') { %> Cash on Delivery <% } else { %> Paid Online <% } %>
                 </p>
                 <p><strong>Total Quantity:</strong> <%= order.orderItems.length %></p>
-                <p><strong>Total Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
+                <p><strong>Total Amount:</strong> ₹<%= order.total %></p>
+                <p><strong>Discount:</strong> ₹<%= order.discount %></p>
+                <p><strong>Tax:</strong> ₹<%= order.tax %></p>
+                <p><strong>Shipping Charge:</strong> ₹<%= order.shippingCharge %></p>
+                <p><strong>Amount Payable:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
             </div>
 
             <!-- Shipping Address -->
@@ -138,6 +142,7 @@
                         <p><strong><%= item.bookId.title %></strong></p>
                         <p>Quantity: <%= item.quantity %></p>
                         <p>Price: ₹<%= item.price.toFixed(2) %></p>
+                        <p>discount: ₹<%= item.discount.toFixed(2) %></p>
                     </div>
                 <% }) %>
             </div>

@@ -3,6 +3,7 @@ const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/
 const bcrypt= require('bcryptjs')
 const Category=require('../../models/categorySchema')
 const Books=require('../../models/bookSchema')
+const Coupon=require('../../models/couponSchema')
 
 
 const pageNotFound=async(req,res)=>{
@@ -31,7 +32,7 @@ const loadSignup=async(req,res)=>{
 const signup=async(req,res)=>{
     
     try{
-        const {username,phone,email,password,cpassword}=req.body
+        const {username,phone,email,password,cpassword,referral}=req.body
         if(password!==cpassword){
             return res.render("signup",{message:"password do not  match"})
         }
@@ -54,7 +55,7 @@ const signup=async(req,res)=>{
         req.session.otpExpires = Date.now() + 60000;
         
          
-        req.session.userData={username,phone,email,password}
+        req.session.userData={username,phone,email,password,referral}
         
         res.render('verify-otp',{message:null ,otpExpires: req.session.otpExpires})
 
@@ -80,14 +81,47 @@ const verifyOtp = async (req, res) => {
         const user = req.session.userData;
         const passwordHash = await securePassword(user.password);
 
+        // ✅ Generate referral code for new user
+        const generateReferralCode = () => {
+            return Math.random().toString(36).substring(2, 8).toUpperCase(); 
+        };
+
         const saveUserData = new User({
             username: user.username,
             email: user.email,
             phone: user.phone,
-            password: passwordHash
+            password: passwordHash,
+            referalCode: generateReferralCode(),  
+            redeemed: false
         });
 
         await saveUserData.save();
+
+         
+         if (user.referral) {
+            const referrer = await User.findOne({ referalCode: user.referral });
+            if (referrer && !referrer.redeemedUsers.includes(saveUserData._id)) {
+                referrer.redeemedUsers.push(saveUserData._id);
+                referrer.redeemed = true;
+                await referrer.save();
+
+                
+                const referralCoupon = new Coupon({
+                    code: "REF" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+                    discountValue: 100, 
+                    discountType: "fixed",
+                    limit: 1,
+                    usedCount: 0,
+                    minimumPrice: 1000,
+                    limitPerUser: true,
+                    expireDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
+                    isActive: "yes"
+                });
+
+                await referralCoupon.save();
+                
+            }
+        }
         
 
         

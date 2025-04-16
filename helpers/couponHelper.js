@@ -41,14 +41,7 @@ const applyCoupon = async ({ couponCode, userId, subtotal }) => {
         discount = subtotal;
     }
 
-    await Coupon.updateOne(
-        { _id: coupon._id },
-        {
-            $push: { usersUsed: userId },
-            $inc: { usedCount: 1 }
-        }
-        
-    );
+ 
 
     return {
         valid: true,

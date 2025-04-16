@@ -10,7 +10,8 @@ const { uploadProfile,processProfileImage } = require("../helpers/multerHelper")
 const cartController=require('../controllers/user/cartController')
 const orderController=require('../controllers/user/orderController')
 const walletController=require('../controllers/user/walletController')
-
+const razorpay = require('../helpers/razorpay');
+const crypto = require('crypto');
 
 
 
@@ -104,13 +105,20 @@ router.get('/orders/view/:orderId',auth.loadCommonData,orderController.orderSucc
 router.post('/orders/return/:id',orderController.returnOrder)
 router.get('/orders/invoice/:id', orderController.downloadInvoice);
 
+//coupon related
+router.post('/apply-coupon',orderController.couponDiscount)
+router.post('/remove-coupon',orderController.removeCoupon)
+
 //wallet
 
 router.get('/wallet',auth.loadCommonData,walletController.getWalletPage)
+router.post('/razorpay-order',orderController.placeOrder)
+
+//razorpay
+router.post('/verify-payment',orderController.verifyPayment);
 
 
-router.post('/apply-coupon',orderController.couponDiscount)
-router.post('/remove-coupon',orderController.removeCoupon)
+ 
 
 
 

@@ -13,7 +13,7 @@
   <meta name="description" content="Bootstrap 5 Fashion Store HTML CSS Template">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css"> 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
   <link rel="stylesheet" type="text/css" href="style.css">
 
@@ -200,7 +200,7 @@ h3, h4, h5 {
                 <h5><strong>Final Total:</strong> <span id="final-total">₹<%= finalTotal.toFixed(2) %></span></h5>
 
                
-                <form id="placeOrderForm" method="POST" action="/place-order">
+                <form id="placeOrderForm" >
                   <input type="hidden" name="addressId" id="selectedAddressInput">
                   <input type="hidden" name="paymentMethod" id="selectedPaymentInput">
                   <input type="hidden" name="couponCode" id="couponCodeInput" value="">
@@ -340,14 +340,20 @@ h3, h4, h5 {
   <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
   <script src="js/script.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
   <script>
    document.addEventListener('DOMContentLoaded',function(){
     initClearSearch()
-    select()
+   
     applyCoupon()
     openCouponModal()
     closeCouponModal()
+    initPlaceOrder();
+    
+    
+    
     
     
    })
@@ -364,61 +370,8 @@ window.location.href="/shop"
 
 }}
 
-   function select(){
-    const orderForm = document.getElementById("placeOrderForm");
-    const addressRadios = document.querySelectorAll("input[name='selectedAddress']");
-    const paymentRadios = document.querySelectorAll("input[name='paymentMethod']");
-    const addressInput = document.getElementById("selectedAddressInput");
-    const paymentInput = document.getElementById("selectedPaymentInput");
-    const cartItems = document.querySelectorAll("input[name='books[]']");
-    const buyNowItem = document.querySelector("input[name='book']");
-    const placeOrderBtn = document.getElementById("placeOrderBtn");
-   
-   placeOrderBtn.disabled = (cartItems.length === 0 && !buyNowItem);
-
-
-    orderForm.addEventListener('submit',function(event){
-      let addressSelected = false;
-      let paymentSelected = false;
-
-      addressRadios.forEach((radio) => {
-            if (radio.checked) {
-                addressSelected = true;
-                addressInput.value = radio.value; //storing  selected address
-            }
-        });
-
-        paymentRadios.forEach((radio) => {
-            if (radio.checked) {                  //storing selected payment method
-                paymentSelected = true;
-                paymentInput.value = radio.value; 
-            }
-        });
-      
-        if (cartItems.length === 0&&!buyNowItem) {
-            alert("Your cart is empty. Please add books before placing an order.");
-            event.preventDefault();
-            return;
-        }
-        if (!addressSelected) {
-            alert("Please select a delivery address.");
-            event.preventDefault();
-            return;
-        }
-
-        if (!paymentSelected) {
-            alert("Please select a payment method.");
-            event.preventDefault();
-            return;
-        }
-
-
-
-    })
-
 
     
-   }
 
    function applyCoupon(){
     
@@ -513,6 +466,140 @@ function updateTotals(subtotal, tax, finalTotal) {
   document.getElementById('tax').textContent = '₹' + tax.toFixed(2);
   document.getElementById('final-total').textContent = '₹' + finalTotal.toFixed(2);
 }
+
+
+  
+
+
+  document.getElementById("placeOrderForm").addEventListener("submit", async function(event) {
+    event.preventDefault();  
+
+  
+
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+    
+   
+   
+    const data = {
+        addressId: selectedAddress ? selectedAddress.value : null,
+        paymentMethod: selectedPayment ? selectedPayment.value : null,
+        
+        book: document.querySelector('input[name="book"]')?.value,
+        quantity: document.querySelector('input[name="quantity"]')?.value //handling direct buynow cart items will be found through user's cart
+    };
+
+    try {
+        
+        const res = await fetch('/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(data)  
+        });
+
+        const response = await res.json();
+
+        if (res.ok && response.success) {
+            if (data.paymentMethod === 'online') {
+                
+                initiateRazorpayPayment(response);
+            } else {
+                
+                window.location.href = `/orders/success/${response.orderId}`;
+            }
+        } else {
+            
+            alert(response.message || "Something went wrong!");
+        }
+    } catch (error) {
+        console.error("Error submitting order:", error);
+    }
+});
+
+
+
+
+
+function initiateRazorpayPayment(response) {
+    const options = {
+        key: response.key,  
+        amount: response.amount,  
+        currency: 'INR',
+        order_id: response.razorpayOrderId,  
+        name: response.customerName,
+        description: "Order payment",
+        image: "path_to_logo",  
+        handler: function (paymentResponse) {
+            
+            verifyPayment(paymentResponse, response.savedOrderId);
+        },
+        prefill: {
+            name: response.customerName,
+            email: response.customerEmail,
+            contact: response.customerPhone
+        },
+        notes: {
+            address: response.customerAddress
+        }
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.open();
+}
+
+
+async function verifyPayment(paymentResponse, savedOrderId) {
+    try {
+        const res = await fetch(`/verify-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                razorpayOrderId: paymentResponse.razorpay_order_id,
+                paymentId: paymentResponse.razorpay_payment_id,
+                signature: paymentResponse.razorpay_signature,
+                orderId: savedOrderId
+            })
+        });
+        const result = await res.json();
+        if (result.success) {
+            window.location.href = `/orders/success/${savedOrderId}`;
+        } else {
+            alert("Payment verification failed.");
+        }
+    } catch (error) {
+        console.error("Error verifying payment:", error);
+    }
+}
+
+function togglePlaceOrderButton() {
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+    const placeOrderButton = document.getElementById("placeOrderBtn");
+
+    
+    placeOrderButton.disabled = !(selectedAddress && selectedPayment);
+}
+
+
+
+  document.querySelectorAll('input[name="selectedAddress"]').forEach(radio => {
+    radio.addEventListener('change', togglePlaceOrderButton);
+});
+
+document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+    radio.addEventListener('change', togglePlaceOrderButton);
+});
+
+
+
+
+
+
+
 
    
   </script>

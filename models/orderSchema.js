@@ -39,8 +39,8 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["processing", "delivered", "cancelled","shipped","returned","requested"],
-        default: "processing"
+        enum: ["initiated","processing", "delivered", "cancelled","shipped","returned","requested"],
+        default: "initiated"
     },
     shippingCharge: {
         type: Number,

@@ -12,6 +12,8 @@ const { refundToWallet } =require('../../helpers/walletHelper')
 const {getBestOffer}=require('../../helpers/offerHelper')
 const Coupon=require('../../models/couponSchema')
 const {applyCoupon}=require('../../helpers/couponHelper')
+const razorpayInstance=require('../../helpers/razorpay')
+const crypto = require('crypto');
 
 
 
@@ -278,16 +280,20 @@ console.log('remove called')
 
 const placeOrder = async (req, res) => {    
     try {
+        console.log("PaymentMethod received:", req.body.paymentMethod);
+
+        const { book, quantity,  addressId, paymentMethod,couponCode} = req.body;
         
-        const { book, quantity, addressId, paymentMethod,couponCode} = req.body;
-        console.log(couponCode)
         
         
         const userId = await checkUserSession(req);
         if (!userId) return res.redirect('/login');
 
-        if (!addressId || !paymentMethod) {
-            return res.status(400).json({ message: 'Address and payment details are required' });
+        if ( !paymentMethod) {
+            return res.status(400).json({ message: ' payment details are required' });
+        }
+        if ( !addressId) {
+            return res.status(400).json({ message: 'Address  details are required' });
         }
 
         
@@ -375,12 +381,14 @@ const placeOrder = async (req, res) => {
        
 
        netAmount=subtotal+tax+shippingCharge-totalDiscount
+       const initialStatus = paymentMethod === "online" ? "initiated" : "processing";
+
 
         
         const newOrder = new Order({
             userId,
             orderItems,
-            status: "processing",
+            status: initialStatus,
             paymentMethod: validPaymentId,
             addressId,
             total: subtotal,
@@ -391,8 +399,45 @@ const placeOrder = async (req, res) => {
             couponId:appliedCoupon
         });
 
+
         const savedOrder = await newOrder.save();
-        console.log(" Order Saved:", savedOrder);
+
+        if (paymentMethod === "online") {
+            try {
+              
+             //follow razorpay verification -status will be default value-initiated
+              const razorpayOrder = await razorpayInstance.orders.create({
+                amount: netAmount * 100,
+                currency: "INR",
+                receipt: `order_rcptid_${Date.now()}`
+              });
+          
+              return res.json({
+                success: true,
+                razorpayOrderId: razorpayOrder.id,
+                key: 'rzp_test_gb3HG6N5Igmh50',
+                savedOrderId: savedOrder._id,
+                customerName: userId.username,
+                customerEmail: userId.email,
+                customerPhone: userId.phone,
+                amount: razorpayOrder.amount
+              });
+          
+            } catch (error) {
+              console.error("Error in online payment setup:", error);
+          
+              
+          
+              return res.status(500).json({
+                success: false,
+                message: "Something went wrong while setting up online payment. Please try again later."
+              });
+            }
+          }
+          
+
+       
+    
 
         if (appliedCoupon) {
             await Coupon.updateOne(
@@ -419,7 +464,10 @@ const placeOrder = async (req, res) => {
         }
        
 
-        res.redirect(`/orders/success/${savedOrder._id}`);
+        res.json({
+            success: true,
+            orderId: savedOrder._id
+        });
         
 
     } catch (error) {
@@ -427,6 +475,57 @@ const placeOrder = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+const verifyPayment=async(req,res)=>{
+    try {
+
+        const userId = await checkUserSession(req);
+        if (!userId) return res.redirect('/login');
+       const { razorpayOrderId, paymentId, signature, orderId } = req.body;
+       const secret = 'ECPPAufB9DXrPJD4ExUxcVLF';
+   
+       const generatedSignature = crypto.createHmac('sha256', secret)
+         .update(`${razorpayOrderId}|${paymentId}`)
+         .digest('hex');
+   
+         if (generatedSignature === signature) {
+            //if payment verified update other details 
+           
+            const updatedOrder = await Order.findByIdAndUpdate(orderId, {
+                status: 'processing',
+                paymentId
+            }, { new: true }).populate('userId');
+
+            
+            for (const item of updatedOrder.orderItems) {
+                await Books.findByIdAndUpdate(item.bookId, {
+                    $inc: { stock: -item.quantity }
+                });
+            }
+
+            
+            if (updatedOrder.couponId) {
+                await Coupon.updateOne(
+                    { _id: updatedOrder.couponId },
+                    {
+                        $push: { usersUsed: updatedOrder.userId._id },
+                        $inc: { usedCount: 1 }
+                    }
+                );
+            }
+
+            
+            await Cart.deleteMany({ userId: updatedOrder.userId._id });
+
+            res.json({ success: true });
+        } else {
+            res.json({ success: false, message: "Signature mismatch" });
+        }
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
+}
 
 const orderSuccess= async(req,res,next)=>{
     try {
@@ -446,7 +545,7 @@ const orderSuccess= async(req,res,next)=>{
      if (!order) {
          return res.status(404).render('error', { message: 'Order not found' });
      }
-     res.locals.order=order;
+     res.locals.order=order; //so this same logic can use both for order success and view order detail of particular boook dependupon next 
      next();
     
 
@@ -588,4 +687,4 @@ const downloadInvoice = async (req, res) => {
 
 
 
-module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,couponDiscount,removeCoupon}
+module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,couponDiscount,removeCoupon,verifyPayment}
