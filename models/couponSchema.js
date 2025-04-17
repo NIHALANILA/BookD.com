@@ -53,6 +53,10 @@ const couponSchema = new Schema({
     isDeleted: {
         type: Boolean,
         default: false
+      },issuedTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null 
       }
 }, { timestamps: true });
 

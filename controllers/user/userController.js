@@ -115,7 +115,8 @@ const verifyOtp = async (req, res) => {
                     minimumPrice: 1000,
                     limitPerUser: true,
                     expireDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
-                    isActive: "yes"
+                    isActive: "yes",
+                    issuedTo: referrer._id
                 });
 
                 await referralCoupon.save();

@@ -19,6 +19,11 @@ const applyCoupon = async ({ couponCode, userId, subtotal }) => {
     }
 
      
+     if (coupon.issuedTo && coupon.issuedTo.toString() !== userId.toString()) {        //ensuring that the user is eligible for refered coupon
+        return { valid: false, message: "This coupon is not valid for your account" };
+    }
+
+     
      const userUsed = coupon.usersUsed.includes(userId) && coupon.limitPerUser; //filtering those used coupons which is onetime usable
 
      if (userUsed) {

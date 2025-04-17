@@ -69,18 +69,12 @@ const loadcheckout = async (req, res) => {
                        }));
 
                 const subtotal = cartItems.reduce((sum, item) => sum + item.discountedPrice*item.quantity, 0);
-                req.session.subtotal = subtotal;
-
-            
-        
-            
+                req.session.subtotal = subtotal;     
         
 
-        const tax = subtotal * 0.05;
+            const tax = subtotal * 0.05;
         
-    
-
-        const userId = new mongoose.Types.ObjectId(user._id);
+             const userId = user._id
 
         
         const coupons = await Coupon.find({
@@ -88,13 +82,30 @@ const loadcheckout = async (req, res) => {
             expireDate: { $gte: new Date() },
             minimumPrice: { $lte: subtotal },
             isDeleted: false,
-            $or: [
-                { limitPerUser: false }, 
-                {                              //unlimited coupns always need to show but onetime used never show if it is used
-                  limitPerUser: true,
-                  usersUsed: { $nin: [userId] } 
-                }
+            $or: [{
+
+                issuedTo:null,
+                $or:[ { limitPerUser: false }, 
+                    {                              // unlimited coupns always need to show but onetime used never show if it is used and (non refererred copuns)
+                      limitPerUser: true,
+                      usersUsed: { $nin: [userId] } 
+                    }]
+                
+            },
+
+            {
+
+                issuedTo:userId,
+                $or:[ { limitPerUser: false }, 
+                    {                              //unlimited coupns always need to show but onetime used never show if it is used- (refered to this user)
+                      limitPerUser: true,
+                      usersUsed: { $nin: [userId] } 
+                    }]
+                
+            },
+               
               ]
+           
         });
         
         const finalTotal=subtotal+tax
@@ -164,20 +175,37 @@ const buynow=async(req,res)=>{
          
          const finalTotal=subtotal+tax
          req.session.subtotal = subtotal;
+         
 
-         const userId = new mongoose.Types.ObjectId(user._id);
+         const userId = user._id
              
         const coupons = await Coupon.find({
             isActive: "yes",
             expireDate: { $gte: new Date() },
             minimumPrice: { $lte: subtotal },
             isDeleted: false,
-            $or: [
-                { limitPerUser: false }, 
-                {                              //unlimited coupns always need to show but onetime used never show if it is used
-                  limitPerUser: true,
-                  usersUsed: { $nin: [userId] } 
-                }
+            $or: [{
+
+                issuedTo:null,
+                $or:[ { limitPerUser: false }, 
+                    {                              // unlimited coupns always need to show but onetime used never show if it is used and (non refererred copuns)
+                      limitPerUser: true,
+                      usersUsed: { $nin: [userId] } 
+                    }]
+                
+            },
+
+            {
+
+                issuedTo:userId,
+                $or:[ { limitPerUser: false }, 
+                    {                              //unlimited coupns always need to show but onetime used never show if it is used- (refered to this user)
+                      limitPerUser: true,
+                      usersUsed: { $nin: [userId] } 
+                    }]
+                
+            },
+               
               ]
         });
 
