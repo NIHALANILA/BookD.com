@@ -618,7 +618,7 @@ const orderCancel=async(req,res)=>{
        
         
       if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
-        await refundToWallet(order.userId, order.totalAmount);
+        await refundToWallet(order.userId, order.netAmount);
       }
 
         res.json({ success: true });

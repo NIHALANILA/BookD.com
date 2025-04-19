@@ -266,6 +266,8 @@
             crossorigin="anonymous"></script>
           <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
           <script src="/js/script.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
           <script>
          document.addEventListener("DOMContentLoaded", function () {
     initClearSearch();
@@ -366,14 +368,25 @@ function validateForm() {
     const file = fileInput.files[0]; 
 
     if (!file) {
-        alert("Please select an image to upload.");
+        Swal.fire({
+  icon: 'warning',
+  title: 'Oops...',
+  text: 'Please select an image to upload.'
+});
+
         return false; 
     }
 
     
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
-        alert("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+       // alert("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+        Swal.fire({
+            icon:'error',
+            title:'Invalid File',
+             text: 'Only JPG, PNG, and GIF are allowed.'
+        })
+
         return false;
     }
 
@@ -397,8 +410,13 @@ function deleteImage() {
        .then(response => response.json())
        .then(data => {
            if (data.success) {
-             alert(data.message)
-             window.location.reload();
+             //alert(data.message)
+             Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: data.message
+             })
+             previewContainer.innerHTML=""
            }
        })
        .catch(error => console.error('Error deleting profile picture:', error));
@@ -410,7 +428,13 @@ function deleteImage() {
 function handleDelete() {
        
        previewContainer.innerHTML = `<span>Add Image</span>`;
-       alert('deleted');
+       //alert('deleted');
+       Swal.fire({
+        icon:'success',
+        title: 'Deleted',
+        text: 'Profile image deleted successfully!'
+
+       })
    }
 //both for username and password updation
    function initEditableField(inputId, buttonId, apiEndpoint, fieldName) {
@@ -430,7 +454,13 @@ function handleDelete() {
         } else {
             let newValue = inputField.value.trim();
             if (!newValue) {
-                alert(`${fieldName} cannot be empty!`);
+                //alert(`${fieldName} cannot be empty!`);
+                Swal.fire({
+                    icon:'warning',
+                    title: 'Validation Error',
+                    text: `${fieldName} cannot be empty!`
+
+                })
                 resetField();
                 return;
             }
@@ -460,16 +490,41 @@ function handleDelete() {
             .then(data => {
                 if (data.success) {
                     if(fieldName==="username"){
-                        alert(`${fieldName} updated successfully !`);                       
+                        //alert(`${fieldName} updated successfully !`);  
+                        Swal.fire({
+                            icon:'success',
+                            title:'Success',
+                            text:`${fieldName} updated successfully!`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        })                     
                     originalValue = newValue;
-                    window.location.reload();
+
+                    // Update header without reload
+                    const headerBtn = document.getElementById("headerUsername");
+                    if (headerBtn) {
+                        headerBtn.innerHTML = `<i class='bx bx-user'></i> Hi, ${newValue}`;
+                    }
+                    
                     }                   
                     else{
-                        alert(`${fieldName} updated successfully!`);
+                       // alert(`${fieldName} updated successfully!`);
+                       Swal.fire({
+                        icon:'success',
+                        title:'Success',
+                        text:`${fieldName} updated successfully!`,
+                            timer: 2000,
+                            showConfirmButton: false
+                       })
                         originalValue = newValue;
                     }
                 } else {
-                    alert(data.message || "Something went wrong!");
+                    //alert(data.message || "Something went wrong!");
+                    Swal.fire({
+                        icon:'warning',
+                        title:'Oops',
+                        text:'Something went wrong'
+                    })
                     resetField();
                 }
                 inputField.setAttribute("readonly", true);
@@ -477,7 +532,13 @@ function handleDelete() {
             })
             .catch(error => {
                 console.error(`Error updating ${fieldName}:`, error);
-                alert("Server error. Try again later.");
+               // alert("Server error. Try again later.");
+               Swal.fire({
+                icon:'warning',
+                title:'Oops',
+                text:'Server error. Try again later'
+
+               })
                 resetField();
             });
     }

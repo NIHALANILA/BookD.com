@@ -5,7 +5,7 @@ const {checkUserSession} = require('../../helpers/userDry')
 const path = require("path");
 const fs=require('fs')
 const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper');
-const { success } = require( '../../middleware/auth' );
+
 const bcrypt= require('bcryptjs')
 
 
@@ -36,15 +36,15 @@ const updateProfileImage = async (req, res) => {
             return res.status(404).json({ message: "User not found!" });
         }
 
-        // Delete old profile picture if it exists 
-        if (user.profileImage && user.profileImage !== "/images/default-avatar.png") {
+        // deleting existing img
+        if (user.profileImage ) {
             const oldImagePath = path.join(__dirname,"../public/uploads/profiles", user.profileImage);
             if (fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath);
             }
         }
 
-        // Save new profile image path
+        // saviing new profile image path
         user.profileImage = req.processedImage;
         await user.save();
 
@@ -68,8 +68,8 @@ const deleteProfileImage = async (req, res) => {
         }
 
         
-        // Only delete if the image is not the default one
-        if (user.profileImage && user.profileImage !== "/images/default-avatar.png") {
+        //delete img
+        if (user.profileImage ) {
             const imagePath = path.join(__dirname, "..", "..", "public", user.profileImage);
            
 
@@ -82,7 +82,7 @@ const deleteProfileImage = async (req, res) => {
         }
 
         
-        user.profileImage = "/images/default-avatar.png";
+        user.profileImage = "";
         await user.save();
 
         
@@ -115,14 +115,14 @@ const changEmail=async(req,res)=>{
         const newEmail=req.body.newEmail;
         const otp = generateOtp();
 
-          // Store OTP temporarily in session (not in DB)
+          
           req.session.emailOtp = otp;
           req.session.newEmail = newEmail;
           req.session.otpExpires = Date.now() + 60000;
 
-          // Send OTP via email
+          
         const emailSent = await sendVerificationEmail(
-            newEmail,
+            newEmail,                                     //reused the verification mail function using nodemailer
             otp,
             "Verify Your Email Change",
             "Your OTP for email verification is"
@@ -157,7 +157,7 @@ const verifyChangEmail=async(req,res)=>{
 
         
          console.log("Received OTP from User:", otp);
-         // Check OTP from session
+         
          if (!req.session.emailOtp || !req.session.newEmail) {
             return res.send(`<script>alert('No OTP request found.'); window.location.href='/profile/email-change';</script>`);
         }
@@ -166,11 +166,11 @@ const verifyChangEmail=async(req,res)=>{
             return res.render("veryfy-mailotp", { message: "OTP incorrect", otpExpires: req.session.otpExpires });
         }
 
-        // Update email
+        
         user.email = req.session.newEmail;
         await user.save();
 
-        // Clear OTP session data
+        
         delete req.session.emailOtp;
         delete req.session.newEmail;
         delete req.session.otpExpires;

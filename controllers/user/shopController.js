@@ -3,7 +3,6 @@ const Category = require('../../models/categorySchema');
 const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const {checkUserSession} = require('../../helpers/userDry')
-const {generateOtp,sendVerificationEmail,securePassword}=require('../../helpers/otpHelper')
 const {getBestOffer}=require('../../helpers/offerHelper')
 
 
@@ -214,24 +213,23 @@ const viewBookDetails = async (req, res) => {
 const maxRelatedBooks = 4; 
 
 if (categoryArray.length > 0) {
-    // Fetch books by the same author first
+    // relative books fetched first by author
     relatedBooks = await Books.find({
         author: bookData.author,
-        language: bookData.language, // Ensure same language
         _id: { $ne: bookId }, 
         isDeleted: false, 
         isListed: true
     }).lean().limit(maxRelatedBooks);
 
-    // If not enough books found by author, fill with books from same category
+    // if not same author exist ,filtering based on the ctegory
     if (relatedBooks.length < maxRelatedBooks) {
         const additionalBooks = await Books.find({
             category_ids: { $in: categoryArray },
-            language: bookData.language, // Ensure same language
+            language: bookData.language, // ensured same language to avoid confusion
             _id: { $ne: bookId },
             isDeleted: false, 
             isListed: true,
-            author: { $ne: bookData.author } // Avoid duplicates
+            author: { $ne: bookData.author } // avoiding duplicates
         }).lean()
         .limit(maxRelatedBooks - relatedBooks.length);
 

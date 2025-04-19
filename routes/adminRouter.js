@@ -9,6 +9,7 @@ const bookController= require('../controllers/admin/bookController')
 const { upload, processImages } = require("../helpers/multerHelper");
 const orderController=require('../controllers/admin/orderController')
 const couponController=require('../controllers/admin/couponController')
+const salesController=require('../controllers/admin/salesController')
 
 
 
@@ -77,5 +78,12 @@ router.post('/coupons/add',couponController.addCoupon)
 router.get('/coupons/:id',couponController.loadEditCoupon)
 router.patch('/coupons/:id',couponController.editCoupon)
 router.delete('/coupons/:id',couponController.deleteCoupon)
+
+
+//saleReport
+
+router.get('/sales',salesController.loadSaleReport)
+router.get('/sales/excel',salesController.saleReportExcel)
+router.get('/sales/pdf',salesController.saleReportPDF)
 
 module.exports=router

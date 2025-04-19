@@ -48,7 +48,7 @@ const addCategory = async (req, res) => {
 
         await Category.create({ name });
         res.redirect("/admin/categories");
-    } catch (error) {
+    } catch (error) { 
         console.error(error);
         res.status(500).send("Error adding category");
     }

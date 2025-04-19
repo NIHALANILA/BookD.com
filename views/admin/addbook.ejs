@@ -716,10 +716,10 @@ function validateForm() {
 
 function validateImages() {
     let images = document.querySelectorAll('input[type="file"]');
-    let hasImage = Array.from(images).some(input => input.files.length > 0);
+    let hasImage = Array.from(images).every(input => input.files.length === 1);
 
     if (!hasImage) {
-        alert("Please upload at least one image.");
+        alert("Please upload  image in each box.");
         return false;
     }
     return true;

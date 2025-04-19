@@ -60,14 +60,8 @@ const dashboard=async(req,res)=>{
 }
 const logout=async(req,res)=>{
     try {
-        req.session.destroy(err=>{
-            if(err){
-                console.log("Error destroying session",err)
-                return res.redirect('/pageNotFound')
-            }
-            res.redirect('/admin/login')
-        })
-        
+        req.session.admin = null;
+        res.redirect('/admin/login');
     } catch (error) {
         console.log(error)
         

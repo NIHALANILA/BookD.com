@@ -29,7 +29,7 @@
         <% categories.forEach((category, index) => { %>
             <tr>
                 <td><%= (currentPage - 1) * 5 + index + 1 %></td>
-                <td><%= category.name %></td>
+                <td id="cat-name-<%= category._id %>"><%= category.name %></td>
                 <td>
                     <%= category.isListed ? "Active" : "Inactive" %>
                 </td>
@@ -46,8 +46,9 @@
 </table>
 
 
-<form class="user-search-form" action="/admin/categories" method="POST">
-    <input type="text" name="name" required placeholder="Category Name">
+<form class="user-search-form" action="/admin/categories" method="POST" onsubmit="return validateCategoryForm()">
+    <input type="text" id="category"  name="name" required placeholder="Category Name">
+    <span id="error-message" style="color: red;"></span><br>
     <button type="submit">Add Category</button>
 </form>
 
@@ -68,25 +69,47 @@
         input: "text",
         inputValue: name,
         showCancelButton: true,
-        confirmButtonText: "Save"
+        confirmButtonText: "Save",
+        inputValidator: (value) => {
+            if (!value.trim()) {
+                return "Category name cannot be empty.";
+            }
+            if (value.trim().length < 3) {
+                return "Category name must be at least 3 characters.";
+            }
+            return null; 
+        }
     });
 
     if (result.isConfirmed) {
         try {
+            const updatedName = result.value.trim();
             const response = await fetch(`/admin/categories/edit/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: result.value })
+                body: JSON.stringify({ name: updatedName})
             });
-            const data= await response.json()
+           
+           let data;
+            try {
+                data = await response.json(); 
+            } catch (jsonErr) {
+                console.error("Error parsing JSON response:", jsonErr);
+                return Swal.fire("Error!", "Invalid response from server", "error");
+            }
+
+            console.log("Status:", response.status);
+            console.log("Response Data:", data);
 
             if (response.ok) {
+                document.getElementById(`cat-name-${id}`).textContent = updatedName;
                 await Swal.fire("Success",data.message,"success")
             
             } else {
                 await Swal.fire("Error!",data.message||"failed to update category");
             }
         } catch (error) {
+            console.error("Fetch error:", error);
             console.error("Error updating category:", error);
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
@@ -147,6 +170,22 @@ async function softDeleteCategory(id) {
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
     }
+}
+
+function validateCategoryForm() {
+    const categoryInput = document.getElementById("category");
+    const errorMessage = document.getElementById("error-message");
+
+    if (categoryInput.value.trim() === "") {
+        errorMessage.textContent = "Category name cannot be empty.";
+        return false;
+    } else if (categoryInput.value.length < 3) {
+        errorMessage.textContent = "Category name must be at least 3 characters.";
+        return false;
+    }
+
+    errorMessage.textContent = "";
+    return true;
 }
 
 </script>

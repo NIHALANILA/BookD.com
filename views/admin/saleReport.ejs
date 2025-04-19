@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Report</title>
+  <style>
+    /* public/css/sales-report.css */
+    table {
+  width: 50%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+
+table th,
+table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+table thead {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.center-text {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+.down-btn {
+  background-color:#3498db;;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px 10px 20px 0;
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+</style>
+ 
+
+  </style>
+</head>
+<%-include("../../views/partials/admin/header")%>
+ 
+
+  <!-- Filter Form -->
+  <form  class="user-search-form" action="/admin/sales" method="get">
+    <div class="form-group">
+      <label for="filterType">Filter By</label>
+      <select name="filterType" id="filterType" class="form-control">
+        <option value="today" <%= filterType === 'today' ? 'selected' : '' %>>Today</option>
+        <option value="week" <%= filterType === 'week' ? 'selected' : '' %>>This Week</option>
+        <option value="month" <%= filterType === 'month' ? 'selected' : '' %>>This Month</option>
+        <option value="year" <%= filterType === 'year' ? 'selected' : '' %>>This Year</option>
+        <option value="custom" <%= filterType === 'custom' ? 'selected' : '' %>>Custom Range</option>
+      </select>
+    </div>
+
+    
+    <div id="customDateRange" class="form-group" style="display: none;">
+      <label for="fromDate">From Date</label>
+      <input type="date" name="fromDate" id="fromDate" class="form-control">
+      <label for="toDate">To Date</label>
+      <input type="date" name="toDate" id="toDate" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+  </form>
+  <h3 class="center-text">Sales Report from <%= from ? moment(from).format('DD MMM YYYY') : 'N/A' %> to <%= to ? moment(to).format('DD MMM YYYY') : 'N/A'%></h3>
+
+
+  
+  
+  <a href="/admin/sales/excel?<%= 'filterType=' + filterType + '&fromDate=' + from + '&toDate=' + to %>" class="down-btn" style="text-decoration: none; float: right;">Download Excel</a>
+  <a href="/admin/sales/pdf?<%= 'filterType=' + filterType + '&fromDate=' + from + '&toDate=' + to %>" class="down-btn" style="text-decoration: none; float: right;">Download PDF</a>
+  
+  <h2>Total Metrics</h2>
+<table class="table table-bordered table-striped book-table">
+  <thead>
+    <tr>
+      <th>Total Ordes</th>
+      <th>Total Amount</th>
+      <th>Net Sales</th>
+      <th>Total Order Discount</th>
+      <th>Total Coupon Used</th>
+    </tr>
+  </thead>
+  <tr>
+    <% result.totalMetrics.forEach(metric => { %>
+      <td><%= metric.totalOrders %></td>
+      <td><%= metric.totalAmount %></td>
+      <td><%= metric.netSales %></td>
+      <td><%= metric.totalOrderDiscount %></td>
+      <td><%= metric.totalCouponUsed %></td>
+    <% }) %>
+  </tr>
+</table>
+
+<h2>Status Counts</h2>
+<table class="table table-bordered table-striped book-table">
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Count</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% result.statusCounts.forEach(status => { %>
+      <tr>
+        <td><%= status._id %></td>
+        <td><%= status.count %></td>
+        <td><%= status.totalAmount %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2>Best Selling Books</h2>
+<table class="table table-bordered table-striped book-table">
+  <thead>
+    <tr>
+      <th>Book name</th>
+      <th>Quantity Sold</th>
+      <th>Total Discount applied</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% result.bestSellingBooks.forEach(book => { %>
+      <tr>
+        <td><%= book.bookName %></td>
+        <td><%= book.totalQuantitySold %></td>
+        <td><%= book. totalOfferdiscount %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+ 
+</main>
+</div>
+  <script>
+   
+    const filterType = document.getElementById('filterType');
+    const customDateRange = document.getElementById('customDateRange');
+
+    filterType.addEventListener('change', () => {
+      if (filterType.value === 'custom') {
+        customDateRange.style.display = 'block';
+      } else {
+        customDateRange.style.display = 'none';
+      }
+    });
+
+    
+    filterType.dispatchEvent(new Event('change'));
+  </script>
+</body>
+</html>

@@ -274,7 +274,7 @@ textarea {
         document.querySelectorAll(".cancel-order").forEach(button => {
     button.addEventListener("click", function () {
         document.getElementById("cancelOrderId").value = this.dataset.orderid;
-        document.getElementById("cancelModal").style.display = "block";
+        document.getElementById("cancelModal").style.display = "flex";
     });
 });
 
@@ -308,7 +308,7 @@ document.getElementById("confirmCancel").addEventListener("click", function () {
 document.querySelectorAll(".return-order").forEach(button => {
     button.addEventListener("click", function () {
         document.getElementById("returnOrderId").value = this.dataset.orderid;
-        document.getElementById("returnModal").style.display = "block";
+        document.getElementById("returnModal").style.display = "flex";
     });
 });
 

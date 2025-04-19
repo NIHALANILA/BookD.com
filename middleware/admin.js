@@ -18,7 +18,7 @@ const adminIn= async(req,res,next)=>{
 }
 const adminNotIn=async(req,res,next)=>{
     try {
-        if(!req.session.user){
+        if(!req.session.admin){
             next()
         }
         else{

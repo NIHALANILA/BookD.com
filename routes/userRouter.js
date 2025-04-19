@@ -18,6 +18,7 @@ const crypto = require('crypto');
 
 
 
+
 router.get('/pageNotFound',userController.pageNotFound)
 router.get('/signup',auth.userNotIn,userController.loadSignup)
 router.post('/signup',userController.signup)

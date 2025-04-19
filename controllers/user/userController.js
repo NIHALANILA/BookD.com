@@ -81,7 +81,7 @@ const verifyOtp = async (req, res) => {
         const user = req.session.userData;
         const passwordHash = await securePassword(user.password);
 
-        // ✅ Generate referral code for new user
+        //  referal code of new user
         const generateReferralCode = () => {
             return Math.random().toString(36).substring(2, 8).toUpperCase(); 
         };

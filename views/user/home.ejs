@@ -79,7 +79,7 @@
                   </svg>
                 </a>
                 <div class="product-content">
-                  <h5 class="element-title text-uppercase fs-5 mt-3">                   
+                  <h5 class="element-title  fs-5 mt-3">                   
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>                 
                   <form action="/cart" method="POST" style="display: inline;">
@@ -118,7 +118,7 @@
                   </svg>
                 </a>
                 <div class="product-content">
-                  <h5 class="element-title text-uppercase fs-5 mt-3">
+                  <h5 class="element-title  fs-5 mt-3">
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>
                 <form action="/cart" method="POST" style="display: inline;">
@@ -161,7 +161,7 @@
     <div class="container">
       <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 mb-3">
         <h4 class="text-uppercase">Best Selling Items</h4>
-        <a href="/shop?filter=bestSellers" class="btn-link">View All Products</a>
+        <a href="/shop?category=Best Seller"  class="btn-link">View All Products</a>
       </div>
       <div class="swiper product-swiper open-up" data-aos="zoom-out">
         <div class="swiper-wrapper d-flex">
@@ -184,7 +184,7 @@
                   </svg>
                 </a>
                 <div class="product-content">
-                  <h5 class="text-uppercase fs-5 mt-3">
+                  <h5 class=" fs-5 mt-3">
                     <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>
                   </h5>
                   <form action="/cart" method="POST" style="display: inline;">
@@ -232,9 +232,10 @@
                     </svg>
                   </a>
                   <div class="product-content">
-                    <h5 class="text-uppercase fs-5 mt-3">
-                      <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>
+                    <h5 class=" fs-5 mt-3">
+                      <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>                     
                     </h5>
+                   
                   
                   <form action="/cart" method="POST" style="display: inline;">
                     <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">

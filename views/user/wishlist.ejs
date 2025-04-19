@@ -29,6 +29,9 @@
       div.swiper-wrapper {
   height: 80%;
 }
+
+
+
   </style>
 </head>
 <%-include("../../views/partials/user/header")%>
@@ -39,38 +42,45 @@
   <h2 class="mb-4 text-center">My Wishlist</h2>
 
   <% if (wishlistItems && wishlistItems.length > 0) { %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="wishlist-container">
       <% wishlistItems.forEach(item => { %>
-        <div class="col">
-          <div class="card h-100 shadow-sm">
-            <a href="/book/<%= item.book_id._id %>"><img src="<%= item.book_id.image %>" class="card-img-top" alt="<%= item.book_id.title %>">
-            <div class="card-body">
-              <h5 class="card-title"><%= item.book_id.title %></h5>
-              <p class="card-text">
-                <strong class="text-danger">₹<%= item.book_id.price - 100 %></strong> 
-                <span class="text-muted text-decoration-line-through ms-2">₹<%= item.book_id.price %></span>
-              </p>
-              <div class="d-flex justify-content-between mt-3">
-                <form action="/cart" method="POST">
-                  <input type="hidden" name="bookId" value="<%= item.book_id._id %>">
-                  <button class="btn btn-sm btn-primary">Add to Cart</button>
-                </form>
-
-                <button class="btn btn-sm btn-outline-danger remove-wishlist-btn" data-id="<%= item._id %>">
-                    Remove
-                  </button>
-                  
-              </div>
-            </div></a>
+        <div class="wishlist-box row align-items-center p-3 mb-3 border rounded-3 g-3">
+  
+          <!-- Book Image (Left) -->
+          <div class="col-3 col-sm-2 col-md-2">
+            <a href="/book/<%= item.book_id._id %>">
+              <img src="/<%= item.book_id.book_images[0] %>" alt="<%= item.book_id.title %>" class="img-fluid rounded" style="max-height: 130px; object-fit: cover;">
+            </a>
           </div>
+  
+          <!-- Title, Description, and Price (Middle) -->
+          <div class="col-6 col-sm-7 col-md-8">
+            <h6 class="mb-1 fw-bold"><%= item.book_id.title %></h6>
+            <div class="price">
+              <span class="text-muted text-decoration-line-through me-2">₹<%= item.book_id.price %></span>
+              <span class="fw-bold text-success">₹<%= item.book_id.limitPrice %></span>
+            </div>
+          </div>
+  
+          <!-- Action Buttons (Right) -->
+          <div class="col-3 col-sm-3 col-md-2 d-flex flex-column gap-2 align-items-end">
+            <form action="/cart" method="POST" class="w-100">
+              <input type="hidden" name="bookId" value="<%= item.book_id._id %>">
+              <button class="btn btn-sm btn-primary w-100">Add To Cart</button>
+            </form>
+            <button class="btn btn-sm btn-outline-danger w-100 remove-wishlist-btn" data-id="<%= item._id %>">
+              Remove
+            </button>
+          </div>
+  
         </div>
       <% }) %>
     </div>
   <% } else { %>
-    <div class="alert alert-info text-center">
-      Your wishlist is empty.
-    </div>
+    <div class="alert alert-info text-center">Your wishlist is empty.</div>
   <% } %>
+  
+  
 </div>
 
 
@@ -133,9 +143,11 @@
 
             if (result.success) {
               Swal.fire('Removed!', 'Item has been removed from your wishlist.', 'success')
-                .then(() => {
-                  location.reload(); // refresh to reflect changes
-                });
+                 // Remove the item from the DOM
+              const wishlistCard = button.closest('.wishlist-box');
+              if (wishlistCard) wishlistCard.remove();
+
+             
             } else {
               Swal.fire('Error', 'Failed to remove item.', 'error');
             }
