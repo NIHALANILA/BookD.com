@@ -218,34 +218,9 @@ const viewBookDetails = async (req, res) => {
 
         let relatedBooks = [];
 const maxRelatedBooks = 4; 
-/*
-if (categoryArray.length > 0) {
-    // relative books fetched first by author
-    relatedBooks = await Books.find({
-        author: bookData.author,
-        _id: { $ne: bookId }, 
-        isDeleted: false, 
-        isListed: true
-    }).lean().limit(maxRelatedBooks);
 
-    // if not same author exist ,filtering based on the ctegory
-    if (relatedBooks.length < maxRelatedBooks) {
-        const additionalBooks = await Books.find({
-            category_ids: { $in: categoryArray },
-            language: bookData.language, // ensured same language to avoid confusion
-            _id: { $ne: bookId },
-            isDeleted: false, 
-            isListed: true,
-            author: { $ne: bookData.author } // avoiding duplicates
-        }).lean()
-        .limit(maxRelatedBooks - relatedBooks.length);
 
-        relatedBooks = [...relatedBooks, ...additionalBooks]; 
-    }
-}
-*/
-
-// ✅ Step 1: Always fetch by author (excluding the current book)
+// first preferance for author
 relatedBooks = await Books.find({
     author: bookData.author,
     _id: { $ne: bookId },
@@ -253,7 +228,7 @@ relatedBooks = await Books.find({
     isListed: true
 }).lean().limit(maxRelatedBooks);
 
-// ✅ Step 2: If not enough books found, fetch by category (if categoryArray exists)
+//second for category but not different lanaguage
 if (relatedBooks.length < maxRelatedBooks && categoryArray.length > 0) {
     const additionalBooks = await Books.find({
         category_ids: { $in: categoryArray },

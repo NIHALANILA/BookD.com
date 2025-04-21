@@ -209,13 +209,13 @@
             jsonData[key] = value;
         });
 
-        // Step 2: Send PATCH request
+        
         fetch("/profile/address", {
-            method: "PATCH", // Using PATCH instead of POST
+            method: "PATCH", 
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(jsonData) // Convert form data to JSON
+            body: JSON.stringify(jsonData) 
         })
         .then(response => response.json())
         .then(data => {

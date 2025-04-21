@@ -380,7 +380,7 @@ function validateForm() {
     
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
-       // alert("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+       
         Swal.fire({
             icon:'error',
             title:'Invalid File',
@@ -410,7 +410,7 @@ function deleteImage() {
        .then(response => response.json())
        .then(data => {
            if (data.success) {
-             //alert(data.message)
+        
              Swal.fire({
                 icon: 'success',
                 title: 'Success',
@@ -428,7 +428,7 @@ function deleteImage() {
 function handleDelete() {
        
        previewContainer.innerHTML = `<span>Add Image</span>`;
-       //alert('deleted');
+      
        Swal.fire({
         icon:'success',
         title: 'Deleted',
@@ -454,7 +454,7 @@ function handleDelete() {
         } else {
             let newValue = inputField.value.trim();
             if (!newValue) {
-                //alert(`${fieldName} cannot be empty!`);
+               
                 Swal.fire({
                     icon:'warning',
                     title: 'Validation Error',
@@ -490,7 +490,7 @@ function handleDelete() {
             .then(data => {
                 if (data.success) {
                     if(fieldName==="username"){
-                        //alert(`${fieldName} updated successfully !`);  
+                        
                         Swal.fire({
                             icon:'success',
                             title:'Success',
@@ -508,7 +508,7 @@ function handleDelete() {
                     
                     }                   
                     else{
-                       // alert(`${fieldName} updated successfully!`);
+                       
                        Swal.fire({
                         icon:'success',
                         title:'Success',
@@ -532,7 +532,7 @@ function handleDelete() {
             })
             .catch(error => {
                 console.error(`Error updating ${fieldName}:`, error);
-               // alert("Server error. Try again later.");
+              
                Swal.fire({
                 icon:'warning',
                 title:'Oops',
