@@ -56,34 +56,34 @@ router.patch('/books/toggle/:id',adminAuth.adminIn,bookController.toggleBook)
 
 //ordermanage
 
-router.get('/orders',orderController.listOrders)
-router.get('/orders/view/:id',orderController.orderview)
-router.patch('/orders/:id',orderController.statusEdit)
+router.get('/orders',adminAuth.adminIn,orderController.listOrders)
+router.get('/orders/view/:id',adminAuth.adminIn,orderController.orderview)
+router.patch('/orders/:id',adminAuth.adminIn,orderController.statusEdit)
 
-//offermanage--need to work more-no need to do in this week
+//offermanage
 
-router.get("/offers", offerController.getOffers);
-router.get("/offers/add", offerController.addOfferForm);
-router.post("/offers/add", offerController.addOffer);
-router.get("/offers/edit/:id",offerController.loadupdateoffer)
-router.patch("/offers/edit/:id",offerController.editOffers)
-router.delete('/offers/delete/:id',offerController.deleteOffer)
+router.get("/offers",adminAuth.adminIn, offerController.listOffers);
+router.get("/offers/add",adminAuth.adminIn, offerController.addOfferForm);
+router.post("/offers/add",adminAuth.adminIn, offerController.addOffer);
+router.get("/offers/edit/:id",adminAuth.adminIn,offerController.loadupdateoffer)
+router.patch("/offers/edit/:id",adminAuth.adminIn,offerController.editOffers)
+router.delete('/offers/delete/:id',adminAuth.adminIn,offerController.deleteOffer)
 
 
 //coupon
 
-router.get('/coupons',couponController.listCoupons)
-router.get('/coupons/add',couponController.loadaddCoupon)
-router.post('/coupons/add',couponController.addCoupon)
-router.get('/coupons/:id',couponController.loadEditCoupon)
-router.patch('/coupons/:id',couponController.editCoupon)
-router.delete('/coupons/:id',couponController.deleteCoupon)
+router.get('/coupons',adminAuth.adminIn,couponController.listCoupons)
+router.get('/coupons/add',adminAuth.adminIn,couponController.loadaddCoupon)
+router.post('/coupons/add',adminAuth.adminIn,couponController.addCoupon)
+router.get('/coupons/:id',adminAuth.adminIn,couponController.loadEditCoupon)
+router.patch('/coupons/:id',adminAuth.adminIn,couponController.editCoupon)
+router.delete('/coupons/:id',adminAuth.adminIn,couponController.deleteCoupon)
 
 
 //saleReport
 
-router.get('/sales',salesController.loadSaleReport)
-router.get('/sales/excel',salesController.saleReportExcel)
-router.get('/sales/pdf',salesController.saleReportPDF)
+router.get('/sales',adminAuth.adminIn,salesController.loadSaleReport)
+router.get('/sales/excel',adminAuth.adminIn,salesController.saleReportExcel)
+router.get('/sales/pdf',adminAuth.adminIn,salesController.saleReportPDF)
 
 module.exports=router

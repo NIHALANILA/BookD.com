@@ -34,13 +34,14 @@ const loadaddCoupon=(req,res)=>{
           });
         
     } catch (error) {
+        console.log(error)
         
     }
 }
 
 const addCoupon=async(req,res)=>{
     try {
-        console.log('add function called')
+        
         const{code,discountType,discountValue,minimumPrice,limit,expireDate,isActive,limitPerUser}=req.body
         const existcoupon= await Coupon.findOne({code:code.trim()})
         if(existcoupon){

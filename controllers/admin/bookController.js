@@ -134,11 +134,12 @@ const loadeditbook=async(req,res)=>{
 const editbook = async (req, res) => {
    
     try {
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        
+        const bookId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(bookId)) {
             return res.status(400).json({ error: "Invalid Book ID" });
         }
-        const bookId = req.params.id;
+       
         const { title, author, category_ids, isbn, publisher, language, binding, publishing_date, edition, number_of_pages, price, stock ,limitPrice} = req.body;
         
         

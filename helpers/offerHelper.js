@@ -11,7 +11,7 @@ const getBestOffer = async (bookId) => {
 
     const currentDate = new Date();
 
-    // Find all valid active offers
+    // find all available offer for that book
     const offers = await Offer.find({
       status: 'active',
       start_date: { $lte: currentDate },

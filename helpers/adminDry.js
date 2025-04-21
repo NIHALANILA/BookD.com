@@ -2,7 +2,8 @@ const Category=require('../models/categorySchema')
 
 
 
-const checkAndRestoreCategory = async (name, excludeId = null) => {
+const checkAndRestoreCategory = async (name, excludeId = null) => {     //excluded given to reuse this same function incase of edit category 
+                                                                                                                                               
     const query = { name };
     if (excludeId) {
         query._id = { $ne: excludeId }; 

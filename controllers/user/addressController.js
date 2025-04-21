@@ -11,18 +11,17 @@ const loadAddressPage = async (req, res) => {
             return res.redirect('/login'); 
         }
 
-        //  Store where the user came from 
+        //  store from where user came bcz using smae page for adding new address in address and checkout sections
         if (req.query.from === 'checkout') {
             req.session.returnToCheckout = true;
         }
 
-        const searchQuery = req.query.search || ""; 
+        
         const addresses = await Address.find({ userId: user._id });
 
         res.render('address', {
             user,
             addresses,
-            searchQuery,
             session: req.session
         });
     } catch (error) {
@@ -59,9 +58,9 @@ const addNewaddress = async (req, res) => {
 
         await newAddress.save();
 
-        //  Redirect to /checkout if the user came from there
+        //  if user try to add address from checkout page return to there
         if (req.session.returnToCheckout) {
-            req.session.returnToCheckout = null; // clear it
+            req.session.returnToCheckout = null;
             return res.redirect('/checkout');
         }
 

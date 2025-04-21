@@ -63,6 +63,8 @@ const loadShopage = async (req, res) => {
 
         
         const { filter, category, language, minPrice, maxPrice, page,search,clearSearch,publisher,sort } = req.query;
+        const queryObj = { ...req.query };
+        delete queryObj.page;   //deleting page key from queryObj
          
         if (clearSearch) {
             return res.redirect("/shop");
@@ -156,6 +158,10 @@ const loadShopage = async (req, res) => {
                 }
               }
 
+              const queryString = Object.keys(queryObj)
+              .map(key => `${key}=${encodeURIComponent(queryObj[key])}`)  //to create url for pagination
+               .join("&");
+
         res.render('shop', { 
             user: userData, 
             books, 
@@ -165,7 +171,8 @@ const loadShopage = async (req, res) => {
             categories ,
             publishers,
             searchQuery: search || "",
-            sortQuery
+            sortQuery,
+            queryString, // 
         });
 
     } catch (error) {
@@ -211,7 +218,7 @@ const viewBookDetails = async (req, res) => {
 
         let relatedBooks = [];
 const maxRelatedBooks = 4; 
-
+/*
 if (categoryArray.length > 0) {
     // relative books fetched first by author
     relatedBooks = await Books.find({
@@ -236,7 +243,30 @@ if (categoryArray.length > 0) {
         relatedBooks = [...relatedBooks, ...additionalBooks]; 
     }
 }
+*/
 
+// ✅ Step 1: Always fetch by author (excluding the current book)
+relatedBooks = await Books.find({
+    author: bookData.author,
+    _id: { $ne: bookId },
+    isDeleted: false,
+    isListed: true
+}).lean().limit(maxRelatedBooks);
+
+// ✅ Step 2: If not enough books found, fetch by category (if categoryArray exists)
+if (relatedBooks.length < maxRelatedBooks && categoryArray.length > 0) {
+    const additionalBooks = await Books.find({
+        category_ids: { $in: categoryArray },
+        language: bookData.language,
+        _id: { $ne: bookId },
+        isDeleted: false,
+        isListed: true,
+        author: { $ne: bookData.author } // avoid duplicates
+    }).lean()
+    .limit(maxRelatedBooks - relatedBooks.length);
+
+    relatedBooks = [...relatedBooks, ...additionalBooks];
+}
 for (const book of relatedBooks) {
     const offer = await getBestOffer(book._id);
     if (offer) {

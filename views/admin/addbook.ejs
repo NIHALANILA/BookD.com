@@ -589,7 +589,7 @@ document.getElementById("addBookForm").addEventListener("submit", async function
         const response = await fetch("/admin/books/add", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json",      //to veryfy duplicate of isbn from backend
                 "X-Requested-With": "XMLHttpRequest" 
             },
             body: JSON.stringify({ isbn: isbnInput })

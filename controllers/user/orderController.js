@@ -310,7 +310,7 @@ const placeOrder = async (req, res) => {
     try {
         console.log("PaymentMethod received:", req.body.paymentMethod);
 
-        const { book, quantity,  addressId, paymentMethod,couponCode} = req.body;
+        const { book, quantity,  addressId, paymentMethod} = req.body;
         
         
         

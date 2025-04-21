@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 
 
-const getOffers = async (req, res) => {
+const listOffers = async (req, res) => {
     try {
         let search = req.query?.search || "";
         let page = parseInt(req.query.page) || 1;
@@ -67,11 +67,11 @@ const addOffer = async (req, res) => {
         status
       } = req.body;
   
-      // Convert types
+      
       discount_value = parseFloat(discount_value) || 0;
-      book_ids = Array.isArray(book_ids) ? book_ids : book_ids ? [book_ids] : [];
+      book_ids = Array.isArray(book_ids) ? book_ids : book_ids ? [book_ids] : []; //book_ids always an array
   
-      // Validations
+      
       if (!name || !applyTo || !discount_type || !start_date || !expire_date) {
         return res.status(400).send("All required fields must be filled.");
       }
@@ -90,9 +90,9 @@ const addOffer = async (req, res) => {
         status: status || "inactive",
       };
   
-      // Apply based on type
+      
       if (applyTo === "category") {
-        if (!category_id || !mongoose.Types.ObjectId.isValid(category_id)) {
+        if (!category_id || !mongoose.Types.ObjectId.isValid(category_id)) {          //either category or book will be selected 
           return res.status(400).send("Valid category must be selected.");
         }
         offerData.category_id = category_id;
@@ -116,7 +116,6 @@ const addOffer = async (req, res) => {
   
 
 
-//  Edit Offer section
 const loadupdateoffer = async (req, res) => {
     const offer = await Offer.findById(req.params.id);
     const categories = await Category.find();
@@ -124,7 +123,6 @@ const loadupdateoffer = async (req, res) => {
     res.render("editOffer", { offer, categories, books });
 };
 
-// 
 const editOffers = async (req, res) => {
     try {
       const offerId = req.params.id;
@@ -157,4 +155,4 @@ const deleteOffer = async (req, res) => {
   
 };
 
-module.exports = { getOffers, addOfferForm, addOffer, loadupdateoffer, deleteOffer,editOffers };
+module.exports = { listOffers, addOfferForm, addOffer, loadupdateoffer, deleteOffer,editOffers };

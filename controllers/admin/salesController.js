@@ -12,7 +12,7 @@ const loadSaleReport = async (req, res) => {
         try {
           const { filterType, fromDate, toDate } = req.query;
       
-          const { result, dateRange } = await getSalesReport({ filterType, fromDate, toDate });
+          const { result, dateRange } = await getSalesReport({ filterType, fromDate, toDate });  //performing aggregation according to the query
       
           res.render('saleReport', {
             from: dateRange?.$gte || null,

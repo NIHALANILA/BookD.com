@@ -84,7 +84,7 @@ const orderview=async(req,res)=>{
         
     }
 }
-
+//here is refunding logic for cod to wallet
 const statusEdit=async(req,res)=>{
     try {
        const {id} =req.params;
@@ -92,14 +92,14 @@ const statusEdit=async(req,res)=>{
 
        const order = await Order.findById(id);
 
-       if(status==="returned"&& order.status!=="returned"){
+       if(status==="returned"&& order.status!=="returned"){ //ensured that order status is request not returned
 
         for (const item of order.orderItems){
             await Book.findByIdAndUpdate(item.bookId,{
                 $inc:{stock:item.quantity}
             })
         }
-        await refundToWallet(order.userId, order.total);
+        await refundToWallet(order.userId, order.netAmount-order.shippingCharge);
 
        }
       
