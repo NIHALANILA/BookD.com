@@ -54,7 +54,7 @@ const getBestOffer = async (bookId) => {
       limitPrice,
       discount: maxDiscount,
       discountPercent: appliedOffer ? appliedOffer.discount_value : (maxDiscount > 0 ? 5 : 0),
-      finalPrice: price - maxDiscount,
+      finalPrice,
       offerId: appliedOffer ? appliedOffer._id : null
     };
   } catch (err) {

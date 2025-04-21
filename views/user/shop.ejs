@@ -115,10 +115,14 @@
                                           <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                                         </button>
                                       </form>
+                                    <form action="/wishlist" method="POST" style="float: right;">
+                                        <input type="hidden" name="bookId" value="<%= book._id %>">
+                                        <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                          <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f; float: right;">favorite</span>
+                                        </button>
+                                      </form>
                                       
-                                    <a href="/wishlist/<%= book._id %>" class="text-decoration-none">
-                                        <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f; float: right;">favorite</span>
-                                    </a>
+                                    
                                     
                                 </div></a>
                                

@@ -159,7 +159,7 @@ const deleteAddress=async(req,res)=>{
 
         await Address.findByIdAndDelete(addressId);
         return res.json({ success: true, message: "Username updated successfully" });
-       // res.status(200).send("Address deleted");
+    
         
     } catch (error) {
         res.status(500).send("Error deleting address");

@@ -107,8 +107,9 @@ const loadcheckout = async (req, res) => {
               ]
            
         });
+        const shippingCharge=50
         
-        const finalTotal=subtotal+tax
+        const finalTotal=subtotal+tax+shippingCharge
 
     
         
@@ -118,7 +119,8 @@ const loadcheckout = async (req, res) => {
             cartItems,
             addresses,
             subtotal,
-            tax,            
+            tax,
+            shippingCharge,            
             finalTotal,
             coupons,
             session: req.session
@@ -172,8 +174,9 @@ const buynow=async(req,res)=>{
 
          const subtotal=discountedPrice;
          const tax=subtotal*0.05;
+         const shippingCharge=50;
          
-         const finalTotal=subtotal+tax
+         const finalTotal=subtotal+tax+shippingCharge
          req.session.subtotal = subtotal;
          
 
@@ -215,6 +218,7 @@ const buynow=async(req,res)=>{
             addresses,
             subtotal,
             tax,
+            shippingCharge,
             finalTotal,
             coupons,
             session:req.session
@@ -258,7 +262,8 @@ const couponDiscount=async(req,res)=>{
         }
 
         const tax = subtotal * 0.05;
-        const finalTotal = subtotal + tax - result.discount;
+        const shippingCharge=50
+        const finalTotal = subtotal + tax+shippingCharge - result.discount;
 
     
         req.session.appliedCoupon = {
@@ -287,8 +292,9 @@ console.log('remove called')
 
     
     const subtotal = req.session.subtotal || 0;
+    const shippingCharge=50;
     const tax = subtotal * 0.05;
-    const finalTotal = subtotal + tax;
+    const finalTotal = subtotal + tax+shippingCharge;
 
     
     res.json({
