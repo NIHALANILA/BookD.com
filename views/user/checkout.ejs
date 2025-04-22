@@ -499,6 +499,7 @@ function initPlaceOrder(){
         });
 
         const response = await res.json();
+        console.log("Received backend response:", response); 
 
         if (res.ok && response.success) {
             if (data.paymentMethod === 'online') {
@@ -523,6 +524,8 @@ function initPlaceOrder(){
 
 
 function initiateRazorpayPayment(response) {
+
+  const savedOrderId = response.savedOrderId; 
     const options = {
         key: response.key,  
         amount: response.amount,  
@@ -532,8 +535,8 @@ function initiateRazorpayPayment(response) {
         description: "Order payment",
         image: "path_to_logo",  
         handler: function (paymentResponse) {
-            
-            verifyPayment(paymentResponse, response.savedOrderId);
+          console.log("Payment Response: ", paymentResponse);
+            verifyPayment(paymentResponse, savedOrderId);
         },
         prefill: {
             name: response.customerName,
@@ -541,17 +544,39 @@ function initiateRazorpayPayment(response) {
             contact: response.customerPhone
         },
         notes: {
-            address: response.customerAddress
+            address: response.customerAddress,
+            order_id: savedOrderId
         }
     };
 
     const razorpay = new Razorpay(options);
+
+      // Handle payment failure
+      razorpay.on('payment.failed', async function (response) {
+
+         // Send failure info to server
+        await fetch('/payment-failure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            orderId: savedOrderId,
+            reason: response.error.description || "Payment failed"
+        })
+    });
+        
+
+        window.location.href = `/payment-failure?orderId=${savedOrderId}`; 
+        
+    });
+
     razorpay.open();
 }
 
 
 async function verifyPayment(paymentResponse, savedOrderId) {
     try {
+      console.log("Redirecting with savedOrderId:", savedOrderId);
+
         const res = await fetch(`/verify-payment`, {
             method: 'POST',
             headers: {
@@ -568,10 +593,12 @@ async function verifyPayment(paymentResponse, savedOrderId) {
         if (result.success) {
             window.location.href = `/orders/success/${savedOrderId}`;
         } else {
-            alert("Payment verification failed.");
+          window.location.href = `/order-failure?orderId=${savedOrderId}`;
+          console.log("save order id is:",savedOrderId)
         }
     } catch (error) {
         console.error("Error verifying payment:", error);
+        window.location.href = `/order-failure?orderId=${savedOrderId}`;
     }
 }
 

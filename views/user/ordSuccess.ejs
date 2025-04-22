@@ -113,8 +113,9 @@
                 </a>
                 <p><strong>Order ID:</strong> #<%= order.orderId %></p>
                 <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                <p><strong>Order Status:</strong> <%= order.status %></p>
                 <p><strong>Payment Method:</strong> 
-                    <% if (order.paymentId === 'cod') { %> Cash on Delivery <% } else { %> Paid Online <% } %>
+                    <%= order.paymentMethod %>
                 </p>
                 <p><strong>Total Quantity:</strong> <%= order.orderItems.length %></p>
                 <p><strong>Total Amount:</strong> ₹<%= order.total %></p>

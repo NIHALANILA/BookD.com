@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Failed</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container text-center mt-5">
+    
+    <h2 class="mt-4">Payment Failed!</h2>
+    <p>Oops! Something went wrong during the transaction.</p>
+    <div class="mt-3">
+      
+      <a href="/orders/view/<%= orderId %>" class="btn btn-secondary">View Order Details</a>
+      
+      <a href="#" id="retryBtn" data-orderid="<%= orderId %>" class="btn btn-warning">Retry Payment</a>
+
+    </div>
+  </div>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+
+const retryBtn = document.getElementById("retryBtn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", async function(e) {
+      e.preventDefault();
+      const orderId = retryBtn.getAttribute("data-orderid");
+      console.log("Retry clicked with orderId:", orderId);
+      await retryPayment(orderId);
+    });
+  } else {
+    console.log("Retry button not found ❌");
+  }
+
+
+   async function retryPayment(orderId) {
+      console.log("Retry button clicked with orderId:", orderId);
+  try {
+    const res = await fetch(`/retry-payment/${orderId}`);
+    const response = await res.json();
+
+    if (response.success) {
+      console.log('retry payment response:',response)
+      initiateRazorpayPayment(response); // Use the same existing function
+    } else {
+      alert("Retry failed. Please try again later.");
+    }
+  } catch (error) {
+    console.error("Error during retry:", error);
+  }
+}
+
+
+
+function initiateRazorpayPayment(response) {
+
+const savedOrderId = response.savedOrderId; 
+  const options = {
+      key: response.key,  
+      amount: response.amount,  
+      currency: 'INR',
+      order_id: response.razorpayOrderId,  
+      name: response.customerName,
+      description: "Order payment",
+      image: "path_to_logo",  
+      handler: function (paymentResponse) {
+        console.log("Payment Response: ", paymentResponse);
+          verifyPayment(paymentResponse, savedOrderId);
+      },
+      prefill: {
+          name: response.customerName,
+          email: response.customerEmail,
+          contact: response.customerPhone
+      },
+      notes: {
+          address: response.customerAddress,
+          order_id: savedOrderId
+      }
+  };
+
+  const razorpay = new Razorpay(options);
+
+    // Handle payment failure
+    razorpay.on('payment.failed', async function (response) {
+
+       // Send failure info to server
+      await fetch('/payment-failure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+          orderId: savedOrderId,
+          reason: response.error.description || "Payment failed"
+      })
+  });
+      
+
+      window.location.href = `/payment-failure?orderId=${savedOrderId}`; 
+      
+  });
+
+  razorpay.open();
+}
+
+
+async function verifyPayment(paymentResponse, savedOrderId) {
+  try {
+    console.log("Redirecting with savedOrderId:", savedOrderId);
+
+      const res = await fetch(`/verify-payment`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              razorpayOrderId: paymentResponse.razorpay_order_id,
+              paymentId: paymentResponse.razorpay_payment_id,
+              signature: paymentResponse.razorpay_signature,
+              orderId: savedOrderId
+          })
+      });
+      const result = await res.json();
+      if (result.success) {
+          window.location.href = `/orders/success/${savedOrderId}`;
+      } else {
+        window.location.href = `/order-failure?orderId=${savedOrderId}`;
+        console.log("save order id is:",savedOrderId)
+      }
+  } catch (error) {
+      console.error("Error verifying payment:", error);
+      window.location.href = `/order-failure?orderId=${savedOrderId}`;
+  }
+}
+
+
+  </script>
+</body>
+</html>

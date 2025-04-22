@@ -14,6 +14,7 @@ const Coupon=require('../../models/couponSchema')
 const {applyCoupon}=require('../../helpers/couponHelper')
 const razorpayInstance=require('../../helpers/razorpay')
 const crypto = require('crypto');
+const { success } = require( '../../middleware/auth' );
 
 
 
@@ -438,6 +439,8 @@ const placeOrder = async (req, res) => {
 
         if (paymentMethod === "online") {
             try {
+
+                console.log("Saved Order ID:", savedOrder._id);
               
              //follow razorpay verification -status will be default value-initiated
               const razorpayOrder = await razorpayInstance.orders.create({
@@ -446,7 +449,7 @@ const placeOrder = async (req, res) => {
                 receipt: `order_rcptid_${Date.now()}`
               });
           
-              return res.json({
+              return res.status(200).json({
                 success: true,
                 razorpayOrderId: razorpayOrder.id,
                 key: 'rzp_test_gb3HG6N5Igmh50',
@@ -456,6 +459,9 @@ const placeOrder = async (req, res) => {
                 customerPhone: userId.phone,
                 amount: razorpayOrder.amount
               });
+
+              
+
           
             } catch (error) {
               console.error("Error in online payment setup:", error);
@@ -718,7 +724,83 @@ const downloadInvoice = async (req, res) => {
 };
 
 
+const orderFail=async(req,res)=>{
+    const userId=await checkUserSession(req);
+    if(!userId) return res.redirect('/login')
+        const orderId=req.query.orderId
+
+    if (!orderId) {
+        return res.status(400).send("Order ID is missing.");
+    }
+    console.log(orderId)
+    res.render('paymentFail',{orderId})
+}
+
+const paymentFail=async(req,res)=>{
+    const{orderId}=req.body;
+    try {
+        await Order.findByIdAndUpdate(orderId,{status:"Payment Failed"})
+        res.json({success:true})
+    } catch (error) {
+        console.error('failed payment to mark as payment failed',error)
+        res.status(500).json({success:false,message:"internal server error"})
+    }
+}
+
+
+const retryPayment = async (req, res) => {
+    console.log('retry payment calling');
+    try { 
+        console.log(req.params.orderId)
+        const order = await Order.findById(req.params.orderId);
+        
+        console.log(order.status)
+        
+        if (!order || order.status !== "Payment Failed") {
+            return res.redirect('/');
+        }
+
+        
+        if (!order.netAmount || order.netAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid amount" });
+        }
+
+        
+        const razorpayOrder = await razorpayInstance.orders.create({
+            amount:  order.netAmount * 100 , 
+            currency: "INR",
+            receipt: `retry_${order._id.toString().substring(0, 10)}_${Date.now()}`,
+        });
+
+        
+        if (!razorpayOrder || razorpayOrder.status !== "created") {
+            return res.status(500).json({ success: false, message: "Failed to create Razorpay order" });
+        }
+
+        
+        
+        
+        res.json({
+            success: true,
+            key: 'rzp_test_gb3HG6N5Igmh50',
+            amount: razorpayOrder.amount,
+            razorpayOrderId: razorpayOrder.id,
+            savedOrderId: order._id,
+            customerName: order.customerName,
+            customerEmail: order.customerEmail,
+            customerPhone: order.customerPhone,
+            customerAddress: order.customerAddress,
+        });
+
+    } catch (error) {
+        console.error("Error during retry payment:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
 
 
 
-module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,couponDiscount,removeCoupon,verifyPayment}
+
+
+module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,
+    couponDiscount,removeCoupon,verifyPayment,orderFail,paymentFail,retryPayment}
