@@ -18,6 +18,7 @@ const { success } = require( '../../middleware/auth' );
 
 
 
+
 const loadcheckout = async (req, res) => {
     try {
         const user = await checkUserSession(req);
@@ -336,6 +337,7 @@ const placeOrder = async (req, res) => {
         if (paymentMethod !== "cod" && paymentMethod!=="online"&& paymentMethod!=="wallet") {
             return res.status(400).json({ message: 'Invalid payment method' });
         }
+       
 
         let orderItems = [];
         let subtotal = 0;
@@ -362,6 +364,9 @@ const placeOrder = async (req, res) => {
             subtotal = totalPrice;
             tax = subtotal * 0.05; 
             
+            if(bookQuantity>bookDetails.stock){
+                return res.status(404).json({message:'out of stock'})
+            }
 
             orderItems.push({
                 bookId: bookDetails._id,
@@ -389,6 +394,10 @@ const placeOrder = async (req, res) => {
                 const offerId=offer?offer.offerId:null;
                 const totalPrice=item.quantity*finalPrice;
                 const discount=offer ? offer.discount:0
+
+                if(item.quantity>item.bookId.stock){
+                    return res.status(400).json({message:"out of stock"})
+                }
             
 
             orderItems.push({
@@ -643,10 +652,10 @@ const orderCancel=async(req,res)=>{
 
 const returnOrder=async(req,res)=>{
     try {
-        console.log("Session in return order:", req.session); 
+        
 
         const { returnReason } = req.body;
-        console.log("Return Reason:", returnReason);
+        
 
         if (!returnReason) {
             return res.status(400).json({ success: false, message: "Return reason is required" });
@@ -749,12 +758,12 @@ const paymentFail=async(req,res)=>{
 
 
 const retryPayment = async (req, res) => {
-    console.log('retry payment calling');
+    
     try { 
-        console.log(req.params.orderId)
+        
         const order = await Order.findById(req.params.orderId);
         
-        console.log(order.status)
+        
         
         if (!order || order.status !== "Payment Failed") {
             return res.redirect('/');
@@ -799,8 +808,139 @@ const retryPayment = async (req, res) => {
 };
 
 
+const cancelItem=async(req,res)=>{
+    const {itemId,reason}=req.body
+    
+    const orderId = req.params.id;
+   
+
+    try {
+        const order=await Order.findOne({_id:orderId}).populate("couponId")
+
+        if (!order) {
+           
+            return res.status(404).send("Order not found.");
+          }
+        const item= order.orderItems.id(itemId)
+
+        if (!item) {
+            
+            return res.status(404).send("Item not found in order.");
+          }
+
+        if(!item||item.status!=='Ordered'){
+            return res.status(400).json({success:false,message:"invalid or already processed item"})
+
+        }
+        if(item.price<order.discount){
+            return res.status(404).json({success:false,message:"this item is not refundable from this order due to coupon condition"})
+        }
 
 
 
+
+        item.status='Cancelled';
+        item.cancelReason=reason;
+        
+        await Books.updateOne({_id:item.bookId},{$inc:{stock:item.quantity}})
+
+        let cancelTotal=item.totalPrice;
+        let remainingTotal=0;
+        let proportionalDiscount=0;
+
+        for(const i of order.orderItems){
+            if(i.status==="Ordered"){                   //recalculating and updating order total and other related fields(refer statusedit in admin side-same steps here)
+                remainingTotal+=i.totalPrice;
+            }
+        }
+        
+        const coupon=order.couponId;
+
+        if(coupon){
+
+           
+            const { discountType, discountValue, minimumPrice } = coupon;
+
+            if(remainingTotal<minimumPrice){
+                order.couponId = null; 
+                proportionalDiscount=order.discount;
+            }
+            else{
+                if(discountType==="percentage"){
+                    proportionalDiscount=(cancelTotal*discountValue)/100
+                }
+                else if(discountType==="fixed"){
+                    const ratio=cancelTotal/order.total;
+                    proportionalDiscount=ratio*discountValue
+                }
+            }
+        }
+
+        if(order.paymentMethod!=="cod"){
+            const refundAmount=cancelTotal-proportionalDiscount;     //if payment was through online or wallet 
+            await refundToWallet(order.userId,refundAmount)
+        }
+         
+        order.total=remainingTotal;
+        order.cancelledItems++;
+        order.discount=order.discount-proportionalDiscount;
+        order.netAmount=remainingTotal+order.tax+order.shippingCharge-order.discount
+        const allItemsCancelled = order.orderItems.every(item => item.status ==="Cancelled");
+
+        if (allItemsCancelled) {
+            order.status = "cancelled";    //if all items individually cancelled update also the order  as canceled
+            
+          }
+
+        await order.save()
+
+
+       
+
+        res.json({success:true})
+    } catch (error) {
+
+        console.error(error)
+        
+    }
+}
+
+const returnItem=async(req,res)=>{
+    try {
+
+         console.log('return item called')
+        const orderId=req.params.id;
+        const{itemId,reason}=req.body;
+        console.log(orderId)
+        console.log(req.body)
+
+        const order= await Order.findById({_id:orderId})
+
+        if(!order){
+            return res.status(404).send('order not found')
+        }
+
+        const item= order.orderItems.id(itemId)
+
+        if(!item||item.status!=="Ordered"){
+            return res.status(404).json({success:false,message:"invalid or already processed item"})
+
+        }
+        //not allow the book which price fall below coupon discount
+        if(item.price<order.discount){
+            return res.status(404).json({success:false,message:"this item is not refundable from this order due to coupon condition"})
+        }
+        
+        item.status="Requested",
+        item.returnReason=reason;
+        order.status="requested"
+
+        await order.save()
+
+        res.json({success:true})
+    } catch (error) {
+        console.error(error)
+    }
+}
 module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,
-    couponDiscount,removeCoupon,verifyPayment,orderFail,paymentFail,retryPayment}
+    couponDiscount,removeCoupon,verifyPayment,orderFail,paymentFail,retryPayment,cancelItem,returnItem}

@@ -102,8 +102,10 @@ router.post('/cart/update',cartController.updateCart)
 
 router.get('/orders',auth.loadCommonData,orderController.orderList)
 router.post('/orders/cancel/:id',orderController.orderCancel)
+router.post('/orders/cancel-item/:id',orderController.cancelItem)
 router.get('/orders/view/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.view)
 router.post('/orders/return/:id',orderController.returnOrder)
+router.post('/orders/return-item/:id',orderController.returnItem)
 router.get('/orders/invoice/:id', orderController.downloadInvoice);
 
 //coupon related

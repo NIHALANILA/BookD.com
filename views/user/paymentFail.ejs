@@ -5,6 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment Failed</title>
   <link rel="stylesheet" href="/style.css">
+  <style>
+    /* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container for centering */
+.container {
+  max-width: 600px;
+  margin: 100px auto;
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Heading */
+h2 {
+  color: #dc3545; /* Bootstrap danger color */
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+/* Paragraph */
+p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 6px;
+  margin: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Button Colors */
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: scale(1.05);
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+  transform: scale(1.05);
+}
+
+  </style>
 </head>
 <body>
   <div class="container text-center mt-5">
@@ -31,13 +99,11 @@ const retryBtn = document.getElementById("retryBtn");
       console.log("Retry clicked with orderId:", orderId);
       await retryPayment(orderId);
     });
-  } else {
-    console.log("Retry button not found ❌");
-  }
+  } 
 
 
    async function retryPayment(orderId) {
-      console.log("Retry button clicked with orderId:", orderId);
+      
   try {
     const res = await fetch(`/retry-payment/${orderId}`);
     const response = await res.json();
@@ -83,10 +149,10 @@ const savedOrderId = response.savedOrderId;
 
   const razorpay = new Razorpay(options);
 
-    // Handle payment failure
+    
     razorpay.on('payment.failed', async function (response) {
 
-       // Send failure info to server
+      
       await fetch('/payment-failure', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

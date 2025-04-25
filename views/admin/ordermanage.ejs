@@ -63,6 +63,7 @@
                           <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
                           <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
                           <option value="requested" <%= order.status === 'requested' ? 'selected' : '' %>>Requested</option>
+                          <option value="Partial return" <%= order.status === 'Partial return' ? 'selected' : '' %>>Partial Return</option>
                         </select>
                         <button type="button" class="edit-btn btn-update" style="background-color: #3498db;">Update</button>
                       </td>

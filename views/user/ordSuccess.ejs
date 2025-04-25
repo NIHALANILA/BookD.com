@@ -117,7 +117,7 @@
                 <p><strong>Payment Method:</strong> 
                     <%= order.paymentMethod %>
                 </p>
-                <p><strong>Total Quantity:</strong> <%= order.orderItems.length %></p>
+                <p><strong>Total Items:</strong> <%= order.orderItems.length-(order.cancelledItems||0)-(order.returnedItems||0) %></p>
                 <p><strong>Total Amount:</strong> ₹<%= order.total %></p>
                 <p><strong>Discount:</strong> ₹<%= order.discount %></p>
                 <p><strong>Tax:</strong> ₹<%= order.tax %></p>

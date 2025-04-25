@@ -92,6 +92,17 @@
     transition: 0.3s;
 }
 
+.btnitem{
+  display: inline-block;
+    padding: 2px 4px;
+    border-radius: 5px;
+    text-decoration: none;
+    ;
+    cursor: pointer;
+    transition: 0.3s;
+
+}
+
 .btn-primary {
     background-color: #007bff;
     color: white;
@@ -170,14 +181,18 @@ textarea {
 <%-include("../../views/partials/user/header")%>
 
 <div class="containerA">
-    <h2 class="mb-3">My Orders</h2>
+    
+    <h4 class="mb-3"><strong>My Orders</strong></h4>
 
     <% if (orders.length > 0) { %>
         <% orders.forEach(order => { %>
             <div class="containerB">
                 <div class="success-box">
-                    <h5>Order ID: <%= order.orderId %></h5>
-                    <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                    
+                        <p><strong>Order ID: </strong><%= order.orderId %></p>
+                        <p ><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                    
+                   
                     <p><strong>Status:</strong> 
                         <% if (order.status === 'processing') { %> 
                             <span class="badge bg-warning">Processing</span> 
@@ -185,8 +200,12 @@ textarea {
                             <span class="badge bg-success">Delivered</span> 
                         <% } else if (order.status === 'requested') { %> 
                             <span class="badge bg-success">Requested</span> 
+                        <% } else if (order.status === 'Payment Failed') { %> 
+                            <span class="badge bg-danger">Payment Failed</span> 
+                        <% } else if (order.status === 'Partial return') { %> 
+                            <span class="badge bg-danger">Partial return </span> 
                         <% } else { %> 
-                            <span class="badge bg-danger">Cancelled</span> 
+                            <span class="badge bg-primary">Cancelled</span> 
                         <% } %>
                     </p>
                     <p><strong>Total Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
@@ -194,11 +213,29 @@ textarea {
                     <h5>Items:</h5>
                     <ul>
                         <% order.orderItems.forEach(item => { %>
-                            <li>
-                                <strong><%= item.bookId.title %></strong> - Quantity: <%= item.quantity %>
-                            </li>
+                          <li class="mt-3 mb-3">
+                            <strong><%= item.bookId.title %></strong> - Quantity: <%= item.quantity %>
+                           
+                      
+                            <% if (order.status === 'processing') { %>
+                              <% if (item.status === 'Cancelled') { %>
+                                <button class="btn btn-secondary btn-sm btnitem" disabled>Cancelled</button>
+                              <% } else { %>
+                                <button class="btn btn-danger btn-sm cancel-item btnitem" data-orderid="<%= order._id %>" data-itemid="<%= item._id %>">Cancel Item</button>
+                              <% } %>
+                            <% } %>
+                      
+                            <% if (order.status === 'delivered' || order.status === 'requested'||order.status==='Partial return' ) { %>
+                              <% if (item.status === 'Returned'||item.status==='Requested') { %>
+                                <button class="btn btn-secondary btn-sm btnitem" disabled>Returned</button>
+                              <% } else { %>
+                                <button class="btn btn-warning btn-sm return-item btnitem" data-orderid="<%= order._id %>" data-itemid="<%= item._id %>">Return Item</button>
+                              <% } %>
+                            <% } %>
+                          </li>
                         <% }) %>
-                    </ul>
+                      </ul>
+                      
 
                     <!-- View Order Details -->
                     <div class="buttons">
@@ -244,7 +281,30 @@ textarea {
         <button class="closeModal">Close</button>
     </div>
 </div>
-
+<!-- Cancel Item Modal -->
+<div id="cancelItemModal" class="modal">
+    <div class="modal-content">
+      <h3>Cancel Item</h3>
+      <input type="hidden" id="cancelItemOrderId">
+      <input type="hidden" id="cancelItemId">
+      <textarea id="cancelItemReason" placeholder="Enter reason (optional)"></textarea>
+      <button id="confirmCancelItem" class="btn btn-danger">Confirm Cancel</button>
+      <button class="closeModal">Close</button>
+    </div>
+  </div>
+  
+  <!-- Return Item Modal -->
+  <div id="returnItemModal" class="modal">
+    <div class="modal-content">
+      <h3>Return Item</h3>
+      <input type="hidden" id="returnItemOrderId">
+      <input type="hidden" id="returnItemId">
+      <textarea id="returnItemReason" placeholder="Enter reason (mandatory)"></textarea>
+      <button id="confirmReturnItem" class="btn btn-warning">Confirm Return</button>
+      <button class="closeModal">Close</button>
+    </div>
+  </div>
+  
 
 <%-include("../../views/partials/user/footer")%>
   <script src="js/jquery.min.js"></script>
@@ -254,6 +314,9 @@ textarea {
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <!-- Add this in your HTML head or before the closing body tag -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <script src="js/script.min.js"></script>
   <script>
    document.addEventListener('DOMContentLoaded',function(){
@@ -333,10 +396,109 @@ document.querySelectorAll(".closeModal").forEach(button => {
     button.addEventListener("click", function () {
         document.getElementById("cancelModal").style.display = "none";
         document.getElementById("returnModal").style.display = "none";
+        document.getElementById("cancelItemModal").style.display = "none";
+        document.getElementById("returnItemModal").style.display = "none";
     });
 });
 
-   
+
+// Handle cancel item button click
+document.querySelectorAll(".cancel-item").forEach(button => {
+  button.addEventListener("click", function () {
+    document.getElementById("cancelItemOrderId").value = this.dataset.orderid;
+    document.getElementById("cancelItemId").value = this.dataset.itemid;
+    document.getElementById("cancelItemModal").style.display = "flex";
+  });
+});
+
+document.getElementById("confirmCancelItem").addEventListener("click", function () {
+  const orderId = document.getElementById("cancelItemOrderId").value;
+  const itemId = document.getElementById("cancelItemId").value;
+  const reason = document.getElementById("cancelItemReason").value;
+
+  fetch(`/orders/cancel-item/${orderId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ itemId, reason })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+       // alert("Item cancelled successfully.");
+        //location.reload();
+        Swal.fire({
+          icon: 'success',
+          title: 'Cancelled!',
+          text: data.message || "Item Cancelled successfully."
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        //alert("Failed to cancel item.");
+        Swal.fire({
+          icon: 'warning',
+          title: 'Cancel Failed',
+          text: data.message || "Failed to return item."
+        });
+      }
+    })
+    .catch(err => {
+      console.log("Cancel Item Error:", err);
+      alert("Something went wrong.");
+    });
+});
+
+// Handle return item button click
+document.querySelectorAll(".return-item").forEach(button => {
+  button.addEventListener("click", function () {
+    document.getElementById("returnItemOrderId").value = this.dataset.orderid;
+    document.getElementById("returnItemId").value = this.dataset.itemid;
+    document.getElementById("returnItemModal").style.display = "flex";
+  });
+});
+
+document.getElementById("confirmReturnItem").addEventListener("click", function () {
+  const orderId = document.getElementById("returnItemOrderId").value;
+  const itemId = document.getElementById("returnItemId").value;
+  const reason = document.getElementById("returnItemReason").value;
+
+  fetch(`/orders/return-item/${orderId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ itemId, reason })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        //alert("Item returned successfully.");
+        //location.reload();
+        Swal.fire({
+          icon: 'success',
+          title: 'Returned!',
+          text: data.message || "Item returned successfully."
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        //alert("Failed to return item.");
+        Swal.fire({
+          icon: 'warning',
+          title: 'Return Failed',
+          text: data.message || "Failed to return item."
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Return Item Error:", err);
+      //alert("Something went wrong.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: "Something went wrong."
+      });
+    });
+});
+
    
   </script>
   

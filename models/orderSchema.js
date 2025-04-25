@@ -39,7 +39,7 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["initiated","processing", "delivered", "cancelled","shipped","returned","requested","Payment Failed"],
+        enum: ["initiated","processing", "delivered", "cancelled","shipped","returned","requested","Payment Failed","Partial return"],
         default: "initiated"
     },
     shippingCharge: {
@@ -55,20 +55,29 @@ const orderSchema = new Schema({
         type: String,
         default: null
     },
+    cancelledItems:{
+        type:Number,
+        default:0
+
+    },
+    returnedItems:{
+        type:Number,
+        default:0
+    },
     tax: {
         type: Number,
         default: 0
     },
-    total: {
+    total: {                      //sum of totalPrice of all books
         type: Number,
         required: true
     },
-    netAmount: {
+    netAmount: {                //total payed amount by customer (tax,discount,shippingcharge -included)
         type: Number,
         required: true
     },
     discount: {
-        type: Number,
+        type: Number,         //reduced price by applying coupon on order
         default: 0
     },
     orderItems: [{
@@ -90,14 +99,21 @@ const orderSchema = new Schema({
             ref: 'Offer',
             default: null
         },
-        discount: {
+        discount: {             //price reduced by applying offer
             type: Number,
             default: 0
         },
-        totalPrice: {
+        totalPrice: {            //price of  a book a fter applied an offer 
             type: Number,
             required: true
-        }
+        },
+        status: {
+            type: String,
+            enum: ['Ordered', 'Cancelled', 'Returned',"Requested"],
+            default: 'Ordered'
+          },
+          cancelReason: { type: String, default: "" },
+          returnReason: { type: String, default: "" }
     }]
 }, { timestamps: true });
 
