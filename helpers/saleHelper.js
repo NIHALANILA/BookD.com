@@ -4,10 +4,10 @@ const moment = require('moment');
 async function getSalesReport({ filterType, fromDate, toDate }) {
   try {
     let matchStage = {
-      status: { $ne: 'cancelled' }
+      status: {$in: ['delivered', 'requested','Partial return'] }
     };
 
-    if (filterType) {
+    if (filterType&& filterType !== 'all') {
       let startDate, endDate;
 
       switch (filterType) {
@@ -36,7 +36,7 @@ async function getSalesReport({ filterType, fromDate, toDate }) {
           }
           break;
         default:
-          throw new Error("Invalid filterType");
+          console.warn("Unknown filterType, ignoring date filter")
       }
 
       matchStage.createdAt = { $gte: startDate, $lte: endDate };
@@ -65,35 +65,38 @@ async function getSalesReport({ filterType, fromDate, toDate }) {
               }
             }
           ],
-          bestSellingBooks: [
-            { $unwind: "$orderItems" },
-            {
-              $group: {
-                _id: "$orderItems.bookId",
-                totalQuantitySold: { $sum: "$orderItems.quantity" },
-                totalOfferdiscount: { $sum: "$orderItems.discount" }
-              }
-            },
-            { $sort: { totalQuantitySold: -1 } },
-            { $limit: 5 },
+          
+          orderDetails: [
             {
               $lookup: {
-                from: "books",
-                localField: "_id",
-                foreignField: "_id",
-                as: "bookDetails"
+                from: "users",   
+                localField: "userId",  
+                foreignField: "_id",    
+                as: "userDetails"
               }
             },
-            { $unwind: "$bookDetails" },
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },  // Unwind userDetails
             {
               $project: {
-                _id: 1,
-                totalQuantitySold: 1,
-                totalOfferdiscount: 1,
-                bookName: "$bookDetails.title"
+                userId: 1,
+                status: 1,
+                orderItems: 1,
+                discount: 1,
+                netAmount:1,
+                paymentMethod:1,
+                createdAt: 1,
+                updatedAt: 1,
+                username:"$userDetails.username" , 
+                email:"$userDetails.email"  
               }
+            },
+
+            { 
+              $sort: { createdAt: -1 }  
             }
-          ]
+            
+          ],
+         
         }
       }
     ]);
@@ -109,5 +112,5 @@ async function getSalesReport({ filterType, fromDate, toDate }) {
     throw error;
   }
 }
-
+ 
 module.exports = { getSalesReport };

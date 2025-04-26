@@ -1,4 +1,96 @@
-<%- include("../../views/partials/admin/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Report</title>
+  <style>
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h2, h4 {
+  color: #333;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+th {
+  background-color: #f5f5f5;
+}
+
+p {
+  margin: 8px 0;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Responsive for small screens */
+@media screen and (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  
+  th {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  td {
+    position: relative;
+    padding-left: 50%;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+  
+  td:before {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+  }
+  
+  td:nth-of-type(1):before { content: "Book Name"; }
+  td:nth-of-type(2):before { content: "Quantity"; }
+  td:nth-of-type(3):before { content: "Price"; }
+  td:nth-of-type(4):before { content: "Discount"; }
+  td:nth-of-type(5):before { content: "Total"; }
+  td:nth-of-type(6):before { content: "Status"; }
+}
+
+    </style>
+ 
+
+
+</head>
+<%-include("../../views/partials/admin/header")%>
+ 
 
 
 <h2>Order Details</h2>
@@ -8,6 +100,11 @@
 <p><strong>Order ID:</strong> <%= order.orderId %></p>
 <p><strong>Status:</strong> <%= order.status %></p>
 <p><strong>Order Date:</strong> <%= order.orderDate.toLocaleString() %></p>
+<p><strong>Status:</strong> <%= order.status %></p>
+<% if (order.status == "requested") { %>
+  <p style="color:red;"><strong>Please approve this return (Order Level)</strong></p>
+<% } %>
+
 
 <% if (order.deliveryDate) { %>
   <p><strong>Delivery Date:</strong> <%= order.deliveryDate.toLocaleString() %></p>
@@ -42,6 +139,8 @@
       <th>Price</th>
       <th>Discount</th>
       <th>Total</th>
+      <th>Status</th>
+
     </tr>
   </thead>
   <tbody>
@@ -52,6 +151,15 @@
         <td>₹<%= item.price %></td>
         <td>₹<%= item.discount %></td>
         <td>₹<%= item.totalPrice %></td>
+        <td>
+          <%= item.status %>
+          <% if (item.status == "requested") { %>
+            <br><span style="color:red;">Please approve this return (Item Level)</span>
+            <% if (item.returnReason) { %>
+              <br><strong>Return Reason:</strong> <%= item.returnReason %>
+            <% } %>
+          <% } %>
+        </td>
       </tr>
     <% }) %>
   </tbody>
@@ -59,12 +167,12 @@
 
 <hr>
 <h4> Payment Summary</h4>
-<p><strong>Subtotal:</strong> ₹<%= order.total %></p>
+<p><strong>Subtotal:</strong> ₹<%= order.total.toFixed(2) %></p>
 <p><strong>Shipping:</strong> ₹<%= order.shippingCharge %></p>
-<p><strong>Tax:</strong> ₹<%= order.tax %></p>
+<p><strong>Tax:</strong> ₹<%= order.tax.toFixed(2) %></p>
 <p><strong>Discount:</strong> ₹<%= order.discount %></p>
 <hr>
-<p><strong>Net Amount:</strong> ₹<%= order.netAmount %></p>
+<p><strong>Net Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
 
 <a href="/admin/orders"><button>⬅ Back</button></a>
 </body>

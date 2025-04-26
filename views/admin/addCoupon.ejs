@@ -4,11 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <style>
+      /* General form styling */
+#couponForm {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Labels styling */
+#couponForm label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Inputs, Selects styling */
+#couponForm input,
+#couponForm select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+/* Submit Button */
+#couponForm button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#couponForm button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  #couponForm {
+    padding: 15px;
+  }
+
+  #couponForm input,
+  #couponForm select,
+  #couponForm button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
+    </style>
 </head>
 <body>
     
-</body>
-</html>
+
+
 <%-include("../../views/partials/admin/header")%>
 
 <section class="content">
@@ -17,7 +82,7 @@
   
     <form  id="couponForm" class="form-group">
       <label for="code">Coupon Code:</label>
-      <input type="text" name="code" required class="form-control">
+      <input type="text" name="code"  class="form-control">
   
       <label for="discountType">Discount Type:</label>
       <select name="discountType" class="form-select" required>
@@ -26,7 +91,7 @@
       </select>
   
       <label for="discountValue">Discount Value:</label>
-      <input type="number" name="discountValue" required class="form-control">
+      <input type="number" name="discountValue"  class="form-control">
   
       <label for="minimumPrice">Minimum Purchase Price </label>
       <input type="number" name="minimumPrice" class="form-control">
@@ -42,7 +107,7 @@
       
   
       <label for="expireDate">Expiry Date:</label>
-      <input type="date" name="expireDate" required class="form-control">
+      <input type="date" name="expireDate"  class="form-control">
       <label for="expireDate">Is Active:</label>
       <select name="isActive" id="isActive">
         <option value="yes">yes</option>

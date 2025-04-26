@@ -313,9 +313,9 @@ form.addEventListener("submit", async function (e) {
 
   // Discount Value
   const discountValue = document.getElementById("discount_value").value;
-  if (!discountValue || discountValue <= 0) {
+  if (!discountValue || discountValue <= 0||discountValue>100) {
     e.preventDefault();
-    await Swal.fire("Validation Error", "Enter a valid Discount Value greater than 0", "error");
+    await Swal.fire("Validation Error", "Enter a valid Discount Value greater than 0 less than 100", "error");
     return;
   }
 

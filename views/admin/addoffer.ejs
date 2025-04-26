@@ -298,62 +298,68 @@ function applytoSelect(){
     }
 
     applyTo.addEventListener("change", toggleSections);
-    toggleSections(); // call on page load
+    toggleSections(); 
 
     form.addEventListener("submit", async function (e) {
-      let valid = true;
       bookError.innerText = "";
 
-      // Offer Name
-      const name = document.getElementById("name").value.trim();
-      if (name === "") {
-        e.preventDefault();
-        await Swal.fire("Validation Error", "Offer Name is required", "error");
-        return;
-      }
+ 
+  const name = document.getElementById("name").value.trim();
+  const discountValue = document.getElementById("discount_value").value.trim();
+  const startDate = document.getElementById("start_date").value.trim();
+  const expireDate = document.getElementById("expire_date").value.trim();
+  const applyToValue = applyTo.value;
+  const selectedCategory = document.getElementById("category_id").value.trim();
+  const selectedBooks = document.querySelectorAll(".book-checkbox:checked");
 
-      // Discount Value
-      const discountValue = document.getElementById("discount_value").value;
-      if (!discountValue || discountValue <= 0) {
-        e.preventDefault();
-        await Swal.fire("Validation Error", "Enter a valid Discount Value greater than 0", "error");
-        return;
-      }
+  if (
+    name === "" &&
+    discountValue === "" &&
+    startDate === "" &&
+    expireDate === "" &&
+    (applyToValue === "category" ? selectedCategory === "" : selectedBooks.length === 0)
+  ) {
+    e.preventDefault();
+    await Swal.fire("Validation Error", "Please fill the form", "error");
+    return;
+  }
 
-      // Start and Expiry Dates
-      const startDate = new Date(document.getElementById("start_date").value);
-      const expireDate = new Date(document.getElementById("expire_date").value);
-      if (isNaN(startDate) || isNaN(expireDate)) {
-        e.preventDefault();
-        await Swal.fire("Validation Error", "Please select both Start and Expiry dates", "error");
-        return;
-      } else if (startDate >= expireDate) {
-        e.preventDefault();
-        await Swal.fire("Validation Error", "Expiry Date must be after Start Date", "error");
-        return;
-      }
+  
+  if (name === "") {
+    e.preventDefault();
+    await Swal.fire("Validation Error", "Offer Name is required", "error");
+    return;
+  }
 
-      // Apply To check
-      if (applyTo.value === "category") {
-        const selectedCategory = document.getElementById("category_id").value;
-        if (!selectedCategory) {
-          e.preventDefault();
-          await Swal.fire("Validation Error", "Please select a category", "error");
-          return;
-        }
-      }
+  if (!discountValue || discountValue <= 0||discountValue>=100) {
+    e.preventDefault();
+    await Swal.fire("Validation Error", "Enter a valid Discount Value greater than 0 less than 100", "error");
+    return;
+  }
 
-      if (applyTo.value === "book") {
-        const selectedBooks = document.querySelectorAll(".book-checkbox:checked");
-        if (selectedBooks.length === 0) {
-          e.preventDefault();
-          bookError.innerText = "Please select at least one book.";
-          await Swal.fire("Validation Error", "Please select at least one book", "error");
-          return;
-        }
-      }
-    });
- }
+  if (isNaN(new Date(startDate)) || isNaN(new Date(expireDate))) {
+    e.preventDefault();
+    await Swal.fire("Validation Error", "Please select both Start and Expiry dates", "error");
+    return;
+  } else if (new Date(startDate) >= new Date(expireDate)) {
+    e.preventDefault();
+    await Swal.fire("Validation Error", "Expiry Date must be after Start Date", "error");
+    return;
+  }
+
+  if (applyToValue === "category" && selectedCategory === "") {
+    e.preventDefault();
+    await Swal.fire("Validation Error", "Please select a category", "error");
+    return;
+  }
+
+  if (applyToValue === "book" && selectedBooks.length === 0) {
+    e.preventDefault();
+    bookError.innerText = "Please select at least one book.";
+    await Swal.fire("Validation Error", "Please select at least one book", "error");
+    return;
+  }
+});}
 
  
 

@@ -43,9 +43,24 @@ const addCoupon=async(req,res)=>{
     try {
         
         const{code,discountType,discountValue,minimumPrice,limit,expireDate,isActive,limitPerUser}=req.body
+        const missingFields = [];
+
+        if (!code||!code.trim()) missingFields.push('code');
+        if (!discountType) missingFields.push('discountType');
+        if (!discountValue) missingFields.push('discountValue');
+        if (!minimumPrice) missingFields.push('minimumPrice');
+        if (!limit) missingFields.push('limit');
+        if (!expireDate) missingFields.push('expireDate');
+        
+        
+        if (missingFields.length > 0) {
+          return res.status(400).json({
+                message: `these fields are missing please fill: ${missingFields.join(', ')}`
+            });
+        }
         const existcoupon= await Coupon.findOne({code:code.trim()})
         if(existcoupon){
-            res.status(400).json({ message: "already existing coupon" }); 
+           return res.status(400).json({ message: "already existing coupon" }); 
         }
 
         const coupon=new Coupon({code:code.trim().toUpperCase(),discountType,discountValue,minimumPrice,limit,expireDate,isActive,limitPerUser})

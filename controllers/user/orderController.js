@@ -424,9 +424,19 @@ const placeOrder = async (req, res) => {
         }
        
 
+        subtotal = parseFloat(subtotal.toFixed(2));
+        tax = parseFloat(tax.toFixed(2));
+        netAmount = parseFloat(netAmount.toFixed(2));
+        
+        totalDiscount = parseFloat(totalDiscount.toFixed(2));
+
        netAmount=subtotal+tax+shippingCharge-totalDiscount
        const initialStatus = paymentMethod === "online" ? "initiated" : "processing";
 
+       subtotal = parseFloat(subtotal.toFixed(2));
+        tax = parseFloat(tax.toFixed(2));
+        netAmount = parseFloat(netAmount.toFixed(2));
+        totalDiscount = parseFloat(totalDiscount.toFixed(2));
 
         
         const newOrder = new Order({
@@ -631,6 +641,7 @@ const orderCancel=async(req,res)=>{
         }
         order.status="cancelled";
         order.cancelReason = req.body.reason;
+
         await order.save()
 
         for (let item of order.orderItems) {
@@ -888,7 +899,9 @@ const cancelItem=async(req,res)=>{
         const allItemsCancelled = order.orderItems.every(item => item.status ==="Cancelled");
 
         if (allItemsCancelled) {
-            order.status = "cancelled";    //if all items individually cancelled update also the order  as canceled
+            order.status = "cancelled"; 
+             order.shippingCharge=null , 
+             order.tax=null                 //if all items individually cancelled update also the order  as canceled
             
           }
 

@@ -48,7 +48,7 @@ table thead {
 </style>
  
 
-  </style>
+
 </head>
 <%-include("../../views/partials/admin/header")%>
  
@@ -81,30 +81,64 @@ table thead {
 
   
   
-  <a href="/admin/sales/excel?<%= 'filterType=' + filterType + '&fromDate=' + from + '&toDate=' + to %>" class="down-btn" style="text-decoration: none; float: right;">Download Excel</a>
-  <a href="/admin/sales/pdf?<%= 'filterType=' + filterType + '&fromDate=' + from + '&toDate=' + to %>" class="down-btn" style="text-decoration: none; float: right;">Download PDF</a>
+  <a href="/admin/sales/excel<%= (filterType && from && to) ? ('?filterType=' + filterType + '&fromDate=' + from + '&toDate=' + to) : '' %>" class="down-btn" style="text-decoration: none; float: right;">Download Excel</a>
+
+  <a href="/admin/sales/pdf<%= (filterType && from && to) ? ('?filterType=' + filterType + '&fromDate=' + from + '&toDate=' + to) : '' %>" class="down-btn" style="text-decoration: none; float: right;">Download PDF</a>
   
-  <h2>Total Metrics</h2>
-<table class="table table-bordered table-striped book-table">
-  <thead>
+  <h2>Total Data</h2>
+
+  <table class="table table-bordered table-striped book-table">
+    <thead>
+      <tr>
+        <th>Total Ordes</th>
+        <th>Total Amount</th>
+        <th>Net Sales</th>
+        <th>Total Order Discount</th>
+        <th>Total Coupon Used</th>
+      </tr>
+    </thead>
     <tr>
-      <th>Total Ordes</th>
-      <th>Total Amount</th>
-      <th>Net Sales</th>
-      <th>Total Order Discount</th>
-      <th>Total Coupon Used</th>
+      <% result.totalMetrics.forEach(metric => { %>
+        <td><%= metric.totalOrders %></td>
+        <td><%= metric.totalAmount.toFixed(2) %></td>
+        <td><%= metric.netSales.toFixed(2) %></td>
+        <td><%= metric.totalOrderDiscount.toFixed(2) %></td>
+        <td><%= metric.totalCouponUsed %></td>
+      <% }) %>
     </tr>
-  </thead>
-  <tr>
-    <% result.totalMetrics.forEach(metric => { %>
-      <td><%= metric.totalOrders %></td>
-      <td><%= metric.totalAmount %></td>
-      <td><%= metric.netSales %></td>
-      <td><%= metric.totalOrderDiscount %></td>
-      <td><%= metric.totalCouponUsed %></td>
-    <% }) %>
-  </tr>
-</table>
+  </table>
+
+  <table class="book-table">
+    <thead>
+        <tr>
+            
+          <th>SI.No</th>
+            <th>User Email</th>  
+            <th>User Name</th> 
+            <th>Amount Paid </th> 
+            <th>Discount given </th> 
+             <th>Status</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        <% result.orderDetails.forEach((order, index) => { %>
+            <tr>
+              <td><%=  index + 1 %></td>
+                <td><%= order.email %></td>
+                <td><%= order.username %></td>
+                <td><%= order.netAmount.toFixed(2) %></td>              
+                <td><%= order.discount .toFixed(2) %></td>              
+                <td><%= order.status %></td>
+            </tr>
+        <% }); %>
+    </tbody>
+  </table>
+
+
+
+
+
 
 <h2>Status Counts</h2>
 <table class="table table-bordered table-striped book-table">
@@ -126,25 +160,7 @@ table thead {
   </tbody>
 </table>
 
-<h2>Best Selling Books</h2>
-<table class="table table-bordered table-striped book-table">
-  <thead>
-    <tr>
-      <th>Book name</th>
-      <th>Quantity Sold</th>
-      <th>Total Discount applied</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% result.bestSellingBooks.forEach(book => { %>
-      <tr>
-        <td><%= book.bookName %></td>
-        <td><%= book.totalQuantitySold %></td>
-        <td><%= book. totalOfferdiscount %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+
 
  
 </main>

@@ -13,7 +13,7 @@ const listOrders = async (req, res) => {
         const search = req.query.search || '';
         const status = req.query.status || '';
         const page = parseInt(req.query.page) || 1;
-        const perPage = 5;
+        const perPage = 10;
 
         const query = {};
 
