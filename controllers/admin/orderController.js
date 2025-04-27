@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const User=require('../../models/userSchema')
 const Address=require('../../models/addressSchema')
 const { refundToWallet } =require('../../helpers/walletHelper')
-const Coupon=require('../../models/couponSchema')
+const Coupon=require('../../models/couponSchema');
+const { success } = require( '../../middleware/auth' );
 
 
 
@@ -91,12 +92,35 @@ const statusEdit = async (req, res) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
+
+      const allowedStatusupdate={
+        processing:["delivered","shipped"],
+        shipped:["delivered"],
+        returned:[],
+        "Partial return":[],
+        cancelled:[],
+        orderRequested:["returned","rejected"],
+        itemRequested:["Partial return","rejected"],
+        rejected:["returned","Partial return"],
+        delivered:["orderRequested"]
+      }
   
       const order = await Order.findById(id).populate("couponId"); 
   
       if (!order) {
         return res.status(404).json({ success: false, message: "Order not found" });
       }
+      
+      const currentstatus=order.status;
+
+      if(!allowedStatusupdate[currentstatus].includes(status)){
+        return res.status(400).json({
+          success:false,
+          message:`con't change status from ${currentstatus} to ${status}`
+
+        })
+      }
+
   
       // in complete order return just return full amount but not shipping charge and just keep order data as it is for refarance
       if (status === "returned" && order.status !== "returned") {
@@ -131,7 +155,7 @@ const statusEdit = async (req, res) => {
         } else {
           const { discountType, discountValue, minimumPrice } = coupon;
   
-          //  Calculate remaining total (of non-returned items)
+          //recalculate the total of ramaing  books
           for (const item of order.orderItems) {
             if (item.status === "Ordered") {
               remainingTotal += item.totalPrice;

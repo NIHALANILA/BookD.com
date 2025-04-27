@@ -4,7 +4,7 @@ const moment = require('moment');
 async function getSalesReport({ filterType, fromDate, toDate }) {
   try {
     let matchStage = {
-      status: {$in: ['delivered', 'requested','Partial return'] }
+      status: {$in: ['delivered', 'orderRequested','itemRequested','Partial return'] }
     };
 
     if (filterType&& filterType !== 'all') {

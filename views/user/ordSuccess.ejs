@@ -144,6 +144,12 @@
                         <p>Quantity: <%= item.quantity %></p>
                         <p>Price: ₹<%= item.price.toFixed(2) %></p>
                         <p>discount: ₹<%= item.discount.toFixed(2) %></p>
+                        <% if (item.status=="Cancelled") { %>
+                        <p style="color:red;">cancelled</p>
+                        <% } %>
+                        <% if (item.status=="Returned") { %>
+                        <p style="color:red;">Returned</p>
+                        <% } %>
                     </div>
                 <% }) %>
             </div>

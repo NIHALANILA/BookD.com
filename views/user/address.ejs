@@ -130,7 +130,7 @@ input, textarea {
                     <div class="card address-box p-3">
                         <div class="card-body">
                            
-                            <strong>Select this address</strong>
+                            <strong class="mb-5">Select this address</strong>
                             <p><strong>Name:</strong> <%= address.name %></p>
                             <p><strong>Phone:</strong> <%= address.phone %></p>
                             <p><strong>City:</strong> <%= address.city %></p>
@@ -235,13 +235,17 @@ input, textarea {
             pincode: "Please enter a valid 6-digit pincode.",
             address: "Address must be at least 10 characters long."
         };
+
+        let isvalid=true;
     for (let field of fields){
         let input=document.getElementById(field)
         let errorDiv = document.getElementById(field + "Error");
+
+        errorDiv.innerText="";
         if(input.value.trim()===""){
             errorDiv.innerText = messages[field];
-            input.focus();
-            return false
+            isvalid=false
+            
         }
     }
     let phone = document.getElementById("phone").value.trim();
@@ -249,18 +253,16 @@ input, textarea {
 
     let phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(phone)) {
-            alert(messages.phone);
-            document.getElementById("phone").focus();
-        return false;
+            document.getElementById("phoneError").innerText = messages.phone;
+        isValid = false;
         }
 
         let pincodeRegex = /^[0-9]{6}$/;
         if (!pincodeRegex.test(pincode)) {
-            alert(messages.pincode);
-            document.getElementById("pincode").focus();
-        return false;
+            document.getElementById("pincodeError").innerText = messages.pincode;
+            isValid = false;
         }
-        return true;
+        return isvalid;
 
  }
 function addressDelete(){

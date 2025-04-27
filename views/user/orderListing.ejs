@@ -198,8 +198,10 @@ textarea {
                             <span class="badge bg-warning">Processing</span> 
                         <% } else if (order.status === 'delivered') { %> 
                             <span class="badge bg-success">Delivered</span> 
-                        <% } else if (order.status === 'requested') { %> 
-                            <span class="badge bg-success">Requested</span> 
+                        <% } else if (order.status === 'orderRequested') { %> 
+                            <span class="badge bg-success">Requested Order return</span> 
+                        <% } else if (order.status === 'itemRequested') { %> 
+                            <span class="badge bg-success">Requested Item return</span> 
                         <% } else if (order.status === 'Payment Failed') { %> 
                             <span class="badge bg-danger">Payment Failed</span> 
                         <% } else if (order.status === 'Partial return') { %> 
@@ -225,8 +227,8 @@ textarea {
                               <% } %>
                             <% } %>
                       
-                            <% if (order.status === 'delivered' || order.status === 'requested'||order.status==='Partial return' ) { %>
-                              <% if (item.status === 'Returned'||item.status==='Requested') { %>
+                            <% if (order.status === 'delivered' || order.status === 'orderRequested'||order.status === 'itemRequested'||order.status==='Partial return' ) { %>
+                              <% if (item.status === 'Returned'||item.status==='Requested'||item.status==='Cancelled') { %>
                                 <button class="btn btn-secondary btn-sm btnitem" disabled>Returned</button>
                               <% } else { %>
                                 <button class="btn btn-warning btn-sm return-item btnitem" data-orderid="<%= order._id %>" data-itemid="<%= item._id %>">Return Item</button>

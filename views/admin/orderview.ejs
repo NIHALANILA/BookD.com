@@ -101,8 +101,8 @@ button:hover {
 <p><strong>Status:</strong> <%= order.status %></p>
 <p><strong>Order Date:</strong> <%= order.orderDate.toLocaleString() %></p>
 <p><strong>Status:</strong> <%= order.status %></p>
-<% if (order.status == "requested") { %>
-  <p style="color:red;"><strong>Please approve this return (Order Level)</strong></p>
+<% if (order.status == "orderRequested"||order.status=="itemRequested") { %>
+  <p style="color:red;"><strong>Please approve this return</strong></p>
 <% } %>
 
 
@@ -153,8 +153,8 @@ button:hover {
         <td>₹<%= item.totalPrice %></td>
         <td>
           <%= item.status %>
-          <% if (item.status == "requested") { %>
-            <br><span style="color:red;">Please approve this return (Item Level)</span>
+          <% if (item.status == "Requested") { %>
+            <br><span style="color:red;">Please approve this return</span>
             <% if (item.returnReason) { %>
               <br><strong>Return Reason:</strong> <%= item.returnReason %>
             <% } %>
@@ -166,6 +166,7 @@ button:hover {
 </table>
 
 <hr>
+<% if (order.status!=="cancelled") { %>
 <h4> Payment Summary</h4>
 <p><strong>Subtotal:</strong> ₹<%= order.total.toFixed(2) %></p>
 <p><strong>Shipping:</strong> ₹<%= order.shippingCharge %></p>
@@ -173,6 +174,7 @@ button:hover {
 <p><strong>Discount:</strong> ₹<%= order.discount %></p>
 <hr>
 <p><strong>Net Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
+<% } %>
 
 <a href="/admin/orders"><button>⬅ Back</button></a>
 </body>

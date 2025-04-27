@@ -56,14 +56,16 @@
                     <td>
                         <select name="status"
                                 class="form-select d-inline-block w-auto me-2 status-select"
-                                data-id="<%= order._id %>">
+                                data-id="<%= order._id %>"   data-current-status="<%= order.status %>">
                           <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
                           <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
                           <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
                           <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
                           <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
-                          <option value="requested" <%= order.status === 'requested' ? 'selected' : '' %>>Requested</option>
+                          <option value="orderRequested" <%= order.status === 'orderRequested' ? 'selected' : '' %>>Order Requested</option>
+                          <option value="itemRequested" <%= order.status === 'itemRequested' ? 'selected' : '' %>>Item Requested</option>
                           <option value="Partial return" <%= order.status === 'Partial return' ? 'selected' : '' %>>Partial Return</option>
+                          <option value="rejected" <%= order.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
                         </select>
                         <button type="button" class="edit-btn btn-update" style="background-color: #3498db;">Update</button>
                       </td>
@@ -92,7 +94,24 @@
         const select = this.previousElementSibling;
         const orderId = select.dataset.id;
         const newStatus = select.value;
+        const currentStatus = select.dataset.currentStatus
+
+        const allowedStatusupdate={
+        processing:["delivered","shipped"],
+        shipped:["delivered"],
+        returned:[],
+        "Partial return":[],
+        cancelled:[],
+        orderRequested:["returned","rejected"],
+        itemRequested:["Partial return","rejected"],
+        rejected:["returned","Partial return"],
+        delivered:["orderRequested"]
+      }
   
+      if (!allowedStatusupdate[currentStatus] || !allowedStatusupdate[currentStatus].includes(newStatus)) {
+      Swal.fire('Invalid Action!', `Cannot change status from "${currentStatus}" to "${newStatus}".`, 'error');
+      return;
+    }
         // SweetAlert confirmation
         const result = await Swal.fire({
           title: 'Are you sure?',
@@ -119,7 +138,7 @@
             if (data.success) {
               Swal.fire('Updated!', 'Order status has been updated.', 'success');
             } else {
-              Swal.fire('Error!', 'Failed to update status.', 'error');
+              Swal.fire('Error!', data.message || 'Failed to update status.', 'error');
             }
           } catch (err) {
             console.error('Error:', err);

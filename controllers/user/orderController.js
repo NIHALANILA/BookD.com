@@ -367,6 +367,9 @@ const placeOrder = async (req, res) => {
             if(bookQuantity>bookDetails.stock){
                 return res.status(404).json({message:'out of stock'})
             }
+            if(bookDetails.isDeleted||!bookDetails.isListed){
+                return res.status(404).json({message:'this book is unavailable'})
+            }
 
             orderItems.push({
                 bookId: bookDetails._id,
@@ -396,9 +399,11 @@ const placeOrder = async (req, res) => {
                 const discount=offer ? offer.discount:0
 
                 if(item.quantity>item.bookId.stock){
-                    return res.status(400).json({message:"out of stock"})
+                    return res.status(404).json({message:`${item.bookId.title} is out of stock`})
                 }
-            
+            if(item.bookId.isDeleted||!item.bookId.isListed){
+                return res.status(404).json({message:`${item.bookId.title} is currently unavailable`})
+            }
 
             orderItems.push({
                 bookId: item.bookId._id,
@@ -424,19 +429,15 @@ const placeOrder = async (req, res) => {
         }
        
 
-        subtotal = parseFloat(subtotal.toFixed(2));
-        tax = parseFloat(tax.toFixed(2));
-        netAmount = parseFloat(netAmount.toFixed(2));
-        
-        totalDiscount = parseFloat(totalDiscount.toFixed(2));
+       
 
        netAmount=subtotal+tax+shippingCharge-totalDiscount
        const initialStatus = paymentMethod === "online" ? "initiated" : "processing";
 
-       subtotal = parseFloat(subtotal.toFixed(2));
-        tax = parseFloat(tax.toFixed(2));
-        netAmount = parseFloat(netAmount.toFixed(2));
-        totalDiscount = parseFloat(totalDiscount.toFixed(2));
+       subtotal = Math.round(subtotal.toFixed(2));
+        tax = Math.round(tax.toFixed(2));
+        netAmount = Math.round(netAmount.toFixed(2));
+        totalDiscount = Math.round(totalDiscount.toFixed(2));
 
         
         const newOrder = new Order({
@@ -677,7 +678,7 @@ const returnOrder=async(req,res)=>{
             return res.status(400).json({ success: false, message: "Only delivered orders can be returned" });
         }
 
-        order.status = "requested";
+        order.status = "orderRequested";
         order.returnReason = returnReason;
         
 
@@ -843,7 +844,7 @@ const cancelItem=async(req,res)=>{
             return res.status(400).json({success:false,message:"invalid or already processed item"})
 
         }
-        if(item.price<order.discount){
+        if(item.totalPrice<order.discount){
             return res.status(404).json({success:false,message:"this item is not refundable from this order due to coupon condition"})
         }
 
@@ -940,13 +941,13 @@ const returnItem=async(req,res)=>{
 
         }
         //not allow the book which price fall below coupon discount
-        if(item.price<order.discount){
+        if(item.totalPrice<order.discount){
             return res.status(404).json({success:false,message:"this item is not refundable from this order due to coupon condition"})
         }
         
         item.status="Requested",
         item.returnReason=reason;
-        order.status="requested"
+        order.status="itemRequested"
 
         await order.save()
 

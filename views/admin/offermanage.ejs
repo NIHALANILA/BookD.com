@@ -59,7 +59,7 @@
         <% offers.forEach(offer => { %>
             <tr>
                 <td><%= offer.name %></td>
-                <td></td>
+                <td><%=offer.applyTo%></td>
                 <td><%= offer.discount_value %></td>
                 <td><%= offer.status %></td>
                 <td><%= offer.start_date.toDateString() %></td>
