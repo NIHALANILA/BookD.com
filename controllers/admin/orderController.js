@@ -92,6 +92,7 @@ const statusEdit = async (req, res) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
+      console.log(status)
 
       const allowedStatusupdate={
         processing:["delivered","shipped"],
@@ -121,13 +122,27 @@ const statusEdit = async (req, res) => {
         })
       }
 
+      if(status==="delivered"&& order.status==='processing'){
+        for(const item of order.orderItems){
+          if(item.status==='Ordered'){
+            item.status ='Delivered'
+          }
+        }
+        
+      }
+
   
       // in complete order return just return full amount but not shipping charge and just keep order data as it is for refarance
       if (status === "returned" && order.status !== "returned") {
         for (const item of order.orderItems) {
-          await Book.findByIdAndUpdate(item.bookId, {
-            $inc: { stock: item.quantity },
-          });
+          if(item.status==='Requested'){
+            
+            await Book.findByIdAndUpdate(item.bookId, {
+              $inc: { stock: item.quantity },
+            });
+            item.status='Returned'
+          }
+          
         }
   
         await refundToWallet(order.userId, order.netAmount - order.shippingCharge);
@@ -135,6 +150,13 @@ const statusEdit = async (req, res) => {
   
       // in partial return we need to do some calculation in refunding price(to wallet) and order need to update 
       if (status === "Partial return" && order.status !== "Partial return") {
+
+        let existingItems= order.orderItems.filter(i=>i.status!=="Returned" && i.status!=='Cancelled')
+        console.log(existingItems)
+        if(existingItems.length===1){
+          return orderReturnFromItem(req,res,order)
+        }
+        
         let returnTotal = 0;
         let remainingTotal = 0;
         let proportionalDiscount = 0;
@@ -152,12 +174,18 @@ const statusEdit = async (req, res) => {
   
         if (!coupon) {
           await refundToWallet(order.userId, returnTotal);
+          for (const item of order.orderItems) {
+            if (item.status === "Delivered") {
+              remainingTotal += item.totalPrice;
+            }
+          }
+
         } else {
           const { discountType, discountValue, minimumPrice } = coupon;
   
           //recalculate the total of ramaing  books
           for (const item of order.orderItems) {
-            if (item.status === "Ordered") {
+            if (item.status === "Delivered") {
               remainingTotal += item.totalPrice;
             }
           }
@@ -203,4 +231,30 @@ const statusEdit = async (req, res) => {
     }
   };
   
+  async function orderReturnFromItem(req,res,order){
+    console.log('orderreturnfrmitem called')
+
+    try {
+      order.status="returned";
+      order.returnReason="non of item needed"
+
+      for (const item of order.orderItems) {
+        if(item.status==='Requested'){
+          await Book.findByIdAndUpdate(item.bookId, {
+            $inc: { stock: item.quantity },
+          });
+        item.status='Returned'
+        }
+        
+      }
+      await refundToWallet(order.userId, order.netAmount - order.shippingCharge);
+      await order.save(); 
+      return res.json({success:true,message:"Enitire order marked as returned"})
+      
+    } catch (error) {
+      console.log('errorr in last item return from an order',error)
+      
+    }
+
+  }
 module.exports = { listOrders,orderview ,statusEdit};

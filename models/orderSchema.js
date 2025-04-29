@@ -109,7 +109,7 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['Ordered', 'Cancelled', 'Returned',"Requested"],
+            enum: ['Ordered', 'Cancelled', 'Returned',"Requested","Delivered","Rejected"],
             default: 'Ordered'
           },
           cancelReason: { type: String, default: "" },

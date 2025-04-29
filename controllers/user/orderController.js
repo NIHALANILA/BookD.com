@@ -680,6 +680,13 @@ const returnOrder=async(req,res)=>{
 
         order.status = "orderRequested";
         order.returnReason = returnReason;
+
+        order.orderItems.forEach(item=>{
+            if(item.status==='Delivered'){
+                item.status="Requested";
+                item.returnReason=returnReason
+            }
+        })
         
 
         await order.save();
@@ -844,6 +851,11 @@ const cancelItem=async(req,res)=>{
             return res.status(400).json({success:false,message:"invalid or already processed item"})
 
         }
+        const existingItems=order.orderItems.filter(i=>i.status==="Ordered")
+
+        if(existingItems.length===1&&existingItems[0]._id.toString()===itemId){
+            return orderCancelFromItem(req,res,order,reason)
+        }
         if(item.totalPrice<order.discount){
             return res.status(404).json({success:false,message:"this item is not refundable from this order due to coupon condition"})
         }
@@ -899,12 +911,7 @@ const cancelItem=async(req,res)=>{
         order.netAmount=remainingTotal+order.tax+order.shippingCharge-order.discount
         const allItemsCancelled = order.orderItems.every(item => item.status ==="Cancelled");
 
-        if (allItemsCancelled) {
-            order.status = "cancelled"; 
-             order.shippingCharge=null , 
-             order.tax=null                 //if all items individually cancelled update also the order  as canceled
-            
-          }
+        
 
         await order.save()
 
@@ -919,41 +926,76 @@ const cancelItem=async(req,res)=>{
     }
 }
 
+async function orderCancelFromItem(req,res,order,reason){
+    try {
+        order.status="cancelled"
+        order.cancelReason=reason;
+        await order.save()
+
+        for(let item of order.orderItems){
+            if(item.status="Ordered"){
+                await Books.findByIdAndUpdate(item.bookId,{$inc:{stock:item.quantity}})
+            }
+            
+        }
+
+        if(order.paymentMethod!=="cod"){
+            await refundToWallet(order.userId,order.netAmount)
+        }
+
+        return res.json({success:true,message:"Enitire order cancelled"})
+    } catch (error) {
+        return res.status(500).json({success:false,message:"server error"})
+        
+    }
+}
+
 const returnItem=async(req,res)=>{
     try {
-
-         console.log('return item called')
+         
         const orderId=req.params.id;
         const{itemId,reason}=req.body;
-        console.log(orderId)
-        console.log(req.body)
-
+       
         const order= await Order.findById({_id:orderId})
-
+ 
         if(!order){
             return res.status(404).send('order not found')
         }
 
         const item= order.orderItems.id(itemId)
 
-        if(!item||item.status!=="Ordered"){
-            return res.status(404).json({success:false,message:"invalid or already processed item"})
+        if(!item||item.status!=="Delivered"){
+            return res.status(404).json({success:false,message:"invalid or not delivered item"})
 
         }
         //not allow the book which price fall below coupon discount
         if(item.totalPrice<order.discount){
             return res.status(404).json({success:false,message:"this item is not refundable from this order due to coupon condition"})
         }
+
+        const existingItems=order.orderItems.filter(i=>i.status!=="Cancelled" && i.status!=="Returned" && i.status!=="Requested")
+
+        if(existingItems.length===1 && existingItems[0]._id.toString()===itemId){
+
+            order.status="orderRequested";
+            item.status="Requested";
+            order.returnReason=reason;
+        }
+        else{
+
+            item.status="Requested",
+           item.returnReason=reason;
+            order.status="itemRequested"
+
+        }
         
-        item.status="Requested",
-        item.returnReason=reason;
-        order.status="itemRequested"
 
         await order.save()
 
         res.json({success:true})
     } catch (error) {
-        console.error(error)
+        console.error(error,"error in returnItem")
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
 module.exports={loadcheckout,buynow,placeOrder,orderSuccess,orderList,orderCancel,returnOrder,downloadInvoice,
