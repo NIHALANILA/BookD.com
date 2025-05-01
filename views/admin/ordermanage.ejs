@@ -35,6 +35,8 @@
        
     </form>
 
+    <div class="table-responsive-wrapper">
+
     <table class="book-table">
         <thead>
             <tr>
@@ -54,6 +56,7 @@
                     <td><%= order.userId.email %></td>                    
                     <td><%= order.orderDate.toDateString() %></td>
                     <td>
+                      <div class="action-buttons">
                         <select name="status"
                                 class="form-select d-inline-block w-auto me-2 status-select"
                                 data-id="<%= order._id %>"   data-current-status="<%= order.status %>">
@@ -66,8 +69,10 @@
                           <option value="itemRequested" <%= order.status === 'itemRequested' ? 'selected' : '' %>>Item Requested</option>
                           <option value="Partial return" <%= order.status === 'Partial return' ? 'selected' : '' %>>Partial Return</option>
                           <option value="rejected" <%= order.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                          <option value="initiated" <%= order.status === 'initiated' ? 'selected' : '' %>>Initiated</option>
                         </select>
                         <button type="button" class="edit-btn btn-update" style="background-color: #3498db;">Update</button>
+                      </div>
                       </td>
                       
                     <td>
@@ -77,6 +82,7 @@
             <% }); %>
         </tbody>
     </table>
+  </div>
 
     <!-- Pagination -->
     <div class="pagination-container">
@@ -86,8 +92,13 @@
             </a>
         <% } %>
     </div>
+  </main>
+
+</div>
+</div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.querySelectorAll('.btn-update').forEach(button => {
       button.addEventListener('click', async function () {
@@ -105,7 +116,8 @@
         orderRequested:["returned","rejected"],
         itemRequested:["Partial return","rejected"],
         rejected:["returned","Partial return"],
-        delivered:["orderRequested"]
+        delivered:["orderRequested"],
+        initiated:[]
       }
   
       if (!allowedStatusupdate[currentStatus] || !allowedStatusupdate[currentStatus].includes(newStatus)) {

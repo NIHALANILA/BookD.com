@@ -15,6 +15,7 @@ const {applyCoupon}=require('../../helpers/couponHelper')
 const razorpayInstance=require('../../helpers/razorpay')
 const crypto = require('crypto');
 const { success } = require( '../../middleware/auth' );
+const Wallet=require('../../models/walletSchema')
 
 
 
@@ -493,6 +494,47 @@ const placeOrder = async (req, res) => {
                 message: "Something went wrong while setting up online payment. Please try again later."
               });
             }
+          }
+
+          else if(paymentMethod === "wallet"){
+
+            let wallet=await Wallet.findOne({userId});
+            if(!wallet||wallet.balance<netAmount){
+                return res.status(400).json({success:false,message:'insufficient wallet balance'})
+            }
+
+            wallet.balance-=netAmount;
+            wallet.transactions.push({
+                type:'debit',
+                amount:netAmount,
+                date:new Date(),
+                note:`debited for purchasing order-${savedOrder.orderId}`
+            })
+
+            await wallet.save()
+            savedOrder.status="processing";
+            await savedOrder.save()
+
+            if(appliedCoupon){
+                await Coupon.updateOne({_id:appliedCoupon},{
+                    $push:{usersUsed:userId},
+                    $inc:{usedCount:1}
+                })
+            }
+
+            delete req.session.appliedCoupon;
+
+            for(const item of orderItems){
+                await Books.findByIdAndUpdate(item.bookId,{$inc:{stock:-item.quantity
+
+                }})
+            }
+            if(!book){
+                await Cart.deleteMany({userId})
+            }
+
+            return res.json({success:true,orderId:savedOrder._id})
+
           }
           
 

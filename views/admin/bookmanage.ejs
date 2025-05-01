@@ -31,7 +31,7 @@
     
 <%-include("../../views/partials/admin/header")%>
 <!-- Book Management Section -->
-<section class="content">
+
     <h2>User Management</h2>
                  <!-- Search Form -->
     <form class="user-search-form"   action="/admin/books" method="GET">
@@ -48,6 +48,8 @@
     </form>
 
     <a href="/admin/books/add" class="btn success">Add books</a>
+
+    <div class="table-responsive-wrapper">
     
 
     <table class="book-table">
@@ -79,16 +81,17 @@
                             <td><%= book.stock %></td>
                             
                                 <td>
+                                    <div class="action-buttons">
                                     
                                        <button class="delete-btn" type="button" onclick="softDelete('<%= book._id %>')">Delete</button>
                                        
                                        
                                         <a href="/admin/books/edit/<%= book._id %>" class="edit-btn" style="text-decoration: none;" >Edit</a>
 
-                                        <button class="delete-btn" onclick="toggleBook('<%= book._id %>')">
+                                        <button class="btn btn-primary" onclick="toggleBook('<%= book._id %>')">
                                             <%= book.isListed ? "Unlist" : "list" %>
                                         </button>
-
+                                    </div>
                                     
                                 </td>                                                            
                         </tr>
@@ -96,6 +99,7 @@
                         <% }); %>
                     </tbody>
                 </table>
+            </div>
 
      <!-- Pagination Controls -->
     <div class="pagination-container">
@@ -108,9 +112,11 @@
     
  
     
-</section>
+
 </main>
 </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     function softDelete(bookId) {

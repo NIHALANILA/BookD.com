@@ -80,6 +80,8 @@ const orderSchema = new Schema({
         type: Number,         //reduced price by applying coupon on order
         default: 0
     },
+    
+    
     orderItems: [{
         bookId: {
             type: Schema.Types.ObjectId,

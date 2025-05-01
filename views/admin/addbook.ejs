@@ -266,14 +266,14 @@ body {
 </head>
 
 <%-include("../../views/partials/admin/header")%>
-<section class="content-main">
+
     <h3>Add Books</h3>
     <% if (message) { %>
         <p class="alert alert-warning"><%= message %></p>
     <% } %>
     
     <form  method="post"  enctype="multipart/form-data" id="addBookForm"  action="/admin/books/add">
-        <div class="form-container">
+        
             <!--left-->
             <div class="left-section">
                <div class="card">
@@ -433,10 +433,10 @@ body {
     
             </div>
            
-        </div>  
+        
     </form>
 
-</section>
+
 <!-- Cropper Modal -->
 <div id="cropperModal">
     <div class="modal-content">
@@ -447,10 +447,17 @@ body {
         </div>
     </div>
 </div>
+
+</main>
+
+</div>
+</div>
 <!--old-->
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <script>
 

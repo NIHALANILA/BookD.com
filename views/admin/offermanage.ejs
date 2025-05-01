@@ -43,6 +43,8 @@
 </form>
 <a href="/admin/offers/add" class="btn success">Add Offer</a>
 
+<div class="table-responsive-wrapper">
+
 <table class="book-table">
     <thead>
         <tr>
@@ -65,14 +67,16 @@
                 <td><%= offer.start_date.toDateString() %></td>
                 <td><%= offer.expire_date.toDateString() %></td>
                 <td>
+                  <div class="action-buttons">
                     <a href="/admin/offers/edit/<%= offer._id %>" class="edit-btn" style="text-decoration: none;">Edit</a>
                     <button class="delete-offer-btn edit-btn" data-offer-id="<%= offer._id %>" style="background-color: red;">Delete</button>
-
+                  </div>
                 </td>
             </tr>
         <% }) %>
     </tbody>
 </table>
+</div>
 
 <!-- Pagination -->
 
@@ -83,8 +87,13 @@
       </a>
   <% } %>
 </div>
+</main>
+
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
   const deleteButtons = document.querySelectorAll(".delete-offer-btn");

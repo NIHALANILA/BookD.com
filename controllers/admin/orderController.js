@@ -103,7 +103,8 @@ const statusEdit = async (req, res) => {
         orderRequested:["returned","rejected"],
         itemRequested:["Partial return","rejected"],
         rejected:["returned","Partial return"],
-        delivered:["orderRequested"]
+        delivered:["orderRequested"],
+        initiated:[]
       }
   
       const order = await Order.findById(id).populate("couponId"); 
@@ -117,7 +118,7 @@ const statusEdit = async (req, res) => {
       if(!allowedStatusupdate[currentstatus].includes(status)){
         return res.status(400).json({
           success:false,
-          message:`con't change status from ${currentstatus} to ${status}`
+          message:`can't change status from ${currentstatus} to ${status}`
 
         })
       }
@@ -217,7 +218,7 @@ const statusEdit = async (req, res) => {
         order.returnedItems++; 
         order.total=remainingTotal;
         order.discount=order.discount-proportionalDiscount;
-        order.netAmount=remainingTotal+order.tax+order.shippingCharge-proportionalDiscount
+        order.netAmount=remainingTotal+order.tax+order.shippingCharge-order.discount
       }
   
       order.status = status;

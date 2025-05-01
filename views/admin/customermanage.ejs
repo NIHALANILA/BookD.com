@@ -1,7 +1,7 @@
 
 <%-include("../../views/partials/admin/header")%>
             <!-- Book Management Section -->
-            <section class="content">
+            
                 <h2>User Management</h2>
                  <!-- Search Form -->
     <form class="user-search-form"   action="/admin/customers" method="GET">
@@ -16,6 +16,7 @@
         <% } %>
         
     </form>
+    <div class="table-responsive-wrapper">
                 <table class="book-table">
                     <thead>
                         <tr>
@@ -50,6 +51,7 @@
                         <% }); %>
                     </tbody>
                 </table>
+    </div>
                 <!-- Pagination Controls -->
     <div class="pagination-container">
         <% for(let i = 1; i <= totalPages; i++) { %>
@@ -58,13 +60,14 @@
             </a>
         <% } %>
     </div>
-            </section>
+            
         </main>
+
     </div>
-</main>
-</div>
+  </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
        async function blockUser(userId) {
     const result = await Swal.fire({

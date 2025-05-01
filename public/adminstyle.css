@@ -374,3 +374,71 @@ body {
 .form-container > div {
   margin-bottom: 1.5rem; /* Adds spacing between divs */
 }
+@media (max-width: 768px) {
+  .user-search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .user-search-form input,
+  .user-search-form button,
+  .user-search-form a button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+  .pagination-container {
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center; /* 💡 Keeps it centered */
+    width: 100%; /* Ensure full width to center items properly */
+  }
+
+  .pagination-container button {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Optional: improve appearance on scroll */
+.table-responsive-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+@media (max-width: 600px) {
+  .book-table th,
+  .book-table td {
+    padding: 8px 6px;
+    font-size: 14px;
+  }
+}
+
+/* Flex layout for button container */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;       /* wraps on small screens */
+  gap: 8px;              /* space between buttons */
+  justify-content: start;
+}
+
+/* Ensure buttons and links are consistent */
+.action-buttons button,
+.action-buttons a {
+  flex: 1 1 auto;
+  min-width: 80px;
+  padding: 6px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+

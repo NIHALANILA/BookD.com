@@ -290,6 +290,14 @@ h3, h4, h5 {
           </label>
       </div>
   </div>
+  <div class="col-md-4">
+      <div class="card p-3">
+          <label>
+              <input type="radio" name="paymentMethod" value="wallet" class="select-payment">
+              <strong>Wallet Payment</strong>
+          </label>
+      </div>
+  </div>
 </div>
 
 <!-- Coupon Selection -->
@@ -453,7 +461,14 @@ function removeCoupon() {
       
       updateTotals(data.subtotal, data.tax, data.finalTotal);
     } else {
-      alert('Failed to remove coupon: ' + data.error);
+      //alert('Failed to remove coupon: ' + data.error);
+
+      Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to remove coupon: ' + data.error
+        });
+      
     }
   })
   .catch(error => {
@@ -511,7 +526,15 @@ function initPlaceOrder(){
             }
         } else {
             
-            alert(response.message || "Something went wrong!");
+           // alert(response.message || "Something went wrong!");
+
+           
+      Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: response.message || "Something went wrong!"
+        });
+           
         }
     } catch (error) {
         console.error("Error submitting order:", error);
@@ -594,7 +617,7 @@ async function verifyPayment(paymentResponse, savedOrderId) {
             window.location.href = `/orders/success/${savedOrderId}`;
         } else {
           window.location.href = `/order-failure?orderId=${savedOrderId}`;
-          console.log("save order id is:",savedOrderId)
+          
         }
     } catch (error) {
         console.error("Error verifying payment:", error);

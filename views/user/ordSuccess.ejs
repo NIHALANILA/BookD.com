@@ -38,7 +38,7 @@
 }
 
 .success-box {
-    border: 2px solid #28a745;
+    border: 2px solid #8f8f8f;;
     border-radius: 10px;
     padding: 20px;
     background: #f0fff4;
@@ -91,6 +91,42 @@
 .btn-success {
     background: #28a745;
 }
+
+@media (max-width: 768px) {
+  .containerB {
+    width: 90%;
+    padding: 10px;
+  }
+
+  .items-box .item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .items-box img {
+    width: 100%;
+    height: auto;
+    max-width: 200px;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .order-details, .address-box, .items-box {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
   </style>
 </head>
 <%-include("../../views/partials/user/header")%>
@@ -119,6 +155,14 @@
                 </p>
                 <p><strong>Total Items:</strong> <%= order.orderItems.length-(order.cancelledItems||0)-(order.returnedItems||0) %></p>
                 <p><strong>Total Amount:</strong> ₹<%= order.total %></p>
+                <% if (order.cancelledItems && order.cancelledItems > 0) { %>
+                    <p><strong>Cancelled Items:</strong> <%= order.cancelledItems %></p>
+                  <% } %>
+                  
+                  <% if (order.returnedItems && order.returnedItems > 0) { %>
+                    <p><strong>Returned Items:</strong> <%= order.returnedItems %></p>
+                  <% } %>
+                  
                 <p><strong>Discount:</strong> ₹<%= order.discount %></p>
                 <p><strong>Tax:</strong> ₹<%= order.tax %></p>
                 <p><strong>Shipping Charge:</strong> ₹<%= order.shippingCharge %></p>
@@ -150,6 +194,7 @@
                         <% if (item.status=="Returned") { %>
                         <p style="color:red;">Returned</p>
                         <% } %>
+                        
                     </div>
                 <% }) %>
             </div>
@@ -157,12 +202,17 @@
             <!-- Buttons -->
             <div class="buttons">
                 <a href="/orders" class="btn btn-dark">View All Orders</a>
+                <% if(order.status!=="Payment Failed"){ %>
                 <a href="/" class="btn btn-success">Continue Shopping</a>
+                <% }  else { %>
+                    <a href="#" id="retryBtn" data-orderid="<%= order._id %>" class="btn btn-warning">Retry Payment</a>
+                    <% } %>
             </div>
         </div>
     </div>
 
     <%-include("../../views/partials/user/footer")%>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/jquery.min.js"></script>
     <script src="/js/plugins.js"></script>
     <script src="/js/SmoothScroll.js"></script>
@@ -182,6 +232,117 @@
         })
       }
      })
+
+     const retryBtn = document.getElementById("retryBtn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", async function(e) {
+      e.preventDefault();
+      const orderId = retryBtn.getAttribute("data-orderid");
+      console.log("Retry clicked with orderId:", orderId);
+      await retryPayment(orderId);
+    });
+  } 
+
+
+   async function retryPayment(orderId) {
+      
+  try {
+    const res = await fetch(`/retry-payment/${orderId}`);
+    const response = await res.json();
+
+    if (response.success) {
+      console.log('retry payment response:',response)
+      initiateRazorpayPayment(response); // Use the same existing function
+    } else {
+      alert("Retry failed. Please try again later.");
+    }
+  } catch (error) {
+    console.error("Error during retry:", error);
+  }
+}
+
+
+
+function initiateRazorpayPayment(response) {
+
+const savedOrderId = response.savedOrderId; 
+  const options = {
+      key: response.key,  
+      amount: response.amount,  
+      currency: 'INR',
+      order_id: response.razorpayOrderId,  
+      name: response.customerName,
+      description: "Order payment",
+      image: "path_to_logo",  
+      handler: function (paymentResponse) {
+        console.log("Payment Response: ", paymentResponse);
+          verifyPayment(paymentResponse, savedOrderId);
+      },
+      prefill: {
+          name: response.customerName,
+          email: response.customerEmail,
+          contact: response.customerPhone
+      },
+      notes: {
+          address: response.customerAddress,
+          order_id: savedOrderId
+      }
+  };
+
+  const razorpay = new Razorpay(options);
+
+    
+    razorpay.on('payment.failed', async function (response) {
+
+      
+      await fetch('/payment-failure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+          orderId: savedOrderId,
+          reason: response.error.description || "Payment failed"
+      })
+  });
+      
+
+      window.location.href = `/payment-failure?orderId=${savedOrderId}`; 
+      
+  });
+
+  razorpay.open();
+}
+
+
+async function verifyPayment(paymentResponse, savedOrderId) {
+  try {
+    console.log("Redirecting with savedOrderId:", savedOrderId);
+
+      const res = await fetch(`/verify-payment`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              razorpayOrderId: paymentResponse.razorpay_order_id,
+              paymentId: paymentResponse.razorpay_payment_id,
+              signature: paymentResponse.razorpay_signature,
+              orderId: savedOrderId
+          })
+      });
+      const result = await res.json();
+      if (result.success) {
+          window.location.href = `/orders/success/${savedOrderId}`;
+      } else {
+        window.location.href = `/order-failure?orderId=${savedOrderId}`;
+        console.log("save order id is:",savedOrderId)
+      }
+  } catch (error) {
+      console.error("Error verifying payment:", error);
+      window.location.href = `/order-failure?orderId=${savedOrderId}`;
+  }
+}
+
+
      
     </script>
     
