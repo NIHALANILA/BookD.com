@@ -73,7 +73,9 @@ async function dashBoard({ filterType, fromDate, toDate }) {
               $group: {
                 _id: "$orderItems.bookId",
                 totalQuantitySold: { $sum: "$orderItems.quantity" },
+                totalPrice:{$sum:"$orderItems.price"},
                 totalOfferDiscount: { $sum: "$orderItems.discount" }
+
               }
             },
             { $sort: { totalQuantitySold: -1 } },
@@ -92,6 +94,7 @@ async function dashBoard({ filterType, fromDate, toDate }) {
                 _id: 1,
                 totalQuantitySold: 1,
                 totalOfferDiscount: 1,
+                totalPrice:1,
                 bookName: "$bookDetails.title",
                 publisher: "$bookDetails.publisher",
                 Author: "$bookDetails.author"
@@ -114,7 +117,9 @@ async function dashBoard({ filterType, fromDate, toDate }) {
             {
               $group: {
                 _id: "$book.category_ids",
-                totalQuantitySold: { $sum: "$orderItems.quantity" }
+                totalQuantitySold: { $sum: "$orderItems.quantity" },
+                totalPrice:{$sum:'$orderItems.price'}
+
               }
             },
             { $sort: { totalQuantitySold: -1 } },
@@ -132,6 +137,7 @@ async function dashBoard({ filterType, fromDate, toDate }) {
               $project: {
                 _id: 1,
                 totalQuantitySold: 1,
+                totalPrice:1,
                 categoryName: "$category.name"
               }
             }
@@ -151,31 +157,36 @@ async function dashBoard({ filterType, fromDate, toDate }) {
             {
               $group: {
                 _id: "$book.publisher",
-                totalQuantitySold: { $sum: "$orderItems.quantity" }
+                totalQuantitySold: { $sum: "$orderItems.quantity" },
+                totalPrice:{$sum:"$orderItems.price"}
               }
             },
             { $sort: { totalQuantitySold: -1 } },
-            { $limit: 10 }
+            { $limit: 5 }
           ],
-          couponDetails: [
+          authorDetails: [
+            { $unwind: "$orderItems" },
+            { $match: { "orderItems.status": "Delivered" } },
             {
               $lookup: {
-                from: "coupons",
-                localField: "couponId",
+                from: "books",
+                localField: "orderItems.bookId",
                 foreignField: "_id",
-                as: "couponDetails"
+                as: "book"
               }
             },
-            { $unwind: "$couponDetails" },
+            { $unwind: "$book" },
             {
-              $project: {
-                "couponDetails.code": 1,
-                "couponDetails.minimumPrice": 1,
-                "couponDetails.discountType": 1,
-                "couponDetails.discountValue": 1,
+              $group: {
+                _id: "$book.author",
+                totalQuantitySold: { $sum: "$orderItems.quantity" },
+                totalPrice:{$sum:"$orderItems.price"}
               }
-            }
+            },
+            { $sort: { totalQuantitySold: -1 } },
+            { $limit: 5 }
           ],
+          
           orderDetails: [
             {
               $match: {

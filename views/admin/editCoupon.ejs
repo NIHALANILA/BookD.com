@@ -83,22 +83,27 @@
 
   <form id="editCouponForm" class="form-group">
     <label>Coupon Code:</label>
-    <input type="text" name="code" value="<%= coupon.code %>" required class="form-control" />
+    <input type="text" name="code" value="<%= coupon.code %>"  />
+    <span class="text-danger" id="codeError"></span>
 
     <label>Discount Type:</label>
-    <select name="discountType" class="form-select" required>
+    <select name="discountType" class="form-select">
       <option value="percentage" <%= coupon.discountType === "percentage" ? "selected" : "" %>>Percentage</option>
       <option value="fixed" <%= coupon.discountType === "fixed" ? "selected" : "" %>>Fixed</option>
     </select>
 
     <label>Discount Value:</label>
-    <input type="number" name="discountValue" value="<%= coupon.discountValue %>" required class="form-control" />
+    <input type="number" name="discountValue" value="<%= coupon.discountValue %>"  />
+    <span class="text-danger" id="discountValueError"></span>
 
     <label>Minimum Purchase Price:</label>
     <input type="number" name="minimumPrice" value="<%= coupon.minimumPrice %>" class="form-control" />
-
+    <span class="text-danger" id="minimumPriceError"></span>
+    
     <label>Usage Limit:</label>
     <input type="number" name="limit" value="<%= coupon.limit %>" class="form-control" />
+    <span class="text-danger" id="limitError"></span>
+
     <label for="limitPerUser"> Limit Per User </label>
       <select name="limitPerUser" id="limitPerUser">
         <option value="true" <%= coupon.limitPerUser === true ? "selected" : "" %>>Only once</option>
@@ -107,7 +112,8 @@
   
 
     <label>Expiry Date:</label>
-    <input type="date" name="expireDate" value="<%= coupon.expireDate.toISOString().split('T')[0] %>" class="form-control" required />
+    <input type="date" name="expireDate" value="<%= coupon.expireDate.toISOString().split('T')[0] %>" class="form-control"  />
+    <span class="text-danger" id="expireDateError"></span>
 
     <label>Status:</label>
     <select name="isActive" class="form-select">
@@ -131,6 +137,9 @@
   
       const form = e.target;
       const couponId = "<%= coupon._id %>";
+
+      const errorFields=document.querySelectorAll('.text-danger');
+      errorFields.forEach(el=>el.textContent="")
   
       
       const code = form.code.value.trim();
@@ -141,23 +150,59 @@
       const expireDate = form.expireDate.value;
       const isActive = form.isActive.value;
       const limitPerUser=form.limitPerUser.value;
+
+      let hasError=false;
   
       
-      if (!code || !discountType || !discountValue || !expireDate) {
-        return Swal.fire("Validation Error", "Please fill in all required fields.", "warning");
+      if(!code){
+        document.getElementById('codeError').textContent="code is required"
+        hasError=true
       }
+
+      if(!discountValue){
+        document.getElementById('discountValueError').textContent="Discount value is required"
+        hasError=true;
+      }
+      if(!expireDate){
+        document.getElementById('expireDateError').textContent="Expire date  is required";
+        hasError=true;
+      }
+      if(!limit){
+        document.getElementById('limitError').textContent="limit  is required";
+        hasError=true;
+      }
+      if(!minimumPrice){
+        document.getElementById('minimumPriceError').textContent="minimum price is required";
+        hasError=true;
+      }
+      
   
       if (discountValue <= 0) {
-        return Swal.fire("Invalid Discount", "Discount value must be greater than 0.", "warning");
+        document.getElementById('discountValueError').textContent="Discount value should be positive"
+        hasError=true;
+        
+      }
+  
+      if (discountType=="percentage" &&discountValue >100) {
+        document.getElementById('discountValueError').textContent="Discount value should be less than 100"
+        hasError=true;
+        
       }
   
       if (minimumPrice < 0) {
-        return Swal.fire("Invalid Price", "Minimum price must be 0 or more.", "warning");
+        
+        document.getElementById('minimumPriceError').textContent="minimum price should be positive ";
+        hasError=true;
       }
   
       if (limit < 0) {
-        return Swal.fire("Invalid Limit", "Limit cannot be negative.", "warning");
+        document.getElementById('limitError').textContent="limit  should be positive";
+        hasError=true;
+        
       }
+
+      if(hasError) return
+
   
       
       const formData = {

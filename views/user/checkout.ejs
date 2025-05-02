@@ -35,7 +35,13 @@ h3, h4, h5 {
   margin-bottom: 15px;
   color: #333;
 }
+p {
+  color: black;
 
+}
+strong {
+  color: black;
+}
 /* Cards */
 .card {
   background-color: #fff;
@@ -193,7 +199,7 @@ h3, h4, h5 {
             <div class="card p-3">
                 <h4>Price Summary</h4>
                 <p id="subtotal" ><strong>Total:</strong> ₹<%= subtotal %></p>
-                <p id="tax"><strong>Tax (5%):</strong> ₹<%= tax %></p>
+                <p id="tax"><strong>Tax (5%):</strong> ₹<%= tax.toFixed(2) %></p>
                 <p id="charge"><strong>Shipping Charge:</strong> ₹<%= shippingCharge %></p>
                 
                 <hr>
@@ -273,14 +279,6 @@ h3, h4, h5 {
       <h3>Select a Payment Method</h3>
   </div>
 
-  <div class="col-md-4">
-      <div class="card p-3">
-          <label>
-              <input type="radio" name="paymentMethod" value="cod" class="select-payment">
-              <strong>Cash on Delivery</strong>
-          </label>
-      </div>
-  </div>
 
   <div class="col-md-4">
       <div class="card p-3">
@@ -298,6 +296,14 @@ h3, h4, h5 {
           </label>
       </div>
   </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+        <label>
+            <input type="radio" name="paymentMethod" value="cod" class="select-payment">
+            <strong>Cash on Delivery</strong>
+        </label>
+    </div>
+</div>
 </div>
 
 <!-- Coupon Selection -->
@@ -324,8 +330,8 @@ h3, h4, h5 {
     <ul>
       <% coupons.forEach(coupon => { %>
         <li>
-          <strong><%= coupon.code %></strong> - 
-          <%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %>
+          <strong><%= coupon.code %> -</strong> 
+          <strong><%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %></strong>
         </li>
       <% }); %>
     </ul>
@@ -360,6 +366,7 @@ h3, h4, h5 {
     openCouponModal()
     closeCouponModal()
     initPlaceOrder();
+    hidecod()
     
     
     
@@ -475,6 +482,23 @@ function removeCoupon() {
     console.error('Error:', error);
   });
 }
+
+
+function hidecod(){
+  const finalTotalElement=document.getElementById('final-total');
+  const codOption = document.querySelector('input[type="radio"][value="cod"]');
+
+  if (finalTotalElement && codOption) {
+     
+      const finalTotal = parseFloat(finalTotalElement.innerText.replace("₹", "").trim());
+
+      if (finalTotal > 1000) {
+        // Hide the entire COD card
+        codOption.closest(".card").style.display = "none";
+      }
+
+}}
+
 
 function updateTotals(subtotal, tax, finalTotal) {
   

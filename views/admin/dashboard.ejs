@@ -43,7 +43,11 @@
 
     <button type="submit" class="btn btn-primary">Apply Filter</button>
   </form>
-  <h3 class="center-text">Overall Buisness from <%= from ? moment(from).format('DD MMM YYYY') : 'N/A' %> to <%= to ? moment(to).format('DD MMM YYYY') : 'N/A'%></h3>
+  <% if (from && to) { %>
+    <h3 class="center-text">Overall Business from <%= moment(from).format('DD MMM YYYY') %> to <%= moment(to).format('DD MMM YYYY') %></h3>
+  <% } else { %>
+    <h3 class="center-text">Overall Business</h3>
+  <% } %>
  
 
   <div class="row justify-content-center  mt-4">
@@ -62,36 +66,42 @@
   
   
 <h2>Best Selling Books</h2>
-<table class="table table-bordered table-striped book-table">
+<table class=" book-table">
   <thead>
     <tr>
+      <th>Top ten</th>
       <th>Book name</th>
       <th>Quantity Sold</th>
-      <th>Total Discount applied</th>
+      <th>Total Amount</th>
+      <th>Total Offer applied</th>
     </tr>
   </thead>
   <tbody>
-    <% result.bookDetails.forEach(book => { %>
+    <% result.bookDetails.forEach((book,ind) => { %>
       <tr>
+        <td><%=ind+1 %></td>
         <td><%= book.bookName %></td>
         <td><%= book.totalQuantitySold %></td>
+        <td><%= book.totalPrice %></td>
         <td><%= book. totalOfferDiscount.toFixed(2) %></td>
       </tr>
     <% }) %>
   </tbody>
 </table>
 <h2>Best Selling Categories</h2>
-<table class="table table-bordered table-striped book-table">
+<table class=" book-table">
   <thead>
     <tr>
+      <th>Top ten</th>
       <th>Category name</th>
       <th>Quantity Sold</th>
       
     </tr>
   </thead>
   <tbody>
-    <% result.categoryDetails.forEach(cat => { %>
+    <% result.categoryDetails.forEach((cat,ind) => { %>
       <tr>
+        <td><%=ind+1 %></td>
         <td><%= cat.categoryName %></td>
         <td><%= cat.totalQuantitySold %></td>
         
@@ -100,19 +110,42 @@
   </tbody>
 </table>
 <h2>Best Selling Publications</h2>
-<table class="table table-bordered table-striped book-table">
+<table class=" book-table">
   <thead>
     <tr>
+      <th>Top ten</th>
       <th>Publication</th>
       <th>Quantity Sold</th>
       
     </tr>
   </thead>
   <tbody>
-    <% result.publicationDetails.forEach(pub => { %>
+    <% result.publicationDetails.forEach((pub,ind) => { %>
       <tr>
+        <td><%=ind+1 %></td>
         <td><%= pub._id %></td>
         <td><%= pub.totalQuantitySold %></td>
+        
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<h2>Best Selling Authors</h2>
+<table class=" book-table">
+  <thead>
+    <tr>
+      <th>Top ten</th>
+      <th>Authors</th>
+      <th>Quantity Sold</th>
+      
+    </tr>
+  </thead>
+  <tbody>
+    <% result.authorDetails.forEach((auth,ind) => { %>
+      <tr>
+        <td><%=ind+1 %></td>
+        <td><%= auth._id %></td>
+        <td><%= auth.totalQuantitySold %></td>
         
       </tr>
     <% }) %>

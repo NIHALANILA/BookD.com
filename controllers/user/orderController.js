@@ -440,6 +440,77 @@ const placeOrder = async (req, res) => {
         netAmount = Math.round(netAmount.toFixed(2));
         totalDiscount = Math.round(totalDiscount.toFixed(2));
 
+        if (paymentMethod === "cod" && netAmount > 1000) {
+            return res.status(400).json({ success: false, message: "COD is not allowed for orders above ₹1000." });
+          }
+          
+
+         if (paymentMethod === "wallet") {
+            let wallet = await Wallet.findOne({ userId });
+        
+            if (!wallet || wallet.balance < netAmount) {
+                return res.status(400).json({ success: false, message: 'insufficient wallet balance' });
+            }
+        
+            // Proceed to create the order only after validation
+            const newOrder = new Order({
+                userId,
+                orderItems,
+                status: "processing",
+                paymentMethod: validPaymentId,
+                addressId,
+                total: subtotal,
+                netAmount,
+                shippingCharge,
+                tax,
+                discount: totalDiscount,
+                couponId: appliedCoupon
+            });
+        
+            const savedOrder = await newOrder.save();
+
+            if(!savedOrder){
+                return res.status(500).json({success:false,message:'order failed'})
+            }
+        
+            wallet.balance -= netAmount;
+            wallet.transactions.push({
+                type: 'debit',
+                amount: netAmount,
+                date: new Date(),
+                note: `debited for purchasing order-${savedOrder.orderId}`
+            });
+        
+           const walletSaved= await wallet.save();
+
+           if(!walletSaved){                  //if walletdeduction procedure not success delete the order 
+            await Order.findByIdAndDelete(savedOrder._id)
+            return res.status(500).send('Wallet update failed')
+           }
+        
+            if (appliedCoupon) {
+                await Coupon.updateOne({ _id: appliedCoupon }, {
+                    $push: { usersUsed: userId },
+                    $inc: { usedCount: 1 }
+                });
+            }
+        
+            delete req.session.appliedCoupon;
+        
+            for (const item of orderItems) {
+                await Books.findByIdAndUpdate(item.bookId, {
+                    $inc: { stock: -item.quantity }
+                });
+            }
+        
+            if (!book) {
+                await Cart.deleteMany({ userId });
+            }
+        
+            return res.json({ success: true, orderId: savedOrder._id });
+        }
+        
+
         
         const newOrder = new Order({
             userId,
@@ -496,46 +567,7 @@ const placeOrder = async (req, res) => {
             }
           }
 
-          else if(paymentMethod === "wallet"){
-
-            let wallet=await Wallet.findOne({userId});
-            if(!wallet||wallet.balance<netAmount){
-                return res.status(400).json({success:false,message:'insufficient wallet balance'})
-            }
-
-            wallet.balance-=netAmount;
-            wallet.transactions.push({
-                type:'debit',
-                amount:netAmount,
-                date:new Date(),
-                note:`debited for purchasing order-${savedOrder.orderId}`
-            })
-
-            await wallet.save()
-            savedOrder.status="processing";
-            await savedOrder.save()
-
-            if(appliedCoupon){
-                await Coupon.updateOne({_id:appliedCoupon},{
-                    $push:{usersUsed:userId},
-                    $inc:{usedCount:1}
-                })
-            }
-
-            delete req.session.appliedCoupon;
-
-            for(const item of orderItems){
-                await Books.findByIdAndUpdate(item.bookId,{$inc:{stock:-item.quantity
-
-                }})
-            }
-            if(!book){
-                await Cart.deleteMany({userId})
-            }
-
-            return res.json({success:true,orderId:savedOrder._id})
-
-          }
+         
           
 
        

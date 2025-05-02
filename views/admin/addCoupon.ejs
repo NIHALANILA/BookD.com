@@ -83,36 +83,44 @@
     <form  id="couponForm" class="form-group">
       <label for="code">Coupon Code:</label>
       <input type="text" name="code"  class="form-control">
+      <span class="text-danger" id="codeError"></span>
   
       <label for="discountType">Discount Type:</label>
       <select name="discountType" class="form-select" required>
         <option value="percentage">Percentage</option>
         <option value="fixed">Fixed Amount</option>
       </select>
+      <span class="text-danger" id="discountTypeError"></span>
   
       <label for="discountValue">Discount Value:</label>
       <input type="number" name="discountValue"  class="form-control">
+      <span class="text-danger" id="discountValueError"></span>
   
       <label for="minimumPrice">Minimum Purchase Price </label>
       <input type="number" name="minimumPrice" class="form-control">
+      <span class="text-danger" id="minimumPriceError"></span>
   
       <label for="limit">Usage Limit </label>
       <input type="number" name="limit"  class="form-control">
+      <span class="text-danger" id="limitError"></span>
       <label for="limitPerUser"> Limit Per User </label>
       <select name="limitPerUser" id="limitPerUser">
         <option value="true">Only once</option>
         <option value="false">unlimited</option>
       </select>
+      <span class="text-danger" id="limitPerUserError"></span>
   
       
   
       <label for="expireDate">Expiry Date:</label>
       <input type="date" name="expireDate"  class="form-control">
-      <label for="expireDate">Is Active:</label>
+      <span class="text-danger" id="expireDateError"></span>
+      <label for="isActive">Is Active:</label>
       <select name="isActive" id="isActive">
         <option value="yes">yes</option>
         <option value="no">no</option>
       </select>
+      <span class="text-danger" id="isActiveError"></span>
   
       <button type="submit" class="btn btn-primary mt-3">Add Coupon</button>
     </form>
@@ -134,15 +142,55 @@
     document.getElementById("couponForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    const errorFields = document.querySelectorAll(".text-danger");
+    errorFields.forEach(el => el.textContent = ""); 
+
     const form = e.target;
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
-
     
-    if (!data.code || !data.discountType || !data.discountValue || !data.expireDate) {
-      return Swal.fire("Error", "Please fill in all required fields.", "error");
+
+    let hasError=false;
+
+    if(!data.code){
+      document.getElementById("codeError").textContent="coupon code needed ";
+
+      hasError=true;
+
+    }
+    if(!data.discountValue){
+      document.getElementById('discountValueError').textContent="discount value should be gven";
+      hasError=true
+    }
+    if(data.discountValue<0){
+      document.getElementById('discountValueError').textContent="discount value should be positive";
+      hasError=true
+    }
+  
+    if(data.discountType="percentage"&&data.discountValue>100){
+      document.getElementById('discountValueError').textContent="invalid discount value"
     }
 
+    if(!data.expireDate){
+      document.getElementById('expireDateError').textContent="expire date should be given"
+      hasError=true;
+    }
+
+    if(!data.minimumPrice){
+      document.getElementById('minimumPriceError').textContent="minimum price is required"
+      hasError=true;
+    }
+    if(data.minimumPrice<0){
+      document.getElementById('minimumPriceError').textContent="minimum price should be positive"
+      hasError=true;
+    }
+  if(!data.limit||data.limit<0){
+    document.getElementById('limitError').textContent="usage limit is not provided or invalid limit"
+    hasError=true
+  }
+    if(hasError) return
+
+   
     
     data.discountValue = Number(data.discountValue);
     if (data.minimumPrice) data.minimumPrice = Number(data.minimumPrice);
