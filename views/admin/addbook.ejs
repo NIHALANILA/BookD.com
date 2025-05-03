@@ -426,6 +426,7 @@ body {
                         </div>
                         <% } %>
                     </div>
+                    <div id="imageError" class="text-danger"></div>
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn-primary">Add Product</button>
@@ -726,8 +727,11 @@ function validateImages() {
     let hasImage = Array.from(images).every(input => input.files.length === 1);
 
     if (!hasImage) {
-        alert("Please upload  image in each box.");
-        return false;
+        /*alert("Please upload  image in each box.");
+        return false;*/
+
+        document.getElementById('imageError').innerText = "upload images";
+        isValid = false;
     }
     return true;
 }

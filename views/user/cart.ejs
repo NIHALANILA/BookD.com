@@ -161,8 +161,9 @@
 }
 
 .out-of-stock {
-    opacity: 0.6;  /* Make it look faded */
-    pointer-events: none;  /* Disable interactions */
+    opacity: 0.6;
+  background-color: #f8d7da;
+  
 }
 
 .out-of-stock .quantity-control button,
@@ -203,7 +204,7 @@
                     <div class="col-md-8">
                         <div class="card shadow p-3">
                             <% cartItems.forEach(item => { %>
-                                <div class="row mb-3 cart-item">
+                                <div class="row mb-3 cart-item <%= item.stock === 0 ? 'out-of-stock' : '' %>">
                                     <div class="col-md-3">
                                         <img src="<%= item.imageUrl %>" class="img-fluid rounded" alt="<%= item.title %>">
                                     </div>
@@ -249,15 +250,17 @@
                             <h4>Order Summary</h4>
                            
                             
-                            <p>Total Items: <%= cartItems.length %></p>
+                            <p>Total Items: <%= cartItems.filter(item=>item.stock>0).length %></p>
                             <h5 id="totalPrice">Total Price: ₹<%= totalPrice %></h5>
                             <form method="POST" action="/checkout">
                                 <% cartItems.forEach(item => { %>
                                     <input type="hidden" name="books[]" value="<%= item._id %>">
                                 <% }) %>
                                 
-                                <button type="submit" class="btn btn-success w-100"
-                                    <% if (outOfStock) { %> disabled <% } %>>Proceed to Checkout</button>
+                                <% const onlyOutOfStock = cartItems.every(item => item.stock === 0); %>
+
+                                <button type="submit" id="proceedBtn" class="btn btn-success w-100"
+                                  <% if (onlyOutOfStock) { %> disabled <% } %>>Proceed to Checkout</button>
                             </form>
                             
                         </div>
@@ -313,8 +316,8 @@
         const quantityText = form.querySelector(".quantity-text");
 
         function updateCart(action) {
-            fetch("/cart/update", {
-                method: "POST",
+            fetch("/cart", {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ bookId, action })
             })
@@ -347,8 +350,8 @@
                 button.addEventListener('click',function(){
                     const bookId=this.getAttribute('data-book-id')
 
-                    fetch('/cart/remove',{
-                        method:"POST",
+                    fetch('/cart',{
+                        method:"DELETE",
                         headers:{
                             "Content-Type":"application/json"
                         },
@@ -359,6 +362,8 @@
                         if(data.success){
                             this.closest(".cart-item").remove()
                             document.querySelector("#totalPrice").textContent = "₹" + data.totalPrice;
+                           
+                    
                         }
                         else{
                             alert('failed to remove itemm ')

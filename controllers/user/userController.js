@@ -38,7 +38,12 @@ const signup=async(req,res)=>{
         }
         const findUser= await User.findOne({email});
         if(findUser){
-            return res.render("signup",{message:"User with this email already exist"})
+            return res.render("signup",{message:"user with this email already exist"})
+        }
+
+        const findName= await User.findOne({username})
+        if(findName){
+            return res.render('signup',{message:"user with this username already exist"})
         }
         const subject = "Verify Your Account";
         const message = "Your OTP for account verification is";
@@ -112,7 +117,7 @@ const verifyOtp = async (req, res) => {
                     discountType: "fixed",
                     limit: 1,
                     usedCount: 0,
-                    minimumPrice: 1000,
+                    minimumPrice: 700,
                     limitPerUser: true,
                     expireDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
                     isActive: "yes",

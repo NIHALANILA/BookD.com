@@ -68,7 +68,7 @@ const addbook = async (req, res) => {
          
          if (req.headers["x-requested-with"] === "XMLHttpRequest") {
             const existingBook = await Book.findOne({ isbn });
-            if (existingBook) {
+            if (existingBook) {                                                               //we need to duplication of isbn from backend
                 return res.json({ exists: true, message: "This ISBN already exists." });
             }
             return res.json({ exists: false });

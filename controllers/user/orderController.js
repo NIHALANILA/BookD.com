@@ -47,6 +47,7 @@ const loadcheckout = async (req, res) => {
                         'bookData._id': 1,
                         'bookData.title': 1,
                         'bookData.price': 1,
+                        'bookData.stock':1,
                         'bookData.book_images': { $arrayElemAt: ['$bookData.book_images', 0] },
                         'quantity': '$items.quantity',
                         'totalPrice': { $multiply: ['$items.quantity', '$bookData.price'] },
@@ -59,8 +60,22 @@ const loadcheckout = async (req, res) => {
                 return res.redirect('/books');
             }
 
-            
-          const cartItems = await Promise.all(cart.map(async (item) => {
+            // Extract IDs of out-of-stock items
+               const outOfStockItems = cart
+              .filter((item) => item.quantity > item.bookData.stock)
+               .map((item) => item.bookData._id);
+
+               // Remove them from the user's cart in DB
+             if (outOfStockItems.length > 0) {
+               await Cart.updateOne(
+                { userId: user._id },
+              { $pull: { items: { bookId: { $in: outOfStockItems } } } }
+                             );
+                        }
+
+
+        const filteredCarts=cart.filter((item)=>item.quantity<=item.bookData.stock)
+          const cartItems = await Promise.all(filteredCarts.map(async (item) => {
               const fullBook = await Books.findById(item.bookData._id);  
               const offerData = await getBestOffer(fullBook);
 
@@ -392,7 +407,8 @@ const placeOrder = async (req, res) => {
             }
 
             for(const item of cart.items){
-                if(!item.bookId) continue;
+                if(!item.bookId||item.bookId.stock<=item.quantity) continue;
+                
                 const offer=await getBestOffer(item.bookId._id);
                 const finalPrice=offer ? offer.finalPrice:item.bookId.price;
                 const offerId=offer?offer.offerId:null;

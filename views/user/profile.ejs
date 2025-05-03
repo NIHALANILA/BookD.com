@@ -47,7 +47,9 @@
     align-items: center;
     justify-content: center;
 }
-
+p{
+    color: black;
+}
 .image-container {
     display: flex;
     flex-direction: column;
@@ -156,6 +158,7 @@
 .profile a {
     white-space: nowrap; /* Prevent button text from breaking */
     padding: 6px 12px; /* Adjust button padding */
+    
 }
 
 
@@ -170,9 +173,9 @@
         <!-- Left Sidebar -->
         <div class="col-md-3">
             <div class="list-group">                
-                <a href="/profile/address" class="list-group-item list-group-item-action">Address Management</a>
-                <a href="/orders" class="list-group-item list-group-item-action">My Orders</a>
-                <a href="/wallet" class="list-group-item list-group-item-action">My Wallet</a>
+                <a href="/profile/address" class="list-group-item list-group-item-action" style="color: black;">Address Management</a>
+                <a href="/orders" class="list-group-item list-group-item-action" style="color: black;">My Orders</a>
+                <a href="/wallet" class="list-group-item list-group-item-action" style="color: black;">My Wallet</a>
             </div>
         </div>
       
@@ -184,21 +187,21 @@
            
             <!-- Email (Readonly) -->
             <div class="mb-3 profile">
-                <label class="form-label">Email</label>
+                <label class="form-label" style="color: black;">Email</label>
                 <input type="email" class="form-control" value="<%= user.email %>" readonly>
-                <a href="/profile/email-change" class="btn btn-secondary px-3 py-2">Change</a>
+                <a href="/profile/email-change" class="btn btn-secondary px-3 py-2" >Change</a>
 
             </div>
 
             
             <div class="mb-3 profile">
-                <label class="form-label">Username</label>
+                <label class="form-label" style="color: black;">Username</label>
                 <input type="text" id="usernameInput" class="form-control" value="<%= user.username %>" readonly>
                 <button id="changeUsernameBtn" class="btn btn-secondary px-3 py-2">Change</button>
             </div>
             
             <div class="mb-3 profile">
-                <label class="form-label">Phone</label>
+                <label class="form-label" style="color: black;">Phone</label>
                 <input type="text" id="phoneInput" class="form-control" value="<%= user.phone || '' %>" readonly>
                 <button id="changePhoneBtn" class="btn btn-secondary px-3 py-2">Change</button>
             </div>

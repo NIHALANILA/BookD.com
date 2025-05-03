@@ -85,9 +85,9 @@ router.delete('/profile/address/:id',addressController.deleteAddress)
 //cartController-cart and wishlist
 router.post('/cart',cartController.addcart)
 router.get('/cart',auth.loadCommonData,cartController.viewCart)
-router.post('/cart/update',cartController.updateCart)
+router.patch('/cart',cartController.updateCart)
 //
- router.post('/cart/remove',cartController.removecart)
+ router.delete('/cart',cartController.removecart)
  
  router.get('/wishlist',auth.loadCommonData,cartController.loadWishlist)
  router.post('/wishlist',auth.loadCommonData,cartController.addWishlist)

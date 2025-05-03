@@ -98,8 +98,12 @@ const viewCart = async (req, res) => {
             const offer = await getBestOffer(book._id);
             const finalPrice = offer?.finalPrice || item.price;
             const discountPercent = offer?.discountPercent || 0;
+           let  itemTotal=0;
+            if(book.stock>=item.quantity){
+                 itemTotal = finalPrice * item.quantity;
+            
 
-            const itemTotal = finalPrice * item.quantity;
+            }
             totalPrice += itemTotal;
 
             if (book.stock < item.quantity) outOfStock = true;
