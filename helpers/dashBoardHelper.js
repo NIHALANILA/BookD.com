@@ -118,7 +118,8 @@ async function dashBoard({ filterType, fromDate, toDate }) {
               $group: {
                 _id: "$book.category_ids",
                 totalQuantitySold: { $sum: "$orderItems.quantity" },
-                totalPrice:{$sum:'$orderItems.price'}
+                totalPrice:{$sum:'$orderItems.price'},
+                totalOfferDiscount: { $sum: "$orderItems.discount" }
 
               }
             },
@@ -138,6 +139,7 @@ async function dashBoard({ filterType, fromDate, toDate }) {
                 _id: 1,
                 totalQuantitySold: 1,
                 totalPrice:1,
+                totalOfferDiscount:1,
                 categoryName: "$category.name"
               }
             }
@@ -158,7 +160,8 @@ async function dashBoard({ filterType, fromDate, toDate }) {
               $group: {
                 _id: "$book.publisher",
                 totalQuantitySold: { $sum: "$orderItems.quantity" },
-                totalPrice:{$sum:"$orderItems.price"}
+                totalPrice:{$sum:"$orderItems.price"},
+                totalOfferDiscount: { $sum: "$orderItems.discount" }
               }
             },
             { $sort: { totalQuantitySold: -1 } },
@@ -180,23 +183,37 @@ async function dashBoard({ filterType, fromDate, toDate }) {
               $group: {
                 _id: "$book.author",
                 totalQuantitySold: { $sum: "$orderItems.quantity" },
-                totalPrice:{$sum:"$orderItems.price"}
+                totalPrice:{$sum:"$orderItems.price"},
+                totalOfferDiscount: { $sum: "$orderItems.discount" }
               }
             },
             { $sort: { totalQuantitySold: -1 } },
             { $limit: 5 }
           ],
           
-          orderDetails: [
+          userDetails: [
             {
               $match: {
                 status: { $in: ["delivered", "Partial return"] }
               }
             },
+            {$group:{
+              _id:"$userId",
+              orderCount:{$sum:1},
+              orderAmount:{$sum:"$netAmount"},
+              discount:{$sum:"$discount"}
+
+            }},{
+              $sort:{orderAmount:-1}
+            },{
+              $limit:10
+
+            },
+
             {
               $lookup: {
                 from: "users",
-                localField: "userId",
+                localField: "_id",
                 foreignField: "_id",
                 as: "userDetails"
               }
@@ -209,14 +226,10 @@ async function dashBoard({ filterType, fromDate, toDate }) {
             },
             {
               $project: {
-                userId: 1,
-                status: 1,
-                orderItems: 1,
+                userId: "$_id",
                 discount: 1,
-                netAmount: 1,
-                paymentMethod: 1,
-                createdAt: 1,
-                updatedAt: 1,
+                orderAmount: 1,
+                orderCount:1,
                 username: "$userDetails.username",
                 email: "$userDetails.email"
               }

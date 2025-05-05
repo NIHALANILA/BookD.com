@@ -582,7 +582,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleDelete(index) {
         const previewContainer = document.getElementById(`previewContainer${index}`);
         previewContainer.innerHTML = `<span>Add Image</span>`;
-        alert(`Image ${index + 1} deleted!`);
+        swel.fire(`Image ${index + 1} deleted!`);
     }
 
 document.getElementById("addBookForm").addEventListener("submit", async function (event) {
@@ -610,11 +610,20 @@ document.getElementById("addBookForm").addEventListener("submit", async function
             isbnError.classList.remove("d-none"); 
         } else {
             isbnError.classList.add("d-none"); 
-            alert("Form submitted successfully!");
-            document.getElementById("addBookForm").submit(); 
-        }
-    }
-});
+           /* alert("Form submitted successfully!");
+            document.getElementById("addBookForm").submit(); */
+            Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+             text: 'Form submitted successfully!',
+             confirmButtonText: 'OK'
+            }).then(() => {
+             document.getElementById("addBookForm").submit();
+           });
+
+           }
+             }
+         });
 
 
 function validateForm() {
@@ -727,9 +736,6 @@ function validateImages() {
     let hasImage = Array.from(images).every(input => input.files.length === 1);
 
     if (!hasImage) {
-        /*alert("Please upload  image in each box.");
-        return false;*/
-
         document.getElementById('imageError').innerText = "upload images";
         isValid = false;
     }

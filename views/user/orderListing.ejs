@@ -211,8 +211,14 @@ textarea {
                             <span class="badge bg-danger">Payment Failed</span> 
                         <% } else if (order.status === 'Partial return') { %> 
                             <span class="badge bg-danger">Partial return </span> 
+                         <% } else if (order.status === 'cancelled') { %> 
+                          <span class="badge bg-primary">Cancelled </span> 
+                         <% } else if (order.status === 'returned') { %> 
+                          <span class="badge bg-primary">returned </span> 
+                         <% } else if (order.status === 'shipped') { %> 
+                          <span class="badge bg-primary">shipped</span>
                         <% } else { %> 
-                            <span class="badge bg-primary">Cancelled</span> 
+                            <span class="badge bg-danger">Delivered(rejected return request pls contact if any concern)</span> 
                         <% } %>
                     </p>
                     <p><strong>Total Amount:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
@@ -353,7 +359,7 @@ document.getElementById("confirmCancel").addEventListener("click", function () {
     const reason = document.getElementById("cancelReason").value;
 
     fetch(`/orders/cancel/${orderId}`, {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason })
     }).then(response => response.json())
@@ -361,18 +367,31 @@ document.getElementById("confirmCancel").addEventListener("click", function () {
         
 
        if(data.success){
-        alert('order canceled succefully')
-        location.reload()
+        Swal.fire({
+                  icon: 'success',
+                  title: 'Order Cancelled',
+                  text: data.message || 'Order cancelled successfully.'
+              }).then(() => {
+                  location.reload();
+              });
        }
        else{
-        alert('failed to cancel') 
+        Swal.fire({
+                  icon: 'error',
+                  title: 'Cancel Failed',
+                  text: data.message || 'Failed to cancel order.'
+              });
        }
 
 
       })
       .catch(error => {
     console.error(" Cancel error:", error);
-    alert("Something went wrong.");
+    Swal.fire({
+              icon: 'error',
+              title: 'Oops!',
+              text: 'Something went wrong.'
+          });
 });})
 
 document.querySelectorAll(".return-order").forEach(button => {
@@ -387,16 +406,35 @@ document.getElementById("confirmReturn").addEventListener("click", function () {
     const reason = document.getElementById("returnReason").value;
 
     if (!reason.trim()) {
-        alert("Return reason is required.");
+      Swal.fire({
+            icon: 'warning',
+            title: 'Missing Reason',
+            text: 'Return reason is required.'
+        });
         return;
     }
 
     fetch(`/orders/return/${orderId}`, {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ returnReason: reason }),
         credentials: "include"
-    }).then(() => location.reload());
+    }).then(() => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Returned!',
+            text: 'Order returned successfully.'
+        }).then(() => {
+            location.reload();
+        });
+}).catch(error => {
+        console.error("Return error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: 'Something went wrong.'
+        });
+    });
 });
 
 document.querySelectorAll(".closeModal").forEach(button => {
@@ -424,15 +462,14 @@ document.getElementById("confirmCancelItem").addEventListener("click", function 
   const reason = document.getElementById("cancelItemReason").value;
 
   fetch(`/orders/cancel-item/${orderId}`, {
-    method: "POST",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ itemId, reason })
   })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-       // alert("Item cancelled successfully.");
-        //location.reload();
+      
         Swal.fire({
           icon: 'success',
           title: 'Cancelled!',
@@ -441,7 +478,7 @@ document.getElementById("confirmCancelItem").addEventListener("click", function 
           location.reload();
         });
       } else {
-        //alert("Failed to cancel item.");
+        
         Swal.fire({
           icon: 'warning',
           title: 'Cancel Failed',
@@ -470,15 +507,15 @@ document.getElementById("confirmReturnItem").addEventListener("click", function 
   const reason = document.getElementById("returnItemReason").value;
 
   fetch(`/orders/return-item/${orderId}`, {
-    method: "POST",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ itemId, reason })
   })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        //alert("Item returned successfully.");
-        //location.reload();
+        
+        
         Swal.fire({
           icon: 'success',
           title: 'Returned!',
@@ -487,7 +524,7 @@ document.getElementById("confirmReturnItem").addEventListener("click", function 
           location.reload();
         });
       } else {
-        //alert("Failed to return item.");
+        
         Swal.fire({
           icon: 'warning',
           title: 'Return Failed',
@@ -497,7 +534,7 @@ document.getElementById("confirmReturnItem").addEventListener("click", function 
     })
     .catch(err => {
       console.error("Return Item Error:", err);
-      //alert("Something went wrong.");
+      
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

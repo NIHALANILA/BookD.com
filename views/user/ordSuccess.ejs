@@ -153,12 +153,18 @@ p{
                 </a>
                 <p><strong>Order ID:</strong> #<%= order.orderId %></p>
                 <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
-                <p><strong>Order Status:</strong> <%= order.status %></p>
+                <% if(order.status==='rejected'){ %>
+                  <p><strong>Order Status:</strong>Delivered(Return request rejected-pls contact )</p>
+                  <%}else {%>
+                    <p><strong>Order Status:</strong> <%= order.status %></p>
+                    <%} %>
+                
                 <p><strong>Payment Method:</strong> 
                     <%= order.paymentMethod %>
                 </p>
-                <p><strong>Total Items:</strong> <%= order.orderItems.length-(order.cancelledItems||0)-(order.returnedItems||0) %></p>
                 <p><strong>Total Amount:</strong> ₹<%= order.total %></p>
+                <p><strong>Included Items:</strong> <%= order.orderItems.length-(order.cancelledItems||0)-(order.returnedItems||0) %></p>
+               
                 <% if (order.cancelledItems && order.cancelledItems > 0) { %>
                     <p><strong>Cancelled Items:</strong> <%= order.cancelledItems %></p>
                   <% } %>

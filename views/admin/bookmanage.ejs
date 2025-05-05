@@ -116,13 +116,23 @@
 </main>
 </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     function softDelete(bookId) {
-        if (confirm("Are you sure you want to delete this book?")) {
-            fetch(`/admin/books/delete/${bookId}`, {
-                method: "POST",
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this book?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/books/${bookId}`, {
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json"
                 }
@@ -130,35 +140,49 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    location.reload();
+                    Swal.fire("Deleted!", data.message, "success").then(() => {
+                        location.reload();
+                    });
                 } else {
-                    alert("Error deleting book");
+                    Swal.fire("Error!", "Error deleting book", "error");
                 }
             })
             .catch(error => console.error("Error:", error));
         }
-    }
-    function toggleBook(bookId) {
-    if (confirm("Are you sure you want to unlist this book?")) {
-        fetch(`/admin/books/toggle/${bookId}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => response.json()) 
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert("Error unlisting the book");
-            }
-        })
-        .catch(error => console.error("Error:", error)); 
-    }
+    });
 }
+
+function toggleBook(bookId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to unlist this book?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, unlist it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/books/${bookId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json()) 
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("Success!", data.message, "success").then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire("Error!", "Error unlisting the book", "error");
+                }
+            })
+            .catch(error => console.error("Error:", error)); 
+        }
+    });
+}
+  
 
 </script>
 

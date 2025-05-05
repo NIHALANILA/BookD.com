@@ -407,7 +407,7 @@ const placeOrder = async (req, res) => {
             }
 
             for(const item of cart.items){
-                if(!item.bookId||item.bookId.stock<=item.quantity) continue;
+                if(!item.bookId||item.bookId.stock<item.quantity) continue;
                 
                 const offer=await getBestOffer(item.bookId._id);
                 const finalPrice=offer ? offer.finalPrice:item.bookId.price;

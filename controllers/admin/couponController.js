@@ -4,18 +4,32 @@ const listCoupons=async(req,res)=>{
 
     try {
 
+       let search=req.query?.search||"";
+
         let page=parseInt(req.query.page)||1;
         const limit=5
 
         const query = { isDeleted: false };
+
+        if(search){
+            query.code={$regex:search,$options:'i'}
+
+        }
         const coupons = await Coupon.find(query).sort({ createdAt: -1 }).limit(limit)
         .skip((page-1)*limit) 
 
         const count=await Coupon.countDocuments(query);
+
         const totalPages = Math.ceil(count / limit);
+        let message="";
+        if(coupons.length===0){
+            message=`coupons not found for ${search}`
+        }
         res.render('couponmanage', {
           coupons,currentPage: page,
           totalPages,
+          search,
+          message
          
         })
        

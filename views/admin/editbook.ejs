@@ -607,8 +607,11 @@ document.getElementById("editBookForm").addEventListener("submit", function (eve
     event.preventDefault(); 
 
     if (validateForm()) {
-        alert("Form submitted successfully!");
-        document.getElementById("editBookForm").submit(); 
+       
+        Swal.fire("Form submitted successfully!").then(() => {
+    document.getElementById("editBookForm").submit();
+});
+
     }
 });
 

@@ -95,6 +95,8 @@
       <th>Top ten</th>
       <th>Category name</th>
       <th>Quantity Sold</th>
+      <th>Amount contribution</th>
+      <th>Total Offer applied</th>
       
     </tr>
   </thead>
@@ -104,6 +106,8 @@
         <td><%=ind+1 %></td>
         <td><%= cat.categoryName %></td>
         <td><%= cat.totalQuantitySold %></td>
+        <td><%= cat.totalPrice %></td>
+        <td><%= cat. totalOfferDiscount.toFixed(2) %></td>
         
       </tr>
     <% }) %>
@@ -113,9 +117,11 @@
 <table class=" book-table">
   <thead>
     <tr>
-      <th>Top ten</th>
+      <th>Top five</th>
       <th>Publication</th>
       <th>Quantity Sold</th>
+      <th>Amount contribution</th>
+      <th>Total Offer applied</th>
       
     </tr>
   </thead>
@@ -125,6 +131,8 @@
         <td><%=ind+1 %></td>
         <td><%= pub._id %></td>
         <td><%= pub.totalQuantitySold %></td>
+        <td><%= pub.totalPrice %></td>
+        <td><%= pub. totalOfferDiscount.toFixed(2) %></td>
         
       </tr>
     <% }) %>
@@ -134,10 +142,11 @@
 <table class=" book-table">
   <thead>
     <tr>
-      <th>Top ten</th>
+      <th>Top five</th>
       <th>Authors</th>
       <th>Quantity Sold</th>
-      
+      <th>Amount contribution</th>
+      <th>Total Offer applied</th>
     </tr>
   </thead>
   <tbody>
@@ -146,6 +155,32 @@
         <td><%=ind+1 %></td>
         <td><%= auth._id %></td>
         <td><%= auth.totalQuantitySold %></td>
+        <td><%= auth.totalPrice %></td>
+        <td><%= auth. totalOfferDiscount.toFixed(2) %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<h2>Top customers</h2>
+<table class=" book-table">
+  <thead>
+    <tr>
+      <th>Top ten</th>
+      <th>username</th>
+      <th>Email</th>
+      <th>Purchased Amount</th>
+      <th>No:of orders</th>
+      
+    </tr>
+  </thead>
+  <tbody>
+    <% result.userDetails.forEach((user,ind) => { %>
+      <tr>
+        <td><%=ind+1 %></td>
+        <td><%= user.username %></td>
+        <td><%= user.email %></td>
+        <td><%=user.orderAmount %></td>
+        <td><%=user.orderCount %></td>
         
       </tr>
     <% }) %>

@@ -101,11 +101,11 @@ router.patch('/cart',cartController.updateCart)
  router.get('/orders/success/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.success)
 
 router.get('/orders',auth.loadCommonData,orderController.orderList)
-router.post('/orders/cancel/:id',orderController.orderCancel)
-router.post('/orders/cancel-item/:id',orderController.cancelItem)
+router.patch('/orders/cancel/:id',orderController.orderCancel)
+router.patch('/orders/cancel-item/:id',orderController.cancelItem)
 router.get('/orders/view/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.view)
-router.post('/orders/return/:id',orderController.returnOrder)
-router.post('/orders/return-item/:id',orderController.returnItem)
+router.patch('/orders/return/:id',orderController.returnOrder)
+router.patch('/orders/return-item/:id',orderController.returnItem)
 router.get('/orders/invoice/:id', orderController.downloadInvoice);
 
 //coupon related

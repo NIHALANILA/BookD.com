@@ -242,6 +242,9 @@ const login=async(req,res)=>{
      if(findUser.status==='blocked'){
         return res.render("login",{message:"user is blocked"})
      }
+     if(findUser.googleId){
+        return res.render("login",{message:"please do google login"})
+     }
 
      const passwordMatch= await bcrypt.compare(password,findUser.password)
      if(!passwordMatch){
@@ -265,8 +268,17 @@ const login=async(req,res)=>{
 
 const logout= async(req,res)=>{
     try{
-       req.session.user="null";
-       res.redirect('/login')
+        req.logout(function (err) {
+            if (err) {
+              console.log("Error during logout:", err);
+              return res.redirect("/pageNotFound");
+            }
+      
+            // This clears your app-level user session only, not admin
+            req.session.user = null;
+      
+            res.redirect("/login");
+          });
     }
     catch(error){
         console.log(error)

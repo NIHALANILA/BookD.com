@@ -5,6 +5,18 @@
 
     <a href="/admin/coupons/add"><button class="edit-btn mb-3 " style="background-color: #2ecc71; float: right; margin-bottom: 5px;">Add Coupon</button></a>
 
+    <form class="user-search-form"   action="/admin/coupons" method="GET">
+      <input type="text" name="search" value="<%= search %>" placeholder="Search users">
+      <button type="submit">Search</button>
+      <% if (search) { %>
+          <a href="/admin/coupons"><button type="button">Reset</button></a>
+
+      <% } %>
+      <% if (message) { %>
+          <p class="alert alert-warning"><%= message %></p>
+      <% } %>
+      
+  </form> 
 
     <div class="table-responsive-wrapper">
     <table class="book-table ">
