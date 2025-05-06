@@ -22,9 +22,6 @@ const loadprofile=async(req,res)=>{
 }
 
 
-
-
-
 const updateProfileImage = async (req, res) => {
     try {
         if (!req.processedImage) {

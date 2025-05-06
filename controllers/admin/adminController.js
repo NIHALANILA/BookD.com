@@ -47,7 +47,7 @@ try {
 }}
 
 
-const dashboard=async(req,res)=>{
+const loaddashboard=async(req,res)=>{
 
     try {
      if(req.session.admin){
@@ -57,7 +57,7 @@ const dashboard=async(req,res)=>{
         res.render('dashboard', {
             from: dateRange?.$gte || null,
             to: dateRange?.$lte || null,
-            filterType: filterType || "all",
+            filterType: filterType ,
             result,
             moment
           });
@@ -80,4 +80,4 @@ const logout=async(req,res)=>{
         
     }
 }
-module.exports={loadlogin,login,dashboard,logout}
+module.exports={loadlogin,login,loaddashboard,logout}

@@ -97,7 +97,7 @@ const statusEdit = async (req, res) => {
       const allowedStatusupdate={
         processing:["delivered","shipped"],
         shipped:["delivered"],
-        returned:[],
+        returned:[],                                        // for preventing accidental updates
         "Partial return":[],
         cancelled:[],
         orderRequested:["returned","rejected"],
@@ -153,7 +153,7 @@ const statusEdit = async (req, res) => {
       if (status === "Partial return" && order.status !== "Partial return") {
 
         let existingItems= order.orderItems.filter(i=>i.status!=="Returned" && i.status!=='Cancelled')
-        console.log(existingItems)
+        
         if(existingItems.length===1){
           return orderReturnFromItem(req,res,order)
         }
@@ -200,7 +200,7 @@ const statusEdit = async (req, res) => {
             await refundToWallet(order.userId, refundAmount);
           } else {
             // if coupon condition still hold 
-            //total value reduced bcz books returned  so discount also need to reduced 
+            //total value reduced bcz books returned  so discount also need to reduced proportionally
             //calculate proportional discount and update order fields according with this
             
   

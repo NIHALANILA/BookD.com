@@ -270,11 +270,11 @@ const logout= async(req,res)=>{
     try{
         req.logout(function (err) {
             if (err) {
-              console.log("Error during logout:", err);
+              console.log("at user logout:", err);
               return res.redirect("/pageNotFound");
             }
       
-            // This clears your app-level user session only, not admin
+        
             req.session.user = null;
       
             res.redirect("/login");

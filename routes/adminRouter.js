@@ -14,13 +14,9 @@ const salesController=require('../controllers/admin/salesController')
 
 
 
-
-
-
-
 router.get('/login',adminAuth.adminNotIn,adminController.loadlogin)
 router.post('/login',adminController.login)
-router.get('/dashboard',adminAuth.adminIn,adminController.dashboard)
+router.get('/dashboard',adminAuth.adminIn,adminController.loaddashboard)
 router.get('/logout',adminController.logout)
 
 //customer

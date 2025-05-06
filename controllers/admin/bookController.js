@@ -35,7 +35,7 @@ if (search) {
 
         let message = "";
         if (books.length === 0) {
-            message = `No results found for "${search}".`;
+            message = `no results found for "${search}".`;
         }
 
         res.render("bookmanage",{books,
@@ -68,7 +68,7 @@ const addbook = async (req, res) => {
          
          if (req.headers["x-requested-with"] === "XMLHttpRequest") {
             const existingBook = await Book.findOne({ isbn });
-            if (existingBook) {                                                               //we need to duplication of isbn from backend
+            if (existingBook) {                                                               //we need to check duplication of isbn from backend
                 return res.json({ exists: true, message: "This ISBN already exists." });
             }
             return res.json({ exists: false });

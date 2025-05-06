@@ -87,7 +87,7 @@ const addOffer = async (req, res) => {
         applyTo,
         start_date,
         expire_date,
-        status: status || "inactive",
+        status: status 
       };
   
       

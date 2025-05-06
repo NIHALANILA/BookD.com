@@ -219,16 +219,16 @@ const loadWishlist = async (req, res) => {
 
 const addWishlist=async(req,res)=>{
     try {
-        console.log("Wishlist Form Submitted")
+        
         const user= await checkUserSession(req)
         if(!user) return res.redirect('/login')
             const { bookId } = req.body;
-        console.log("Book ID Received:", bookId);
+        
 
         const existing = await Wishlist.findOne({ user_id:user, book_id: bookId });
         if (existing) {
-            return res.status(409).json({ message: 'Already in wishlist' });
-            console.log("Book already in wishlist"); 
+            return res.status(409).json({ message: 'already in wishlist' });
+            
         }
 
         const wishlistItem = new Wishlist({
