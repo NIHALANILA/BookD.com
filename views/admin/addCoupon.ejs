@@ -167,7 +167,7 @@
       hasError=true
     }
   
-    if(data.discountType="percentage"&&data.discountValue>100){
+    if(data.discountType==="percentage"&&data.discountValue>100){
       document.getElementById('discountValueError').textContent="invalid discount value"
     }
 
@@ -175,6 +175,12 @@
       document.getElementById('expireDateError').textContent="expire date should be given"
       hasError=true;
     }
+
+    if (!data.discountType) {
+     document.getElementById('discountTypeError').textContent = "discount type is required";
+     hasError = true;
+       }
+
 
     if(!data.minimumPrice){
       document.getElementById('minimumPriceError').textContent="minimum price is required"

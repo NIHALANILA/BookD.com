@@ -62,6 +62,7 @@ const addNewaddress = async (req, res) => {
         if (req.session.returnToCheckout) {
             req.session.returnToCheckout = null;
             return res.redirect('/checkout');
+            
         }
 
         

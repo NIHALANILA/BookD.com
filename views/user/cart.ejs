@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <title>BookD</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -280,6 +280,8 @@
 
 
     <%-include("../../views/partials/user/footer")%>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="js/jquery.min.js"></script>
     <script src="js/plugins.js"></script>
     <script src="js/SmoothScroll.js"></script>
@@ -333,7 +335,13 @@
                     // Update total price
                     document.querySelector("#totalPrice").textContent = "₹" + data.totalPrice;
                 } else {
-                    alert(data.message);
+                    Swal.fire({
+                   icon: 'warning',
+                    title: 'Oops...',
+                     text: data.message
+                     });
+
+                    
                 }
             })
             .catch(error => console.error("Error updating cart:", error));
@@ -366,7 +374,11 @@
                     
                         }
                         else{
-                            alert('failed to remove itemm ')
+                            Swal.fire({
+                              icon: 'error',
+                              title: 'Failed',
+                              text: 'Failed to remove item.'
+                              });
                         }
                     })
                     .catch(error=>console.error("Error",error))

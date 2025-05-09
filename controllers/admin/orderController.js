@@ -123,7 +123,7 @@ const statusEdit = async (req, res) => {
         })
       }
 
-      if(status==="delivered"&& order.status==='processing'){
+      if(status==="delivered"&&( order.status==='processing'||order.status==='shipped')){
         for(const item of order.orderItems){
           if(item.status==='Ordered'){
             item.status ='Delivered'
@@ -146,7 +146,7 @@ const statusEdit = async (req, res) => {
           
         }
   
-        await refundToWallet(order.userId, order.netAmount - order.shippingCharge);
+        await refundToWallet(order.userId, order.netAmount - order.tax);
       }
   
       // in partial return we need to do some calculation in refunding price(to wallet) and order need to update 
@@ -161,6 +161,8 @@ const statusEdit = async (req, res) => {
         let returnTotal = 0;
         let remainingTotal = 0;
         let proportionalDiscount = 0;
+        let newTax=0;
+        let returnTax=0;
         for (const item of order.orderItems) {
           if (item.status === "Requested") {
             await Book.findByIdAndUpdate(item.bookId, {
@@ -168,36 +170,40 @@ const statusEdit = async (req, res) => {
             });
             item.status = "Returned";
             returnTotal += item.totalPrice;
+            
+            
           }
         }
-  
+        returnTax=returnTotal*(0.05)
         const coupon = order.couponId;
+
+        for (const item of order.orderItems) {
+          if (item.status === "Delivered") {
+            remainingTotal += item.totalPrice;
+          }
+        }
+        newTax = remainingTotal * 0.05;
   
         if (!coupon) {
-          await refundToWallet(order.userId, returnTotal);
-          for (const item of order.orderItems) {
-            if (item.status === "Delivered") {
-              remainingTotal += item.totalPrice;
-            }
-          }
+          
+          const refundAmount =Number((returnTotal + returnTax).toFixed(2)) ;
+          await refundToWallet(order.userId, refundAmount);
+         
 
         } else {
           const { discountType, discountValue, minimumPrice } = coupon;
   
-          //recalculate the total of ramaing  books
-          for (const item of order.orderItems) {
-            if (item.status === "Delivered") {
-              remainingTotal += item.totalPrice;
-            }
-          }
+          
          
           if (remainingTotal < minimumPrice) {
             // coupon condition broken so deduct the applied discount on order
-            const refundAmount = returnTotal - order.discount;
+            const refundAmount = Number((returnTotal - order.discount+returnTax).toFixed(2))
 
-            proportionalDiscount=order.discount; //so in this discount will be updated to zero
+            proportionalDiscount=order.discount; //so in this, discount will be updated to zero
+           
 
             await refundToWallet(order.userId, refundAmount);
+            order.discount=0;
           } else {
             // if coupon condition still hold 
             //total value reduced bcz books returned  so discount also need to reduced proportionally
@@ -211,14 +217,16 @@ const statusEdit = async (req, res) => {
               proportionalDiscount = ratio * discountValue;
             }
   
-            const refundAmount = returnTotal - proportionalDiscount;
+            const refundAmount =Number((returnTotal - proportionalDiscount+returnTax).toFixed(2)) ;
+            order.discount-=proportionalDiscount
             await refundToWallet(order.userId, refundAmount);
           }
         }
         order.returnedItems++; 
         order.total=remainingTotal;
-        order.discount=order.discount-proportionalDiscount;
-        order.netAmount=remainingTotal+order.tax+order.shippingCharge-order.discount
+        order.tax=newTax
+        order.netAmount=Number((remainingTotal+newTax+order.shippingCharge-order.discount).toFixed(2));
+        
       }
   
       order.status = status;
@@ -248,7 +256,7 @@ const statusEdit = async (req, res) => {
         }
         
       }
-      await refundToWallet(order.userId, order.netAmount - order.shippingCharge);
+      await refundToWallet(order.userId, order.netAmount - order.tax);
       await order.save(); 
       return res.json({success:true,message:"Enitire order marked as returned"})
       

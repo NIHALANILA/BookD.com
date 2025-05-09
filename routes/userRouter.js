@@ -97,6 +97,7 @@ router.patch('/cart',cartController.updateCart)
  router.get('/checkout',auth.loadCommonData,orderController.loadcheckout)
  router.post('/checkout',auth.loadCommonData,orderController.loadcheckout)
  router.post('/buynow',auth.loadCommonData,orderController.buynow)
+ router.get('/buynow',auth.loadCommonData,orderController.buynow)
  router.post('/place-order',orderController.placeOrder)
  router.get('/orders/success/:orderId',auth.loadCommonData,orderController.orderSuccess,auth.success)
 

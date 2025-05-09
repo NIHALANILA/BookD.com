@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <title>BookD</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -225,9 +225,22 @@ strong {
                 <% } %>
                   <button type="submit" class="btn btn-primary w-100" id="placeOrderBtn" disabled>Place Order</button>
               </form>
+              <form id="couponForm" class="mt-5">
+  
+                <button  class="btn btn-primary mb-2 w-auto"  type="button" onclick="openCouponModal()">View Available Coupons</button>
+              </form>
+              
+              <div id="appliedCouponSection" style="display: none;">
+                <p>Coupon <strong id="appliedCouponCode"></strong> applied!</p>
+                <p>Coupon <strong id="appliedCouponAmount"></strong> discounted!</p>
+                <p style="color: #555">Orders placed using this coupon are subject to Our Return & Cancellation Policy</p>
+                <button class="btn btn-danger mb-2 w-auto" onclick="removeCoupon()">Remove Coupon</button>
+              </div>
               
             </div>
         </div>
+       
+        
         </div>
  <div class="row ">
 
@@ -308,19 +321,6 @@ strong {
 
 <!-- Coupon Selection -->
 
-<form id="couponForm">
-  <label for="couponInput">Enter Coupon Code:</label>
-  <input type="text" id="couponInput" name="couponCode" placeholder="Enter your code">
-  <button  class="btn btn-success mb-2 w-auto" type="submit">Apply Coupon</button>
-
-  
-  <button  class="btn btn-primary mb-2 w-auto"  type="button" onclick="openCouponModal()">View Available Coupons</button>
-</form>
-
-<div id="appliedCouponSection" style="display: none;">
-  <p>Coupon <strong id="appliedCouponCode"></strong> applied!</p>
-  <button class="btn btn-danger mb-2 w-auto" onclick="removeCoupon()">Remove Coupon</button>
-</div>
 
 
 <!-- Coupon Modal -->
@@ -332,6 +332,7 @@ strong {
         <li>
           <strong><%= coupon.code %> -</strong> 
           <strong><%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %></strong>
+          <button class="btn btn-sm btn-success ms-2 apply-btn" data-code="<%= coupon.code %>"  onclick="applyCoupon('<%= coupon.code %>',this)">Apply</button>
         </li>
       <% }); %>
     </ul>
@@ -362,7 +363,7 @@ strong {
    document.addEventListener('DOMContentLoaded',function(){
     initClearSearch()
    
-    applyCoupon()
+    
     openCouponModal()
     closeCouponModal()
     initPlaceOrder();
@@ -389,12 +390,10 @@ window.location.href="/shop"
 
     
 
-   function applyCoupon(){
+   async function applyCoupon(couponCode,buttonElement){
+    if(!couponCode)return;
     
-    document.getElementById('couponForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const couponCode = document.getElementById('couponInput').value.trim();
-    if (!couponCode) return;
+    
 
     try {
         const response = await fetch('/apply-coupon', {
@@ -406,23 +405,33 @@ window.location.href="/shop"
         const result = await response.json();
 
         if (result.success) {
-            document.getElementById('tax').innerHTML = `₹${result.tax.toFixed(2)}`;
+            
             document.getElementById('final-total').innerHTML = `₹${result.finalTotal.toFixed(2)}`;
-
-            document.getElementById('couponCodeInput').value = couponCode;
-
-
 
             // Show applied coupon section
             document.getElementById('appliedCouponCode').textContent = couponCode;
+            document.getElementById('appliedCouponAmount').textContent=`₹${result.discount}`;
              document.getElementById('appliedCouponSection').style.display = 'block';
+
+             
+             
+             //
+
+          
 
 
             Swal.fire({
                 icon: 'success',
                 title: 'Coupon Applied!',
-                text: `Discount Applied: ₹${result.discount.toFixed(2)}`
-            });
+                text: `Discount Applied: ₹${result.discount.toFixed(2)}`,
+                timer: 1000, 
+            showConfirmButton: false, 
+              didClose: () => {
+                  closeCouponModal();
+               }
+                
+            })
+    ;
 
         } else {
             Swal.fire({
@@ -440,12 +449,29 @@ window.location.href="/shop"
             text: 'Something went wrong.'
         });
     }
-});
+};
 
-   }
+   
 
    function openCouponModal() {
     document.getElementById('couponModal').style.display = 'block';
+
+    const appliedCode = document.getElementById('appliedCouponCode').textContent.trim();
+
+document.querySelectorAll('.apply-btn').forEach(button => {
+  const code = button.getAttribute('data-code');
+  if (code === appliedCode) {
+    button.disabled = true;
+    button.classList.remove('btn-success');
+    button.classList.add('btn-secondary');
+    button.textContent = 'Already Applied';
+  } else {
+    button.disabled = false;
+    button.classList.remove('btn-secondary');
+    button.classList.add('btn-success');
+    button.textContent = 'Apply';
+  }
+});
 }
 
 function closeCouponModal() {
@@ -465,6 +491,8 @@ function removeCoupon() {
     if (data.success) {
       
       document.getElementById('appliedCouponSection').style.display = 'none';
+      document.getElementById('appliedCouponCode').textContent = '';
+      openCouponModal();
       
       updateTotals(data.subtotal, data.tax, data.finalTotal);
     } else {
@@ -573,7 +601,7 @@ function initPlaceOrder(){
 function initiateRazorpayPayment(response) {
 
   const savedOrderId = response.savedOrderId; 
-    const options = {
+    const options = { 
         key: response.key,  
         amount: response.amount,  
         currency: 'INR',

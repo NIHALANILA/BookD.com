@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <title>BookD</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,13 +18,14 @@
   <link rel="stylesheet" href="/https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
   <link rel="stylesheet" type="text/css" href="/style.css">
 
-  <link rel="preconnect" href="/https://fonts.googleapis.com">
-  <link rel="preconnect" href="/https://fonts.gstatic.com" crossorigin>
-  <link href="/https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link
-    href="/https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
-    <link rel="stylesheet" href="/https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    
 
     <style>
       div.swiper-wrapper {
@@ -276,7 +277,20 @@
                                         <span style="color: green; font-size: 1.1rem;">₹<%= book.salePrice %></span>
                             </p>
                         </a>
+                        <form action="/cart" method="POST" style="display: inline;">
+                            <input type="hidden" name="bookId" value="<%= book._id %>">
+                            <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                              <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
+                            </button>
+                          </form>
+                        <form action="/wishlist" method="POST" style="float: right;">
+                            <input type="hidden" name="bookId" value="<%= book._id %>">
+                            <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                              <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f;">favorite</span>
+                            </button>
+                          </form>
                     </div>
+                    
                 <% }); %>
             <% } else { %>
                 <p>No related books available.</p>

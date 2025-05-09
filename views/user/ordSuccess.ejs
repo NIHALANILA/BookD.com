@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Kaira - Bootstrap 5 Fashion Store HTML CSS Template</title>
+  <title>BookD</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -174,9 +174,22 @@ p{
                   <% } %>
                   
                 <p><strong>Discount:</strong> ₹<%= order.discount %></p>
-                <p><strong>Tax:</strong> ₹<%= order.tax %></p>
+                
+                
+
+                <p><strong>Tax:</strong> ₹<%= order.tax.toFixed(2) %></p>
                 <p><strong>Shipping Charge:</strong> ₹<%= order.shippingCharge %></p>
                 <p><strong>Amount Paid:</strong> ₹<%= order.netAmount.toFixed(2) %></p>
+                <% if (order.discount===0 && order.couponApplied!==0) { %>
+                  <p style="color: red;">Your coupon condition breaked so the  full coupon amount(₹<%= order.couponApplied %>)  deducted from refund amount</p>
+                  
+                <% } %>
+                <% if (order.discount!==0 && order.discount< order.couponApplied) { %>
+                  <p style="color: red;">Your order total changed  so the appropriate coupon discout given to the  cancelled/returned itmes  deducted from refund amount,your initial 
+                    coupon discount was:₹<%= order.couponApplied %>
+                  </p>
+                  
+                <% } %>
             </div>
 
             <!-- Shipping Address -->

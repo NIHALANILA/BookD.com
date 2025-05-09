@@ -1,7 +1,9 @@
 const Wallet = require("../models/walletSchema");
 
 const refundToWallet = async (userId, amount) => {
-  let wallet = await Wallet.findOne({ userId });
+    try {
+
+        let wallet = await Wallet.findOne({ userId });
 
   if (!wallet) {
       wallet = new Wallet({
@@ -26,6 +28,14 @@ const refundToWallet = async (userId, amount) => {
   }
 
   await wallet.save();
+        
+    } catch (error) {
+        console.error(`[ERROR] ${new Date().toISOString()} - ${error.message}`);
+        res.status(500).send("Something went wrong.");
+
+        
+    }
+  
 };
 
 module.exports = { refundToWallet };

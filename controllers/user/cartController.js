@@ -142,16 +142,26 @@ const updateCart=async(req,res)=>{
         let item=cart.items.find(item=>item.bookId._id.toString()===bookId)
         if(!item) return res.json({success:false,message:"item not found"})
 
-        if(action==="increase"&&item.quantity<item.bookId.stock){
-            item.quantity+=1
-        }
+            if (action === "increase") {
+                if (item.quantity >= 5) {
+                    return res.json({ success: false, message: "Maximum 5 copies allowed per book." });
+                }
+                if (item.quantity < item.bookId.stock) {
+                    item.quantity += 1;
+                } else {
+                    return res.json({ success: false, message: "No more stock available." });
+                }
+            }
+            
+        
+        
        
         
         else if(action==="decrease"&&item.quantity>1){
             item.quantity-=1
         }
         else {
-            return res.json({success:false,message:"Invalid action"})
+            return res.json({success:false,message:"Reached maximum limmit"})
         }
 
          // 

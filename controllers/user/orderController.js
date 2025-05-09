@@ -479,6 +479,7 @@ const placeOrder = async (req, res) => {
                 shippingCharge,
                 tax,
                 discount: totalDiscount,
+                couponApplied:couponApplied,
                 couponId: appliedCoupon
             });
         
@@ -538,6 +539,7 @@ const placeOrder = async (req, res) => {
             shippingCharge,
             tax,
             discount:totalDiscount,
+            couponApplied:totalDiscount,
             couponId:appliedCoupon
         });
 
@@ -662,6 +664,8 @@ const verifyPayment=async(req,res)=>{
                     }
                 );
             }
+
+            delete req.session.appliedCoupon;
 
             
             await Cart.deleteMany({ userId: updatedOrder.userId._id });
@@ -788,6 +792,7 @@ const returnOrder=async(req,res)=>{
     }
 }
 
+
 const downloadInvoice = async (req, res) => {
     try {
         const orderId = req.params.id;
@@ -799,39 +804,127 @@ const downloadInvoice = async (req, res) => {
             return res.status(404).send("Order not found");
         }
 
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({ margin: 50 });
         const filename = `invoice-${orderId}.pdf`;
 
-        
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
-        // Pipe the PDF into response
         doc.pipe(res);
 
-        // Create PDF content
-        doc.fontSize(20).text("Order Invoice", { align: "center" });
-        doc.moveDown();
+        // Title
+        doc.fontSize(20).text("BookD", { align: "center" }).moveDown();
+
+        // Order Summary
         doc.fontSize(14).text(`Order ID: ${order.orderId}`);
-        doc.text(`Status: ${order.status}`);
-        doc.text(`Date: ${order.createdAt.toDateString()}`);
+        doc.text(`Order Date: ${order.createdAt.toDateString()}`);
+        doc.text(`Order Status: ${order.status === "rejected" ? "Delivered (Return request rejected - please contact)" : order.status}`);
+        doc.text(`Payment Method: ${order.paymentMethod}`);
+        doc.text(`Included Items: ${order.orderItems.length - (order.cancelledItems || 0) - (order.returnedItems || 0)}`);
+        if (order.cancelledItems) doc.text(`Cancelled Items: ${order.cancelledItems}`);
+        if (order.returnedItems) doc.text(`Returned Items: ${order.returnedItems}`);
         doc.moveDown();
 
-        doc.text(`Shipping Address:`);
-        doc.text(`${order.addressId.name}`);
-        doc.text(`${order.addressId.place}, ${order.addressId.city}`);
-        doc.text(`${order.addressId.state} - ${order.addressId.pincode}`);
+        // Shipping Address
+        doc.fontSize(16).text("Shipping Address", { underline: true });
+        doc.fontSize(12).text(`Name: ${order.addressId.name}`);
+        doc.text(`Address: ${order.addressId.address}, ${order.addressId.city}`);
+        doc.text(`State & Pincode: ${order.addressId.state} - ${order.addressId.pincode}`);
+        doc.text(`Phone: ${order.addressId.phone}`);
         doc.moveDown();
 
-        doc.text(`Items:`);
-        order.orderItems.forEach((item, index) => {
-            doc.text(`${index + 1}. ${item.bookId.title} - Qty: ${item.quantity} - ₹${item.bookId.price}`);
+        // Items Table (Single Table with 5 columns and multiple rows)
+        doc.fontSize(16).text("Items Ordered", { underline: true }).moveDown(0.5);
+
+        const tableTop = doc.y + 10;
+        const titleX = 50;
+        const qtyX = 200;
+        const priceX = 270;
+        const discountX = 350;
+        const statusX = 420;
+        const rowHeight = 25;
+        const tableWidth = 500;
+
+        // Table Header (Single Table)
+        doc.fontSize(12).text("Title", titleX, tableTop)
+            .text("Qty", qtyX, tableTop)
+            .text("Price", priceX, tableTop)
+            .text("Discount", discountX, tableTop)
+            .text("Status", statusX, tableTop);
+
+        // Header underline
+        doc.moveTo(titleX, tableTop + 15).lineTo(tableWidth, tableTop + 15).stroke();
+
+        let y = tableTop + 20;
+
+        // Table Rows for each item
+        order.orderItems.forEach((item) => {
+            const status = item.status || "Ordered";
+            const title = item.bookId.title;
+            const qty = item.quantity.toString();
+            const price = `₹${item.price.toFixed(2)}`;
+            const discount = `₹${item.discount.toFixed(2)}`;
+
+            // Draw table row borders for a single table
+            doc.rect(titleX, y, 150, rowHeight).stroke();
+            doc.rect(qtyX, y, 70, rowHeight).stroke();
+            doc.rect(priceX, y, 80, rowHeight).stroke();
+            doc.rect(discountX, y, 70, rowHeight).stroke();
+            doc.rect(statusX, y, 80, rowHeight).stroke();
+
+            // Write cell text with proper alignment
+            doc.fontSize(10).text(title, titleX + 5, y + 5, { width: 140, ellipsis: true });
+            doc.text(qty, qtyX + 5, y + 5);
+            doc.text(price, priceX + 5, y + 5);
+            doc.text(discount, discountX + 5, y + 5);
+            doc.text(status, statusX + 5, y + 5);
+
+            y += rowHeight;
         });
 
         doc.moveDown();
-        doc.text(`Total: ₹${order.netAmount}`, { align: "right" });
 
-        
+               // Summary Section Table
+               const summaryTop = y + 10; // y was updated after last item row
+               const labelX = titleX;
+               const valueX = labelX + 250; // Space between label and value columns
+               const summaryRowHeight = 25;
+               const summaryColWidth = 250;
+       
+               const summaryItems = [
+                   { label: "Discount", value: `₹${order.discount.toFixed(2)}` },
+                   { label: "Tax", value: `₹${order.tax.toFixed(2)}` },
+                   { label: "Shipping Charge", value: `₹${order.shippingCharge.toFixed(2)}` },
+                   { label: "Total Amount", value: `₹${order.total.toFixed(2)}` },
+                   { label: "Amount Paid", value: `₹${order.netAmount.toFixed(2)}` },
+               ];
+       
+               summaryItems.forEach((item, index) => {
+                   const currentY = summaryTop + index * summaryRowHeight;
+       
+                   // Draw borders
+                   doc.rect(labelX, currentY, summaryColWidth, summaryRowHeight).stroke();
+                   doc.rect(valueX, currentY, summaryColWidth, summaryRowHeight).stroke();
+       
+                   // Write text
+                   doc.fontSize(12)
+                       .text(item.label, labelX + 10, currentY + 7)
+                       .text(item.value, valueX + 10, currentY + 7);
+               });
+       
+               y = summaryTop + summaryItems.length * summaryRowHeight + 30; // Update y for spacing after summary
+       
+        // Conditional Refund Note
+        if (order.discount === 0 && order.couponApplied !== 0) {
+            doc.fillColor("red").text(
+                `Your coupon condition broke, so the full coupon amount (₹${order.couponApplied}) was deducted from the refund amount.`,50,y
+            );
+        } else if (order.discount !== 0 && order.discount < order.couponApplied) {
+            doc.fillColor("red").text(
+                `Your order total changed. The discounted amount for returned/cancelled items was deducted. Initial coupon: ₹${order.couponApplied}`,50,y
+            );
+        }
+
         doc.end();
 
     } catch (err) {
@@ -960,13 +1053,15 @@ const cancelItem=async(req,res)=>{
         let cancelTotal=item.totalPrice;
         let remainingTotal=0;
         let proportionalDiscount=0;
+        let returnTax=0;
+        let newTax=0
 
         for(const i of order.orderItems){
             if(i.status==="Ordered"){                   //recalculating and updating order total and other related fields(refer statusedit in admin side-same steps here)
                 remainingTotal+=i.totalPrice;
             }
         }
-        
+        newTax=remainingTotal*(0.05)
         const coupon=order.couponId;
 
         if(coupon){
@@ -975,8 +1070,9 @@ const cancelItem=async(req,res)=>{
             const { discountType, discountValue, minimumPrice } = coupon;
 
             if(remainingTotal<minimumPrice){
-                order.couponId = null; 
+                 
                 proportionalDiscount=order.discount;
+                order.discount=0;
             }
             else{
                 if(discountType==="percentage"){
@@ -986,19 +1082,25 @@ const cancelItem=async(req,res)=>{
                     const ratio=cancelTotal/order.total;
                     proportionalDiscount=ratio*discountValue
                 }
+                order.discount-=proportionalDiscount
             }
         }
 
+        let refundAmount=0;
         if(order.paymentMethod!=="cod"){
-            const refundAmount=cancelTotal-proportionalDiscount;     //if payment was through online or wallet 
+            returnTax=Number((cancelTotal*0.05).toFixed(2))
+             refundAmount=cancelTotal+returnTax-proportionalDiscount
+           
+            refundAmount = Number(refundAmount.toFixed(2));                                              //if payment was through online or wallet 
             await refundToWallet(order.userId,refundAmount)
         }
+        
          
         order.total=remainingTotal;
         order.cancelledItems++;
-        order.discount=order.discount-proportionalDiscount;
-        order.netAmount=remainingTotal+order.tax+order.shippingCharge-order.discount
-        const allItemsCancelled = order.orderItems.every(item => item.status ==="Cancelled");
+        order.tax=newTax   
+        order.netAmount=Number((remainingTotal+order.tax+order.shippingCharge-order.discount).toFixed(2))
+         
 
         
 

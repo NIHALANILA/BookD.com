@@ -129,7 +129,11 @@ const verifyOtp = async (req, res) => {
             }
         }
         
-
+        req.session.user = {
+            _id: saveUserData._id,
+            username: saveUserData.username
+        };
+        
         
         
         delete req.session.userOtp;
@@ -137,7 +141,7 @@ const verifyOtp = async (req, res) => {
         delete req.session.otpExpires;
 
         
-        return res.redirect('/login'); 
+        return res.redirect('/'); 
     } 
 
     //forget password

@@ -13,7 +13,7 @@ const loadHome=async(req,res)=>{
               
        const userData = await checkUserSession(req)        
         
-        const newArrivals= await Books.find({isDeleted:false,isListed:true}).sort({createdAt: -1}).lean()
+        const newArrivals= await Books.find({isDeleted:false,isListed:true,stock: { $gt: 0 }}).sort({createdAt: -1}).lean()
     
        let bestSellers = [];
        const bestSellerCategory = await Category.findOne({ name: "Best Seller" });
@@ -22,6 +22,7 @@ const loadHome=async(req,res)=>{
         bestSellers = await Books.find({
         isDeleted: false,
         isListed: true,
+        stock: { $gt: 0 },
         category_ids: { $in: [bestSellerCategory._id] } 
        }).sort({ edition: -1 }).lean()
 
@@ -59,7 +60,7 @@ const loadShopage = async (req, res) => {
         let filterTitle = "All Books";
         
         const categories = await Category.find({isDeleted:false,isListed:true});
-        const publishers = await Books.distinct("publisher", { isDeleted: false, isListed: true });
+        const publishers = await Books.distinct("publisher", { isDeleted: false, isListed: true,stock: { $gt: 0 }});
 
         
         const { filter, category, language, minPrice, maxPrice, page,search,clearSearch,publisher,sort } = req.query;
@@ -71,7 +72,7 @@ const loadShopage = async (req, res) => {
         }
 
 
-        let booksQuery = { isDeleted: false, isListed: true };
+        let booksQuery = { isDeleted: false, isListed: true,stock: { $gt: 0 } };
 
         
         
@@ -225,7 +226,8 @@ relatedBooks = await Books.find({
     author: bookData.author,
     _id: { $ne: bookId },
     isDeleted: false,
-    isListed: true
+    isListed: true,
+    stock: { $gt: 0 }
 }).lean().limit(maxRelatedBooks);
 
 //second for category but not different lanaguage
@@ -236,6 +238,7 @@ if (relatedBooks.length < maxRelatedBooks && categoryArray.length > 0) {
         _id: { $ne: bookId },
         isDeleted: false,
         isListed: true,
+        stock: { $gt: 0 },
         author: { $ne: bookData.author } // avoid duplicates
     }).lean()
     .limit(maxRelatedBooks - relatedBooks.length);
