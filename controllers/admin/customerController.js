@@ -1,4 +1,7 @@
 const User= require('../../models/userSchema')
+const Contact=require('../../models/contactSchema');
+const { success } = require( '../../middleware/auth' );
+
 
 const customerlist= async(req,res)=>{
     try {
@@ -57,6 +60,42 @@ const unBlockCustomer=async(req,res)=>{
 }
 
 
+const messageHandle=async(req,res)=>{
+    try {
+        
+        let search=req.query?.search||"";
+        let page=parseInt(req.query.page)||1;
+        const limit=5;
+        const query=search?{
+            $or:[{username:{$regex:search,$options:"i"}}]
+        }:{}
+        const contactMsg=await Contact.find(query).sort({createdAt:-1})
+                    .limit(limit)
+                    .skip((page-1)*limit)
+                    .exec()
+
+        const count=await Contact.countDocuments(query)
+        const totalPages=Math.ceil(count/limit)   
+        let message="" ;
+        if(contactMsg.length===0){
+            message="No messages"
+        } 
+        res.render('messages',{contactMsg,search,currentPage:page,totalPages,message})      
+    } catch (error) {
+        res.status(500).send({error:'internal server error'})
+    }
+}
+
+const resolveMsg=async(req,res)=>{
+    try {
+        console.log('resolve called')
+        await Contact.findByIdAndDelete(req.params.id)
+        res.json({success:true,message:'updated issue as  resolved'})
+    } catch (error) {
+        res.status(500).send({error:'Internal server error'})
+    }
+}
 
 
-module.exports={customerlist,blockCustomer,unBlockCustomer}
+
+module.exports={customerlist,blockCustomer,unBlockCustomer,messageHandle,resolveMsg }

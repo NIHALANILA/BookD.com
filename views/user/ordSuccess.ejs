@@ -141,7 +141,7 @@ p{
     <div class="containerB">
         <div class="success-box">
             <% if (isOrderSuccess) { %>
-            <div class="icon">&#9989;</div> <!-- Success check icon -->
+            <div class="icon">&#9989;</div> 
             <h2>Order Placed Successfully!</h2>
             <p>Thank you for your purchase. Your order has been confirmed.</p>
             <% } %>
@@ -151,7 +151,7 @@ p{
                 <a href="/orders/invoice/<%= order._id %>" class="btn btn-primary" download>
                     Download Invoice
                 </a>
-                <p><strong>Order ID:</strong> #<%= order.orderId %></p>
+                <p><strong>Order ID:</strong> <%= order.orderId %></p>
                 <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
                 <% if(order.status==='rejected'){ %>
                   <p><strong>Order Status:</strong>Delivered(Return request rejected-pls contact )</p>

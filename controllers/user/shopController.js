@@ -4,6 +4,7 @@ const Books = require('../../models/bookSchema');
 const mongoose = require('mongoose');
 const {checkUserSession} = require('../../helpers/userDry')
 const {getBestOffer}=require('../../helpers/offerHelper')
+const Contact=require('../../models/contactSchema')
 
 
 
@@ -262,8 +263,27 @@ for (const book of relatedBooks) {
 }
 };
 
+const contact=async(req,res)=>{
+    try {
+        res.render('contact')
+    } catch (error) {
+       res.status(500).send({ error: 'Internal server error. Please try again later.' });
+ 
+    }
+}
+
+const contactmsg=async(req,res)=>{
+    try {
+        console.log('contactmsg called')
+        const{name,email,subject,message}=req.body;
+        const contact=new Contact({name,email,subject,message})
+        await contact.save()
+        return res.json({success:true,message:'Message sent successfully'})
+    } catch (error) {
+        res.render('contact',{error:'Something went wrong,Please try again later'})
+    }
+}
 
 
 
-
-module.exports = { loadShopage,viewBookDetails,loadHome };
+module.exports = { loadShopage,viewBookDetails,loadHome,contact,contactmsg };

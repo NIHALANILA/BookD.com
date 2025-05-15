@@ -364,7 +364,7 @@ strong {
     initClearSearch()
    
     
-    openCouponModal()
+    
     closeCouponModal()
     initPlaceOrder();
     hidecod()
@@ -431,7 +431,9 @@ window.location.href="/shop"
                }
                 
             })
-    ;
+
+            disableAddressEditingIfCouponApplied();
+    
 
         } else {
             Swal.fire({
@@ -454,6 +456,16 @@ window.location.href="/shop"
    
 
    function openCouponModal() {
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked') 
+    || document.querySelector('.address.selected');
+
+   
+
+    if (!selectedAddress) {
+        Swal.fire("Please add or select a address to deliver");
+        return; // stop here if not selected
+    }
+
     document.getElementById('couponModal').style.display = 'block';
 
     const appliedCode = document.getElementById('appliedCouponCode').textContent.trim();
@@ -578,7 +590,7 @@ function initPlaceOrder(){
             }
         } else {
             
-           // alert(response.message || "Something went wrong!");
+           
 
            
       Swal.fire({
@@ -697,8 +709,63 @@ document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
 });
 
 
+function disableAddressEditingIfCouponApplied() {
+    const appliedSection = document.getElementById('appliedCouponSection');
+    const addNewBtn = document.querySelector('a[href*="/profile/address?from=checkout"]');
+    const editButtons = document.querySelectorAll('a[href*="/profile/address/"]');
 
+    function disableButtons() {
+        if (addNewBtn) {
+            addNewBtn.dataset.disabled = "true";
+            addNewBtn.addEventListener('click', couponBlockAddNew);
+        }
 
+        editButtons.forEach(btn => {
+            btn.dataset.disabled = "true";
+            btn.addEventListener('click', couponBlockEdit);
+        });
+    }
+
+    function enableButtons() {
+        if (addNewBtn && addNewBtn.dataset.disabled === "true") {
+            addNewBtn.removeEventListener('click', couponBlockAddNew);
+            delete addNewBtn.dataset.disabled;
+        }
+
+        editButtons.forEach(btn => {
+            if (btn.dataset.disabled === "true") {
+                btn.removeEventListener('click', couponBlockEdit);
+                delete btn.dataset.disabled;
+            }
+        });
+    }
+
+    function couponBlockAddNew(e) {
+        e.preventDefault();
+        Swal.fire('Please remove the applied coupon to add a new address.');
+    }
+
+    function couponBlockEdit(e) {
+        e.preventDefault();
+        Swal.fire('Please remove the applied coupon to edit address.');
+    }
+
+    // Run once on page load
+    if (appliedSection && appliedSection.style.display !== 'none') {
+        disableButtons();
+    }
+
+    // Observe visibility changes
+    const observer = new MutationObserver(() => {
+        if (appliedSection.style.display !== 'none') {
+            disableButtons();
+        } else {
+            enableButtons();
+        }
+    });
+
+    observer.observe(appliedSection, { attributes: true, attributeFilter: ['style'] });
+}
 
 
 

@@ -131,6 +131,8 @@
 
 
             <div class="text-end form-footer">
+                <input type="hidden" name="addressId" id="addressId" value="<%= user.addressId %>">
+
                 <button type="submit" class="btn btn-primary ">Edit Address</button>
             </div>
         </form>
@@ -182,6 +184,8 @@
         const state = form.state.value.trim();
         const place = form.place.value.trim();
         const address = form.address.value.trim();
+        const addressId = form.addressId.value;
+
 
         const phoneRegex = /^[6-9]\d{9}$/; 
         const pincodeRegex = /^\d{6}$/;
@@ -210,7 +214,7 @@
         });
 
         
-        fetch("/profile/address", {
+        fetch(`/profile/address/${addressId}`, {
             method: "PATCH", 
             headers: {
                 "Content-Type": "application/json"

@@ -19,11 +19,14 @@ router.post('/login',adminController.login)
 router.get('/dashboard',adminAuth.adminIn,adminController.loaddashboard)
 router.get('/logout',adminController.logout)
 
-//customer
+//customerController
 
 router.get('/customers',adminAuth.adminIn,customerController.customerlist)
 router.patch('/block/:id',adminAuth.adminIn,customerController.blockCustomer)
 router.patch('/unblock/:id',adminAuth.adminIn,customerController.unBlockCustomer)
+router.get('/messages',adminAuth.adminIn,customerController.messageHandle)
+router.delete('/messages/:id',adminAuth.adminIn,customerController.resolveMsg)
+
 
 //category
 

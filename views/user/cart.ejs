@@ -258,6 +258,7 @@
                                 <% }) %>
                                 
                                 <% const onlyOutOfStock = cartItems.every(item => item.stock === 0); %>
+                                <input type="hidden" name="source" value="cart">
 
                                 <button type="submit" id="proceedBtn" class="btn btn-success w-100"
                                   <% if (onlyOutOfStock) { %> disabled <% } %>>Proceed to Checkout</button>

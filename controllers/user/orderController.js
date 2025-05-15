@@ -18,7 +18,7 @@ const Wallet=require('../../models/walletSchema')
 
 
 
-
+/*
 const loadcheckout = async (req, res) => {
     try {
         const user = await checkUserSession(req);
@@ -248,6 +248,184 @@ const buynow=async(req,res)=>{
         
     }
 }
+*/
+
+const buynow = async (req, res) => {
+    try {
+        const user = await checkUserSession(req);
+        if (!user) return res.redirect('/login');
+
+        const { bookId } = req.body;
+        const book = await Books.findById(bookId);
+
+        if (!book) {
+            req.flash("error", "Book not found");
+            return res.redirect('/shop');
+        }
+
+        if (book.stock === 0) {
+            return res.redirect(`/book/${book._id}`);
+        }
+
+        const offer = await getBestOffer(bookId);
+        const discountedPrice = offer.finalPrice;
+
+        const item = {
+            bookId: book.id,
+            title: book.title,
+            price: book.price,
+            discountedPrice,
+            quantity: 1,
+            totalPrice: discountedPrice,
+            bookImage: book.book_images[0]
+        };
+
+        // Save to session instead of rendering directly
+        req.session.buyNowItem = item;
+        req.session.buyNowSubtotal = discountedPrice;
+
+        return res.redirect('/checkout');
+
+    } catch (error) {
+        console.error(error);
+        req.flash('error', "Something went wrong");
+        return res.redirect('/shop');
+    }
+};
+
+const loadcheckout = async (req, res) => {
+    try {
+        const user = await checkUserSession(req);
+        if (!user) return res.redirect('/login');
+
+        const addresses = await Address.find({ userId: user._id });
+        const userId = user._id;
+        const source = req.body.source;
+
+              if (source === 'cart') {             //if user give up direct buy now and proceed checkout from cart
+                                                                            
+          delete req.session.buyNowItem;
+          delete  req.session.buyNowSubtotal;
+                       }
+
+        let cartItems = [];
+        let subtotal = 0;
+
+        
+
+        if (req.session.buyNowItem) {
+            // Handle Buy Now flow
+            const item = req.session.buyNowItem;
+            cartItems = [item];
+            subtotal = req.session.buyNowSubtotal || item.discountedPrice;
+
+            // Clear buyNow data after rendering
+            
+        } else {
+            // Regular cart flow
+            const cart = await Cart.aggregate([
+                { $match: { userId: user._id, status: 'active' } },
+                { $unwind: "$items" },
+                {
+                    $lookup: {
+                        from: 'books',
+                        localField: 'items.bookId',
+                        foreignField: '_id',
+                        as: 'bookData'
+                    }
+                },
+                { $unwind: "$bookData" },
+                {
+                    $project: {
+                        'bookData._id': 1,
+                        'bookData.title': 1,
+                        'bookData.price': 1,
+                        'bookData.stock': 1,
+                        'bookData.book_images': { $arrayElemAt: ['$bookData.book_images', 0] },
+                        'quantity': '$items.quantity',
+                        'totalPrice': { $multiply: ['$items.quantity', '$bookData.price'] },
+                    }
+                }
+            ]);
+
+            if (!cart || cart.length === 0) {
+                req.flash("error", "Your cart is empty.");
+                return res.redirect('/books');
+            }
+
+            const outOfStockItems = cart
+                .filter((item) => item.quantity > item.bookData.stock)
+                .map((item) => item.bookData._id);
+
+            if (outOfStockItems.length > 0) {
+                await Cart.updateOne(
+                    { userId: user._id },
+                    { $pull: { items: { bookId: { $in: outOfStockItems } } } }
+                );
+            }
+
+            const filteredCarts = cart.filter((item) => item.quantity <= item.bookData.stock);
+
+            cartItems = await Promise.all(filteredCarts.map(async (item) => {
+                const fullBook = await Books.findById(item.bookData._id);
+                const offerData = await getBestOffer(fullBook);
+
+                return {
+                    ...item,
+                    discount: offerData?.discount || 0,
+                    discountedPrice: offerData?.finalPrice || item.totalPrice
+                };
+            }));
+
+            subtotal = cartItems.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+        }
+
+        req.session.subtotal = subtotal;
+        const tax = subtotal * 0.05;
+        const shippingCharge = 50;
+        const finalTotal = subtotal + tax + shippingCharge;
+
+        const coupons = await Coupon.find({
+            isActive: "yes",
+            expireDate: { $gte: new Date() },
+            minimumPrice: { $lte: subtotal },
+            isDeleted: false,
+            $or: [
+                {
+                    issuedTo: null,
+                    $or: [
+                        { limitPerUser: false },
+                        { limitPerUser: true, usersUsed: { $nin: [userId] } }
+                    ]
+                },
+                {
+                    issuedTo: userId,
+                    $or: [
+                        { limitPerUser: false },
+                        { limitPerUser: true, usersUsed: { $nin: [userId] } }
+                    ]
+                }
+            ]
+        });
+
+        res.render('checkout', {
+            user,
+            cartItems,
+            addresses,
+            subtotal,
+            tax,
+            shippingCharge,
+            finalTotal,
+            coupons,
+            session: req.session
+        });
+
+    } catch (error) {
+        console.error("Checkout error:", error);
+        req.flash("error", "Something went wrong.");
+        res.redirect('/cart');
+    }
+};
 
 const couponDiscount=async(req,res)=>{
 
@@ -522,7 +700,10 @@ const placeOrder = async (req, res) => {
             if (!book) {
                 await Cart.deleteMany({ userId });
             }
-        
+         if(book){
+            delete req.session.buyNowItem;
+            delete req.session.buyNowSubtotal;
+         }
             return res.json({ success: true, orderId: savedOrder._id });
         }
         
@@ -614,7 +795,11 @@ const placeOrder = async (req, res) => {
             await Cart.deleteMany({ userId });
         }
        
-
+       
+        if(book){
+            delete req.session.buyNowItem;
+            delete req.session.buyNowSubtotal;
+        }
         res.json({
             success: true,
             orderId: savedOrder._id
@@ -665,10 +850,22 @@ const verifyPayment=async(req,res)=>{
                 );
             }
 
+            if (req.session.buyNowItem) {
+                delete req.session.buyNowSubtotal;
+                delete req.session.buyNowItem;
+               
+            }
+            else{
+                await Cart.deleteMany({ userId: updatedOrder.userId._id });
+
+            }
             delete req.session.appliedCoupon;
 
             
-            await Cart.deleteMany({ userId: updatedOrder.userId._id });
+               
+            
+            
+           
 
             res.json({ success: true });
         } else {

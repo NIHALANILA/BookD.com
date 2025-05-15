@@ -79,7 +79,8 @@ const loadeditaddress=async(req,res)=>{
         const { search } = req.query;
         const userData = await checkUserSession(req)
         const user = await User.findById(userData);
-        const addressdata=await Address.findOne({userId:user._id})
+        const addressId = req.params.id; 
+        const addressdata=await Address.findOne({_id: addressId,userId:user._id})
         //storing from where req comes
         const from=req.query.from;
         req.session.returnToCheckout = (from === 'checkout');
@@ -92,7 +93,8 @@ const loadeditaddress=async(req,res)=>{
             state:addressdata?.state||"",
             place:addressdata?.place||"",
             pincode:addressdata?.pincode||"",
-            address:addressdata?.address||""
+            address:addressdata?.address||"",
+            addressId: addressdata?._id.toString() || ""
 
         }
         res.render('editAddress',{user:userProfile||{},searchQuery: search || "",message:null})
@@ -107,6 +109,7 @@ const editaddress = async (req, res) => {
         if (!user) return res.redirect("/");
 
         const userId = req.session.user._id;
+        const{id:addressId}=req.params
         const { fullName, phone, city, state, place, pincode, address } = req.body;
 
         if (!fullName || !phone || !city || !state || !place || !pincode || !address) {
@@ -122,7 +125,7 @@ const editaddress = async (req, res) => {
 
         
         const updatedAddress = await Address.findOneAndUpdate(
-            { userId },
+            {_id:addressId,userId },
             {
                 name: fullName,
                 phone,
@@ -132,7 +135,7 @@ const editaddress = async (req, res) => {
                 pincode,
                 address
             },
-            { new: true, upsert: true } 
+            { new: true } 
         );
        
         if (req.session.returnToCheckout) {
