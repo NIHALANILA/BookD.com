@@ -9,7 +9,7 @@ const listbooks = async (req, res) => {
         let page=parseInt(req.query.page)||1;
         const limit=5
         
-        const query = { isDeleted: false };
+     /*   const query = { isDeleted: false };
 
 
 if (search) {
@@ -19,10 +19,47 @@ if (search) {
     query.$or = [
         { title: { $regex: search, $options: "i" } },
         { author: { $regex: search, $options: "i" } },
-        { category_ids: { $in: categoryIds } } 
+        { category_ids: { $in: categoryIds } } ,
+        {stock:{$regex:search}}
     ];
+}*/
+      const conditions = [{ isDeleted: false }];
+      let stockFilter = req.query?.stockFilter || "";
+
+if (search) {
+    const matchingCategories = await Category.find({ name: { $regex: search, $options: "i" } });
+    const categoryIds = matchingCategories.map(category => category._id);
+    conditions.push({
+        $or: [
+            { title: { $regex: search, $options: "i" } },
+            { author: { $regex: search, $options: "i" } },
+            { category_ids: { $in: categoryIds } }
+        ]
+    });
 }
-      
+
+
+
+
+if (stockFilter) {
+    switch (stockFilter) {
+        case "outOfStock":
+            conditions.push({ stock: 0 });
+            break;
+        case "lt10":
+            conditions.push({ stock: { $gt: 0, $lt: 10 } });
+            break;
+        case "lt50":
+            conditions.push({ stock: { $gt: 0, $lt: 50 } });
+            break;
+        case "gte50":
+            conditions.push({ stock: { $gte: 50 } });
+            break;
+    }
+}
+
+const query = conditions.length > 1 ? { $and: conditions } : conditions[0];
+
 
         const books= await Book.find(query).sort({createdAt:-1})
         .populate("category_ids", "name") 
@@ -41,6 +78,7 @@ if (search) {
         res.render("bookmanage",{books,
             search,
             currentPage: page,
+            stockFilter,
             totalPages,
             message});
     } catch (error) {

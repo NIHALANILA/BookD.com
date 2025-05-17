@@ -274,7 +274,7 @@ const contact=async(req,res)=>{
 
 const contactmsg=async(req,res)=>{
     try {
-        console.log('contactmsg called')
+        
         const{name,email,subject,message}=req.body;
         const contact=new Contact({name,email,subject,message})
         await contact.save()
@@ -284,6 +284,13 @@ const contactmsg=async(req,res)=>{
     }
 }
 
+const returnCancelPolicy=async(req,res)=>{
+   try {
+     res.render('returnCancel')
+   } catch (error) {
+    res.render('page404')
+   }
 
+}
 
-module.exports = { loadShopage,viewBookDetails,loadHome,contact,contactmsg };
+module.exports = { loadShopage,viewBookDetails,loadHome,contact,contactmsg,returnCancelPolicy };

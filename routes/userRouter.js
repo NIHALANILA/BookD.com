@@ -52,6 +52,8 @@ router.get('/shop',auth.loadCommonData,shopController.loadShopage)
 router.get('/contact',auth.loadCommonData,shopController.contact)
 router.post('/contact',auth.loadCommonData,shopController.contactmsg)
 router.get('/book/:id',auth.loadCommonData,shopController.viewBookDetails)
+router.get('/returnCancel',auth.loadCommonData,shopController.returnCancelPolicy)
+
 
 
 
@@ -84,14 +86,14 @@ router.delete('/profile/address/:id',auth.userIn,addressController.deleteAddress
 
 
 //cartController-cart and wishlist
-router.post('/cart',auth.userIn,cartController.addcart)
+router.post('/cart',cartController.addcart)
 router.get('/cart',auth.userIn,auth.loadCommonData,cartController.viewCart)
 router.patch('/cart',auth.userIn,cartController.updateCart)
 //
  router.delete('/cart',auth.userIn,cartController.removecart)
  
  router.get('/wishlist',auth.userIn,auth.loadCommonData,cartController.loadWishlist)
- router.post('/wishlist',auth.userIn,auth.loadCommonData,cartController.addWishlist)
+ router.post('/wishlist',auth.loadCommonData,cartController.addWishlist)
  router.delete('/wishlist/:id',auth.userIn,cartController.deleteWishlist)
 
  //orderController

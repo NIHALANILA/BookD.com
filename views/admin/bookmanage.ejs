@@ -35,8 +35,15 @@
     <h2>Book Management</h2>
                  <!-- Search Form -->
     <form class="user-search-form"   action="/admin/books" method="GET">
-        <input type="text" name="search" value="<%= search %>" placeholder="Search users">
-        <button type="submit">Search</button>
+        <input type="text" name="search" value="<%= search %>" placeholder="Search book/authors/category">
+             <select name="stockFilter" class="form-select d-inline-block w-auto me-2">
+  <option value="">-- Filter by Stock --</option>
+  <option value="outOfStock" <%= stockFilter === 'outOfStock' ? 'selected' : '' %>>Out of Stock</option>
+  <option value="lt10" <%= stockFilter === 'lt10' ? 'selected' : '' %>>Less than 10</option>
+  <option value="lt50" <%= stockFilter === 'lt50' ? 'selected' : '' %>>Less than 50</option>
+  <option value="gte50" <%= stockFilter === 'gte50' ? 'selected' : '' %>>50 and above</option>
+</select>
+        <button type="submit">Submit</button>
         <% if (search) { %>
             <a href="/admin/books"><button type="button">Reset</button></a>
 
@@ -44,6 +51,9 @@
         <% if (message) { %>
             <p class="alert alert-warning"><%= message %></p>
         <% } %>
+
+   
+
         
     </form>
 
@@ -104,7 +114,7 @@
      <!-- Pagination Controls -->
     <div class="pagination-container">
         <% for(let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/books?page=<%= i %>&search=<%= search %>">
+            <a href="/admin/books?page=<%= i %>&search=<%= search %>&stockFilter=<%= stockFilter %>">
                 <button <%= currentPage === i ? 'disabled' : '' %>><%= i %></button>
             </a>
         <% } %>

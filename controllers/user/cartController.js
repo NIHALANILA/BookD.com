@@ -10,7 +10,7 @@ const {getBestOffer}=require('../../helpers/offerHelper')
 
 
 
-
+/*
 const addcart = async (req, res) => {
     try {
         const bookId = req.body.bookId;
@@ -77,6 +77,63 @@ const addcart = async (req, res) => {
     }
 };
 
+*/
+const addcart = async (req, res) => {
+  try {
+    const { bookId } = req.body;
+    const quantity = parseInt(req.body.quantity) || 1;
+
+    const user = await checkUserSession(req);
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Please log in to add items to the cart." ,redirect: "/login"});
+    }
+
+    const book = await Books.findById(bookId);
+    if (!book || book.isDeleted || !book.isListed) {
+      return res.status(404).json({ success: false, message: "This book is unavailable." });
+    }
+
+    if (book.stock <= 0) {
+      return res.status(400).json({ success: false, message: "This book is out of stock." });
+    }
+
+    const offer = await getBestOffer(book._id);
+    const salePrice = offer.finalPrice;
+
+    let cart = await Cart.findOne({ userId: user._id });
+    if (!cart) {
+      cart = new Cart({ userId: user._id, items: [] });
+    }
+
+    const existingItem = cart.items.find(item => item.bookId.equals(bookId));
+
+    if (existingItem) {
+      if (existingItem.quantity + quantity > book.stock) {
+        return res.status(400).json({ success: false, message: `Only ${book.stock} copies are available.` });
+      }
+      existingItem.quantity += quantity;
+      existingItem.totalPrice = existingItem.quantity * salePrice;
+    } else {
+      if (quantity > book.stock) {
+        return res.status(400).json({ success: false, message: `Only ${book.stock} copies are available.` });
+      }
+      cart.items.push({
+        bookId,
+        quantity,
+        price: salePrice,
+        totalPrice: salePrice * quantity
+      });
+    }
+
+    await cart.save();
+    await Wishlist.findOneAndDelete({ user_id: user._id, book_id: bookId });
+
+    return res.status(200).json({ success: true, message: "Item added to cart." });
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Something went wrong." });
+  }
+};
 
 const viewCart = async (req, res) => {
     try {
@@ -229,9 +286,9 @@ const loadWishlist = async (req, res) => {
 
 const addWishlist=async(req,res)=>{
     try {
-        
+        console.log('add wishlist called')
         const user= await checkUserSession(req)
-        if(!user) return res.redirect('/login')
+        if(!user) return res.status(401).json({ success: false, message: "Please log in to add items to the cart." });
             const { bookId } = req.body;
         
 
@@ -248,7 +305,7 @@ const addWishlist=async(req,res)=>{
 
         await wishlistItem.save();
         
-        res.redirect('/wishlist'); 
+       return res.status(200).json({ success: true, message: "Book added to wishlist." });
         
 
     } catch (error) {

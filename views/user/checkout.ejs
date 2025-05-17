@@ -233,7 +233,9 @@ strong {
               <div id="appliedCouponSection" style="display: none;">
                 <p>Coupon <strong id="appliedCouponCode"></strong> applied!</p>
                 <p>Coupon <strong id="appliedCouponAmount"></strong> discounted!</p>
-                <p style="color: #555">Orders placed using this coupon are subject to Our Return & Cancellation Policy</p>
+                 <a href="/returncancel" > <p style="color: #555">Orders placed using this coupon are subject to Our Return & Cancellation Policy</p></a>
+                 
+               
                 <button class="btn btn-danger mb-2 w-auto" onclick="removeCoupon()">Remove Coupon</button>
               </div>
               
@@ -264,11 +266,11 @@ strong {
                                <% if (index === 0) { %> checked <% } %> >
                         <strong>Select this address</strong>
                     </label>
-                    <p><strong>Name:</strong> <%= address.name %></p>
+                    <p><strong>Name:</strong> <%= address.name.charAt(0).toUpperCase()+address.name.slice(1)%></p>
                     <p><strong>Phone:</strong> <%= address.phone %></p>
-                    <p><strong>City:</strong> <%= address.city %></p>
-                    <p><strong>State:</strong> <%= address.state %></p>
-                    <p><strong>Place:</strong> <%= address.place %></p>
+                    <p><strong>City:</strong> <%= address.city.charAt(0).toUpperCase()+address.city.slice(1) %></p>
+                    <p><strong>State:</strong> <%= address.state.charAt(0).toUpperCase()+address.state.slice(1) %></p>
+                    <p><strong>Place:</strong> <%= address.place.charAt(0).toUpperCase()+address.place.slice(1) %></p>
                     <p><strong>Pincode:</strong> <%= address.pincode %></p>
                     <p><strong>Full Address:</strong> <%= address.address %></p>
 
@@ -476,7 +478,7 @@ document.querySelectorAll('.apply-btn').forEach(button => {
     button.disabled = true;
     button.classList.remove('btn-success');
     button.classList.add('btn-secondary');
-    button.textContent = 'Already Applied';
+    button.textContent = 'Applied';
   } else {
     button.disabled = false;
     button.classList.remove('btn-secondary');

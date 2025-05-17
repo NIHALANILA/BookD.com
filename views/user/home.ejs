@@ -73,20 +73,26 @@
                  
                  <img src="<%= newArrivals[i].book_images[0] %>" alt="<%= newArrivals[i].title %>" class="product-image img-fluid">
                 </a>
-                <a href="/wishlist/<%= newArrivals[i]._id %>" class="btn-icon btn-wishlist">                 
-                  <svg width="24" height="24" viewBox="0 0 24 24">
-                    <use xlink:href="#heart"></use>
-                  </svg>
-                </a>
+                <form action="/wishlist" method="POST" style="display:inline;">
+                  <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
+                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                        <use xlink:href="#heart"></use>
+                        </svg>
+                        </button>
+                  </form>
+
                 <div class="product-content">
                   <h5 class="element-title  fs-5 mt-3">                   
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>                 
-                  <form action="/cart" method="POST" style="display: inline;">
-                    <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
+                  <form  style="display: inline;">
                     <button type="submit"
                             style="all: unset; cursor: pointer;"
-                            title="Add to cart">
+                            title="Add to cart"
+                            class="add-to-cart"
+                             data-bookid="<%= newArrivals[i]._id %>"
+                            >
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
                     <span style="text-decoration: line-through; color: grey;">Rs <%= newArrivals[i].price %></span>
@@ -112,20 +118,25 @@
  
                  </a>
                
-                 <a href="/wishlist/<%= newArrivals[i]._id %>" class="btn-icon btn-wishlist">
-                  <svg width="24" height="24" viewBox="0 0 24 24">
-                    <use xlink:href="#heart"></use>
-                  </svg>
-                </a>
+                <form action="/wishlist" method="POST" style="display:inline;">
+                  <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
+                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                        <use xlink:href="#heart"></use>
+                        </svg>
+                        </button>
+                  </form>
                 <div class="product-content">
                   <h5 class="element-title  fs-5 mt-3">
                     <a href="/book/<%= newArrivals[i]._id %>"><%= newArrivals[i].title %></a>
                   </h5>
-                <form action="/cart" method="POST" style="display: inline;">
-                  <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
+                <form  style="display: inline;">
+                  
                   <button type="submit"
                           style="all: unset; cursor: pointer;"
-                          title="Add to cart">
+                          title="Add to cart"
+                          class="add-to-cart"
+                          data-bookid="<%= newArrivals[i]._id %>">
                     <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                   </button>
                   
@@ -177,21 +188,25 @@
  
                  </a>
                
-                 <a href="/wishlist/<%= bestSellers[i]._id %>" class="btn-icon btn-wishlist">
-                
-                  <svg width="24" height="24" viewBox="0 0 24 24">
-                    <use xlink:href="#heart"></use>
-                  </svg>
-                </a>
+                 <form action="/wishlist" method="POST" style="display:inline;">
+                  <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
+                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                        <use xlink:href="#heart"></use>
+                        </svg>
+                        </button>
+                  </form>
                 <div class="product-content">
                   <h5 class=" fs-5 mt-3">
                     <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>
                   </h5>
-                  <form action="/cart" method="POST" style="display: inline;">
-                    <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
+                  <form  style="display: inline;">
+                    
                     <button type="submit"
                             style="all: unset; cursor: pointer;"
-                            title="Add to cart">
+                            title="Add to cart"
+                            class="add-to-cart"
+                             data-bookid="<%= bestSellers[i]._id %>">
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
                     
@@ -225,23 +240,27 @@
    
                    </a>
                  
-                   <a href="/wishlist/<%= bestSellers[i]._id %>" class="btn-icon btn-wishlist">
-                  
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#heart"></use>
-                    </svg>
-                  </a>
+                  <form action="/wishlist" method="POST" style="display:inline;">
+                  <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
+                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                        <use xlink:href="#heart"></use>
+                        </svg>
+                        </button>
+                  </form>
                   <div class="product-content">
                     <h5 class=" fs-5 mt-3">
                       <a href="/book/<%= bestSellers[i]._id %>"><%= bestSellers[i].title %></a>                     
                     </h5>
                    
                   
-                  <form action="/cart" method="POST" style="display: inline;">
-                    <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
+                  <form  style="display: inline;">
+                    
                     <button type="submit"
                             style="all: unset; cursor: pointer;"
-                            title="Add to cart">
+                            title="Add to cart"
+                            class="add-to-cart"
+                             data-bookid="<%= newArrivals[i]._id %>">
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
                     <p>
@@ -274,6 +293,7 @@
 
 
   <%-include("../../views/partials/user/footer")%>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="js/jquery.min.js"></script>
   <script src="js/plugins.js"></script>
   <script src="js/SmoothScroll.js"></script>
@@ -293,7 +313,55 @@
       })
     }
    })
-   
+    document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault(); // Prevent default click or form behavior
+
+        const bookId = button.dataset.bookid;
+
+        try {
+          const response = await fetch('/cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bookId })
+          });
+
+          const data = await response.json();
+
+          if (response.ok&& data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to cart',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } else {
+            if(data.redirect){
+              Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message
+            }).then(() => {
+      window.location.href = data.redirect;
+    });
+            }
+            
+          }
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!'
+          });
+        }
+      });
+    });
+  });
+ 
   </script>
   
 </body>

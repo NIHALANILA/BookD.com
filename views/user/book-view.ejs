@@ -221,10 +221,10 @@
         </div>
         <div class="col-md-4">
           <div class="book-actions">
-              <form id="addToCartForm" method="post" action="/cart">
+              <form id="addToCartForm" >
                   <input type="hidden" name="bookId" value="<%= book._id %>">
                   
-                  <button type="submit" class="btn btn-primary">Add to Cart</button>
+                  <button type="submit" class="btn btn-primary add-to-cart" data-bookid="<%= book._id %>">Add to Cart</button>
               </form>
               <form id="addToWishlist" action="/wishlist" method="POST">
                   <input type="hidden" name="bookId" value="<%= book._id %>">
@@ -277,18 +277,19 @@
                                         <span style="color: green; font-size: 1.1rem;">₹<%= book.salePrice %></span>
                             </p>
                         </a>
-                        <form action="/cart" method="POST" style="display: inline;">
+                        <div style="display: flex; align-items: center; gap: 50%;"><form   style="display: inline;">
                             <input type="hidden" name="bookId" value="<%= book._id %>">
-                            <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                            <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;" class="add-to-cart" data-bookid="<%= book._id %>">
                               <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                             </button>
                           </form>
-                        <form action="/wishlist" method="POST" style="float: right;">
+                        <form action="/wishlist" method="POST" class="" >
                             <input type="hidden" name="bookId" value="<%= book._id %>">
                             <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
                               <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f;">favorite</span>
                             </button>
-                          </form>
+                          </form></div>
+                        
                     </div>
                     
                 <% }); %>
@@ -301,6 +302,7 @@
 
 
 <%-include("../../views/partials/user/footer")%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/js/jquery.min.js"></script>
   <script src="/js/plugins.js"></script>
   <script src="/js/SmoothScroll.js"></script>
@@ -360,6 +362,54 @@ mainImageContainer.addEventListener('mousemove', (e) => {
         mainImage.style.transformOrigin = `${x * 100}% ${y * 100}%`; 
     }
 });
+
+
+  document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const bookId = button.dataset.bookid;
+
+      try {
+          const response = await fetch('/cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bookId })
+          });
+
+          const data = await response.json();
+
+          if (response.ok&& data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to cart',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } else {
+            if(data.redirect){
+              Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message
+            }).then(() => {
+      window.location.href = data.redirect;
+    });
+            }
+            
+          }
+        }  catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Something went wrong!'
+        });
+      }
+    });
+  });
 
 
 
