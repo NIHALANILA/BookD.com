@@ -18,20 +18,18 @@
   <link rel="stylesheet" href="/https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
   <link rel="stylesheet" type="text/css" href="/style.css">
 
-  <link rel="preconnect" href="/https://fonts.googleapis.com">
-  <link rel="preconnect" href="/https://fonts.gstatic.com" crossorigin>
-  <link href="/https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link
-    href="/https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
-    <link rel="stylesheet" href="/https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    
     <style>
       div.swiper-wrapper {
   height: 80%;}
- /* Address Box Styling */
-
- /* General Styles */
+ 
 
 
 h2, h3 {
@@ -128,7 +126,11 @@ input, textarea {
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card address-box p-3">
                         <div class="card-body">
-                           
+                           <div class="flex-grow-1 me-2">
+                             <form action="/profile/address/<%= address._id %>?from=address" method="get">
+                                  <button type="submit" class="btn btn-outline-primary btn-sm w-100">Edit</button>
+                             </form>
+                            </div>
                             
                             <p style="color: black;"><strong>Name:</strong> <%= address.name %></p>
                             <p><strong>Phone:</strong> <%= address.phone %></p>
@@ -138,12 +140,16 @@ input, textarea {
                             <p><strong>Pincode:</strong> <%= address.pincode %></p>
                             <p><strong>Full Address:</strong> <%= address.address %></p>
                             
-                            <div class="d-flex justify-content-between">
-                                <form action="/profile/address/<%= address._id %>?from=address" method="get">
-                                    <button type="submit" class="btn btn-primary btn-sm">Edit</button>
-                                </form>
-                                <button class="btn btn-danger btn-sm delete-address" data-address-id="<%= address._id %>">Delete</button>
+  
+  
+
+                           <!-- Delete Button -->
+                              <div class="flex-grow-1 ms-2" >
+   
+                           <button class="btn btn-outline-danger btn-sm w-100 delete-address" data-address-id="<%= address._id %>">Delete</button>
+    
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -298,7 +304,7 @@ function addressDelete(){
                 Swal.fire("Failed to delete address.");
             }
         } catch (error) {
-            console.error("Error:", error);
+            
             Swal.fire("Something went wrong!");
         }
     });

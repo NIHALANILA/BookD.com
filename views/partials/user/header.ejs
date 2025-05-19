@@ -245,28 +245,32 @@
             </li>
             <li class="d-none d-lg-block">
               <a href="/wishlist" class="text-uppercase mx-3">Wishlist
+               (<span id="wishlistCount"><%= wishlistCount || 0 %></span>)
               </a>
             </li>
             <!--cart-->
             <li class="d-none d-lg-block">
-              <a href="/cart" class="text-uppercase mx-3"  
-                >Cart 
+              <a href="/cart"  class="text-uppercase mx-3"  
+                > Cart (<span id="cartCount"><%= cartItemCount || 0 %></span>)
+                
               </a>
             </li>
             <li class="d-lg-none">
-              <a href="#" class="mx-2">
+              <a href="/wishlist" class="mx-2">
                 <svg width="24" height="24" viewBox="0 0 24 24">
                   <use xlink:href="#heart"></use>
                 </svg>
+                (<span id="wishlistCountSmall"><%= wishlistCount || 0 %></span>)
               </a>
             </li>
             <li class="d-lg-none">
-              <a href="#" class="mx-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                aria-controls="offcanvasCart">
-                <svg width="24" height="24" viewBox="0 0 24 24">
-                  <use xlink:href="#cart"></use>
-                </svg>
-              </a>
+              <a href="/cart" class="mx-2">
+             <svg width="24" height="24" viewBox="0 0 24 24">
+              <use xlink:href="#cart"></use>
+            </svg>
+            (<span  id="cartCountSmall"><%= cartItemCount || 0 %></span>)
+            </a>
+
             </li>
             <li class="search-box" class="mx-2">
               <a href="#search" class="search-button">

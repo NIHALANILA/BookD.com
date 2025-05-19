@@ -50,6 +50,7 @@ router.post("/books/add",adminAuth.adminIn, upload.array("images", 5), processIm
 
 router.get('/books/edit/:id',adminAuth.adminIn,bookController.loadeditbook)
 router.post('/books/edit/:id',adminAuth.adminIn,upload.array("images", 5), processImages, bookController.editbook)
+
 router.delete('/books/:id',adminAuth.adminIn,bookController.softDeletebook)
 router.patch('/books/:id',adminAuth.adminIn,bookController.toggleBook)
 

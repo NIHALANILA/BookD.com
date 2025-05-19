@@ -480,7 +480,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let selectedCategories = [];
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                // Fix: Select the corresponding label properly
+                
                 selectedCategories.push(checkbox.closest("li").querySelector("label").textContent.trim());
             }
         });

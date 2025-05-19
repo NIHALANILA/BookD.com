@@ -1,6 +1,6 @@
 const User= require('../../models/userSchema')
 const Contact=require('../../models/contactSchema');
-const { success } = require( '../../middleware/auth' );
+
 
 
 const customerlist= async(req,res)=>{
@@ -38,7 +38,7 @@ const customerlist= async(req,res)=>{
       })
     
     } catch (error) {
-        console.log(error)
+       console.error(error.message);
     }
 }
 
@@ -47,7 +47,8 @@ const blockCustomer=async(req,res)=>{
         await User.findByIdAndUpdate(req.params.id,{status:"blocked"})
         res.json({ success: true, message: "User blocked successfully" });
     } catch (error) {
-        console.log(error)
+        console.error(error.message);
+         res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
     }
 }
 const unBlockCustomer=async(req,res)=>{
@@ -56,6 +57,7 @@ const unBlockCustomer=async(req,res)=>{
         res.json({ success: true, message: "User unblocked successfully" });
     } catch (error) {
         console.log(error)
+         res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
     }
 }
 
@@ -88,7 +90,7 @@ const messageHandle=async(req,res)=>{
 
 const resolveMsg=async(req,res)=>{
     try {
-        console.log('resolve called')
+        
         await Contact.findByIdAndDelete(req.params.id)
         res.json({success:true,message:'updated issue as  resolved'})
     } catch (error) {

@@ -110,7 +110,7 @@
                                     
                                     
                                     <form  style="display: inline;">
-                                        <input type="hidden" name="bookId" value="<%= book._id %>">
+                                        
                                         <button class="add-to-cart" data-bookid="<%= book._id %>" 
                                              style="border: none; background: none; padding: 0; cursor: pointer;">
                                                     <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">
@@ -119,11 +119,13 @@
                                         </button>
 
                                       </form>
-                                    <form action="/wishlist" method="POST" style="float: right;">
-                                        <input type="hidden" name="bookId" value="<%= book._id %>">
-                                        <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                    <form  style="float: right;">
+                                        
+                                       
+                                      <button class="wishlist" data-bookid="<%= book._id %>" style="border: none; background: none; padding: 0; cursor: pointer;">
                                           <span class="material-symbols-outlined" style="font-size: 24px; color: #d9534f; float: right;">favorite</span>
-                                        </button>
+                                      </button>
+
                                       </form>
                                       
                                     
@@ -208,6 +210,10 @@
           const data = await response.json();
 
           if (response.ok&& data.success) {
+             document.querySelector("#cartCount").textContent = data.totalItems;
+             document.querySelector("#cartCountSmall").textContent = data.totalItems;
+             document.querySelector("#wishlistCount").textContent = data.wishlistCount;
+             document.querySelector("#wishlistCountSmall").textContent = data.wishlistCount;
             Swal.fire({
               icon: 'success',
               title: 'Added to cart',
@@ -224,7 +230,14 @@
             }).then(() => {
       window.location.href = data.redirect;
     });
-            }
+            }else {
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: data.message || 'Something went wrong.'
+    });
+  }
             
           }
         } catch (err) {
@@ -236,6 +249,61 @@
       }
     });
   });
+
+  document.querySelectorAll('.wishlist').forEach(button => {
+  button.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const bookId = button.dataset.bookid;
+    try {
+      const response = await fetch('/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bookId })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        document.querySelector("#wishlistCount").textContent = data.wishlistCount;
+        document.querySelector("#wishlistCountSmall").textContent = data.wishlistCount;
+        Swal.fire({
+          icon: 'success',
+          title: "Added to Wishlist",
+          text: data.message,  
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } else {
+            if(data.redirect){
+              Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message
+            }).then(() => {
+      window.location.href = data.redirect;
+    });
+            }else {
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: data.message || 'Something went wrong.'
+    });
+  }
+            
+          }
+
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops',
+        text: 'something went wrong'
+      });
+    }
+  });
+});
+
   </script>
   
 </body>

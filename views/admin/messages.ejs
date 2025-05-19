@@ -38,7 +38,7 @@
                             <td><%= msg.message %></td> 
                             
                                 <td>
-                                    <% if (msg.resolved === false) { %>
+                                    <% if (msg.resolved !== false) { %>
                                         <button class="delete-btn" type="button" onclick="resolveMsg('<%= msg._id %>')">Resolve</button>
                                     <% } %>
                                 </td>

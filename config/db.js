@@ -12,7 +12,7 @@ const connectDB=async()=>{
     }
     catch(error){
 
-        console.log("db connection error",error.message);
+        console.error("Error occurred in user route:", error.message);
         process.exit(1)
     }
 }

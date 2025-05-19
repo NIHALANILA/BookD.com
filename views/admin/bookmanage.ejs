@@ -165,10 +165,10 @@
 function toggleBook(bookId) {
     Swal.fire({
         title: "Are you sure?",
-        text: "Do you want to unlist this book?",
+        text: "Do you want to update this book status?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes, unlist it!",
+        confirmButtonText: "Yes, do it!",
         cancelButtonText: "Cancel"
     }).then((result) => {
         if (result.isConfirmed) {

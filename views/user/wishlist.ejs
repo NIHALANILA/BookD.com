@@ -64,9 +64,9 @@
   
           <!-- Action Buttons (Right) -->
           <div class="col-3 col-sm-3 col-md-2 d-flex flex-column gap-2 align-items-end">
-            <form action="/cart" method="POST" class="w-100">
+            <form  class="w-100">
               <input type="hidden" name="bookId" value="<%= item.book_id._id %>">
-              <button class="btn btn-sm btn-primary w-100">Add To Cart</button>
+              <button class="btn btn-sm btn-primary w-100 add-to-cart" data-bookid="<%= item.book_id._id %>" >Add To Cart</button>
             </form>
             <button class="btn btn-sm btn-outline-danger w-100 remove-wishlist-btn" data-id="<%= item._id %>">
               Remove
@@ -115,6 +115,7 @@
              }
         }
 
+
     function wishlistremove(){
         document.querySelectorAll('.remove-wishlist-btn').forEach(button => {
     button.addEventListener('click', async (e) => {
@@ -142,8 +143,10 @@
             const result = await response.json();
 
             if (result.success) {
+              
+             document.querySelector("#wishlistCount").textContent = result.wishlistCount;
               Swal.fire('Removed!', 'Item has been removed from your wishlist.', 'success')
-                 // Remove the item from the DOM
+                 
               const wishlistCard = button.closest('.wishlist-box');
               if (wishlistCard) wishlistCard.remove();
 
@@ -161,6 +164,68 @@
     });
   });
     }
+
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const bookId = button.dataset.bookid;
+
+      try {
+          const response = await fetch('/cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bookId })
+          });
+
+          const data = await response.json();
+
+          if (response.ok&& data.success) {
+             document.querySelector("#cartCount").textContent = data.totalItems;
+             document.querySelector("#cartCountSmall").textContent = data.totalItems;
+             document.querySelector("#wishlistCount").textContent = data.wishlistCount;
+             document.querySelector("#wishlistCountSmall").textContent = data.wishlistCount;
+
+               const wishlistCard = button.closest('.wishlist-box');
+        if (wishlistCard) wishlistCard.remove();
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to cart',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } else {
+            if(data.redirect){
+              Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message
+            }).then(() => {
+      window.location.href = data.redirect;
+    });
+            }
+            else {
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: data.message || 'Something went wrong.'
+    });
+  }
+            
+          }
+        } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Something went wrong!'
+        });
+      }
+    });
+  });
 </script>
 
 </body>

@@ -24,7 +24,7 @@
     href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    
     <style>
       div.swiper-wrapper {
   height: 80%;
@@ -117,6 +117,10 @@
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     margin-top: 20px;
+   
+}
+p{
+    color: black;
 }
 
 .order-summary h5 {
@@ -250,8 +254,8 @@
                             <h4>Order Summary</h4>
                            
                             
-                            <p>Total Items: <%= cartItems.filter(item=>item.stock>0).length %></p>
-                            <h5 id="totalPrice">Total Price: ₹<%= totalPrice %></h5>
+                            <p >Total Items: <span id="totalItems"><%= cartItems.filter(item=>item.stock>0).length %></span> </p>
+                            <h5>Total Price: <span  id="totalPrice"> ₹<%= totalPrice %></span></h5>
                             <form method="POST" action="/checkout">
                                 <% cartItems.forEach(item => { %>
                                     <input type="hidden" name="books[]" value="<%= item._id %>">
@@ -335,6 +339,8 @@
                     
                     // Update total price
                     document.querySelector("#totalPrice").textContent = "₹" + data.totalPrice;
+                    document.querySelector("#cartCount").textContent = data.totalCarts;
+                    document.querySelector("#cartCountSmall").textContent = data.totalCarts;
                 } else {
                     Swal.fire({
                    icon: 'warning',
@@ -371,6 +377,9 @@
                         if(data.success){
                             this.closest(".cart-item").remove()
                             document.querySelector("#totalPrice").textContent = "₹" + data.totalPrice;
+                            document.querySelector('#totalItems').textContent=data.totalItems
+                            document.querySelector("#cartCount").textContent = data.totalCarts;
+                            document.querySelector("#cartCountSmall").textContent = data.totalCarts;
                            
                     
                         }

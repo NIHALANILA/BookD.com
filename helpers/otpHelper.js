@@ -45,7 +45,7 @@ const securePassword=async(password)=>{
         return passwordHash
     }
     catch(error){
-        console.log(error)
+        console.error(error)
     }
 }
 

@@ -22,7 +22,8 @@ const loadSignup=async(req,res)=>{
 
     }
     catch(error){
-        console.log(error)
+        console.error('error in signup',error)
+        res.redirect('/pageNotfound')
     }
 }
 
@@ -64,7 +65,7 @@ const signup=async(req,res)=>{
         
         res.render('verify-otp',{message:null ,otpExpires: req.session.otpExpires})
 
-        console.log("OTP Sent",otp);
+       
     }
     catch(error){
         console.error(error)
@@ -75,8 +76,7 @@ const signup=async(req,res)=>{
 
 
 const verifyOtp = async (req, res) => {
-    console.log("Request body:", req.body);
-    console.log("Session Data at verifyOtp:", req.session);
+    
       
       const {otp}=req.body
    
@@ -167,7 +167,6 @@ const resendOtp= async(req,res)=>{
     const newOtp=generateOtp()
     req.session.userOtp=newOtp;    
     req.session.otpExpires = Date.now() + 60000;
-    console.log("new otp",newOtp)
     res.json({success:true,message:"new otp sent"})
 
 }
@@ -175,7 +174,6 @@ const resendPassOtp= async(req,res)=>{
     const newOtp=generateOtp()
    req.session.resetOtp=newOtp;    
     req.session.otpExpires = Date.now() + 60000;
-    console.log("new otp",newOtp)
     res.json({success:true,message:"new otp sent"})
 
 }
@@ -187,7 +185,7 @@ const loadForgotPassword=async(req,res)=>{
     try {
         res.render('forgot-password',{message:null})
     } catch (error) {
-        console.log(error)
+        console.error(error)
         res.redirect('/pageNotfound')
         
     }
@@ -210,7 +208,7 @@ const forgotPassword=async(req,res)=>{
         req.session.otpExpires=Date.now()+60000;
         req.session.resetEmail=email;
         res.render('veryfy-passotp',{message:"verify otp to reset password",otpExpires: req.session.otpExpires})
-        console.log("reset otp sent:",otp)
+        
     } catch (error) {
         console.error(error)
         res.redirect("/forgot-password")
@@ -274,7 +272,7 @@ const logout= async(req,res)=>{
     try{
         req.logout(function (err) {
             if (err) {
-              console.log("at user logout:", err);
+              
               return res.redirect("/pageNotFound");
             }
       
@@ -285,7 +283,7 @@ const logout= async(req,res)=>{
           });
     }
     catch(error){
-        console.log(error)
+        console.error('error in logout user',error)
         res.redirect("/pageNotFound")
 
     }
@@ -312,7 +310,7 @@ const resetPassword=async(req,res)=>{
         res.redirect("/login");
 
     } catch (error) {
-        console.error(error);
+        console.error('error in resetpassword',error);
         res.redirect("/pageNotfound");
     }
 }

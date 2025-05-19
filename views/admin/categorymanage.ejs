@@ -106,8 +106,8 @@
                 return Swal.fire("Error!", "Invalid response from server", "error");
             }
 
-            console.log("Status:", response.status);
-            console.log("Response Data:", data);
+            
+            
 
             if (response.ok) {
                 document.getElementById(`cat-name-${id}`).textContent = updatedName;
@@ -117,8 +117,8 @@
                 await Swal.fire("Error!",data.message||"failed to update category");
             }
         } catch (error) {
-            console.error("Fetch error:", error);
-            console.error("Error updating category:", error);
+            
+            
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
     }
@@ -145,7 +145,7 @@ async function toggleCategory(id) {
                 await Swal.fire("Error!", "Failed to update category status.", "error");
             }
         } catch (error) {
-            console.error("Error toggling category:", error);
+            
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
     }
@@ -174,7 +174,7 @@ async function softDeleteCategory(id) {
                 await Swal.fire("Error!", "Failed to update category status.", "error");
             }
         } catch (error) {
-            console.error("Error toggling category:", error);
+            
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
     }

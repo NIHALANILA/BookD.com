@@ -2,7 +2,8 @@ const Wallet = require('../../models/walletSchema');
 const {checkUserSession} = require('../../helpers/userDry')
 
 const getWalletPage = async (req, res) => {
-    const user = await checkUserSession(req);
+    try {
+        const user = await checkUserSession(req);
     
     const wallet = await Wallet.findOne({ userId:user._id });
 
@@ -16,6 +17,11 @@ const getWalletPage = async (req, res) => {
     }
 
     res.render('wallet', { wallet });
+        
+    } catch (error) {
+        console.error('error in getWalletPage',error.message)
+    }
+    
 };
 
 

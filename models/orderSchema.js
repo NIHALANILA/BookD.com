@@ -72,7 +72,7 @@ const orderSchema = new Schema({
         type: Number,
         required: true
     },
-    netAmount: {                //total payed amount by customer (tax,discount,shippingcharge -included)
+    netAmount: {                //total payed amount by customer (tax,discount,shippingcharge (included))
         type: Number,
         required: true
     },

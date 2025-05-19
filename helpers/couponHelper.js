@@ -4,7 +4,7 @@ const applyCoupon = async ({ couponCode, userId, subtotal }) => {
 
     try {
 
-        console.log('apply coupon called')
+        
         const coupon = await Coupon.findOne({
             code: couponCode,
             isActive: "yes",
@@ -37,9 +37,9 @@ const applyCoupon = async ({ couponCode, userId, subtotal }) => {
     
         if (coupon.discountType === "percentage") {
             discount = (subtotal * coupon.discountValue) / 100;
-            console.log('discount type percent')
+            
         } else if (coupon.discountType === "fixed") {
-            console.log('discount fixed')
+            
             discount = coupon.discountValue;
         }
     

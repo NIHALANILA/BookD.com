@@ -9,20 +9,7 @@ const listbooks = async (req, res) => {
         let page=parseInt(req.query.page)||1;
         const limit=5
         
-     /*   const query = { isDeleted: false };
-
-
-if (search) {
-
-    const matchingCategories = await Category.find({ name: { $regex: search, $options: "i" } });
-    const categoryIds = matchingCategories.map(category => category._id);
-    query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { author: { $regex: search, $options: "i" } },
-        { category_ids: { $in: categoryIds } } ,
-        {stock:{$regex:search}}
-    ];
-}*/
+     
       const conditions = [{ isDeleted: false }];
       let stockFilter = req.query?.stockFilter || "";
 
@@ -82,7 +69,7 @@ const query = conditions.length > 1 ? { $and: conditions } : conditions[0];
             totalPages,
             message});
     } catch (error) {
-        console.log(error);
+        console.error(error.message);
     }
 };
 
@@ -91,7 +78,7 @@ const loadaddbook = async (req, res) => {
         const categories = await Category.find({ isListed: true,isDeleted:false });
         res.render("addbook", { categories,message:null });
     } catch (error) {
-        console.log(error, "add books");
+        console.error(error.message);
     }
 };
 
@@ -156,6 +143,7 @@ const addbook = async (req, res) => {
         console.error(error);
     }
 };
+
 const loadeditbook=async(req,res)=>{
     try {
         const bookId = req.params.id;
@@ -163,7 +151,7 @@ const loadeditbook=async(req,res)=>{
     const categories = await Category.find({isListed:true,isDeleted:false}); 
     res.render('editbook', { book, categories });
     } catch (error) {
-        console.log(error)
+        console.error(error.message);
         
     }
 }
@@ -225,7 +213,7 @@ const editbook = async (req, res) => {
         const updatedBook = await Book.findByIdAndUpdate(bookId, { $set: updatedFields }, { new: true });
 
         if (!updatedBook) {
-            console.log("Book update failed!");
+           
             return res.status(500).json({ message: "Book update failed!" });
         }
 
@@ -235,6 +223,7 @@ const editbook = async (req, res) => {
         res.status(500).json({ message: "Error updating book" });
     }
 };
+
 
 const softDeletebook=async(req,res)=>{
     try {

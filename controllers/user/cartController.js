@@ -10,74 +10,7 @@ const {getBestOffer}=require('../../helpers/offerHelper')
 
 
 
-/*
-const addcart = async (req, res) => {
-    try {
-        const bookId = req.body.bookId;
-        const quantity = parseInt(req.body.quantity) || 1;
 
-        const user = await checkUserSession(req);
-        if (!user) {
-            req.flash("error", "Please log in to add items to the cart.");
-            return res.redirect("/login");
-        }
-
-        const book = await Books.findById(bookId);
-        if (!book || book.isDeleted || !book.isListed) {
-            req.flash("error", "This book is unavailable.");
-            return res.redirect("/cart");
-        }
-
-        if (book.stock <= 0) {
-            req.flash("error", "This book is out of stock.");
-            return res.redirect("/cart");
-        }
-
-        const offer = await getBestOffer(book._id);
-
-        const salePrice = offer.finalPrice; 
-
-        let cart = await Cart.findOne({ userId: user._id });
-        if (!cart) {
-            cart = new Cart({ userId: user._id, items: [] });
-        }
-
-        const existingItem = cart.items.find(item => item.bookId.equals(bookId));
-
-        if (existingItem) {
-            if (existingItem.quantity + quantity > book.stock) {
-                req.flash("error", `Only ${book.stock} copies are available.`);
-                return res.redirect("/cart");
-            }
-            existingItem.quantity += quantity;
-            existingItem.totalPrice = existingItem.quantity * salePrice;
-        } else {
-            if (quantity > book.stock) {
-                req.flash("error", `Only ${book.stock} copies are available.`);
-                return res.redirect("/cart");
-            }
-            cart.items.push({
-                bookId,
-                quantity,
-                price: salePrice,
-                totalPrice: salePrice * quantity,
-                
-            });
-        }
-
-        await cart.save();
-        await Wishlist.findOneAndDelete({ user_id: user._id, book_id: bookId });
-        req.flash("success", "Item added to cart.");
-        res.redirect("/cart");
-
-    } catch (error) {
-        
-        req.flash("error", "Something went wrong.");
-        res.redirect("/cart");
-    }
-};
-
-*/
 const addcart = async (req, res) => {
   try {
     const { bookId } = req.body;
@@ -109,7 +42,11 @@ const addcart = async (req, res) => {
 
     if (existingItem) {
       if (existingItem.quantity + quantity > book.stock) {
-        return res.status(400).json({ success: false, message: `Only ${book.stock} copies are available.` });
+        return res.status(400).json({ success: false, message: `Only ${book.stock} copies are available which is already added to cart` });
+      }
+      if(existingItem.quantity + quantity >5){
+        return res.json({ success: false, message: "Maximum 5 copies allowed per book." })
+
       }
       existingItem.quantity += quantity;
       existingItem.totalPrice = existingItem.quantity * salePrice;
@@ -127,11 +64,15 @@ const addcart = async (req, res) => {
 
     await cart.save();
     await Wishlist.findOneAndDelete({ user_id: user._id, book_id: bookId });
+    const totalItems= cart.items.reduce((total, item) => total + item.quantity, 0);
+     const wishlistCount = await Wishlist.countDocuments({ user_id: user._id });
 
-    return res.status(200).json({ success: true, message: "Item added to cart." });
+    
+    return res.status(200).json({ success: true,totalItems,wishlistCount, message: "Item added to cart." });
 
   } catch (error) {
     return res.status(500).json({ success: false, message: "Something went wrong." });
+    
   }
 };
 
@@ -182,7 +123,7 @@ const viewCart = async (req, res) => {
         res.render("cart", { cartItems, totalPrice, outOfStock });
     } catch (error) {
         console.error(error);
-        req.flash("error", "Something went wrong.");
+        
         res.redirect("/cart");
     }
 };
@@ -233,8 +174,9 @@ const updateCart=async(req,res)=>{
  
 
         await cart.save()
+        const totalCarts=cart.items.reduce((tot,item)=>tot+=item.quantity,0)
         
-        res.json({ success: true, newQuantity: item.quantity, totalPrice, stock: item.bookId.stock, });
+        res.json({ success: true, newQuantity: item.quantity, totalPrice, stock: item.bookId.stock,totalCarts });
         
     } catch (error) {
 
@@ -248,18 +190,21 @@ const removecart=async(req,res)=>{
         const user= await checkUserSession(req)
         if(!user) return res.redirect('/login')
         const {bookId}=req.body;
-       let cart=await Cart.findOne({userId:user._id});
+       let cart=await Cart.findOne({userId:user._id})
        if(!cart) return res.json({success: false, message: "Cart not found"})
 
         cart.items=cart.items.filter(item=>item.bookId.toString()!==bookId)
         await cart.save()
         const offer = await getBestOffer(bookId);
         const salePrice = offer ? offer.finalPrice : item.bookId.price;
+         cart = await Cart.findOne({ userId: user._id }).populate("items.bookId");
 
         const totalPrice = cart.items.reduce((sum, i) => sum + i.totalPrice, 0);
+        const totalItems=cart.items.filter(item=>item.bookId.stock>0).length
+        const totalCarts=cart.items.reduce((tot,item)=>tot+=item.quantity,0)
 
        
-        res.json({ success: true, totalPrice });
+        res.json({ success: true, totalPrice,totalItems,totalCarts });
     } catch (error) {
 
         console.error(error);
@@ -286,15 +231,15 @@ const loadWishlist = async (req, res) => {
 
 const addWishlist=async(req,res)=>{
     try {
-        console.log('add wishlist called')
+        
         const user= await checkUserSession(req)
-        if(!user) return res.status(401).json({ success: false, message: "Please log in to add items to the cart." });
+        if(!user) return res.status(401).json({ success: false, message: "Please log in to add items to the wishlist .",redirect:'/login' });
             const { bookId } = req.body;
         
 
         const existing = await Wishlist.findOne({ user_id:user, book_id: bookId });
         if (existing) {
-            return res.status(409).json({ message: 'already in wishlist' });
+            return res.json({success: false, message: "Book is already in wishlist ." });
             
         }
 
@@ -304,8 +249,10 @@ const addWishlist=async(req,res)=>{
         });
 
         await wishlistItem.save();
+
+        const wishlistCount = await Wishlist.countDocuments({ user_id: user });
         
-       return res.status(200).json({ success: true, message: "Book added to wishlist." });
+       return res.status(200).json({ success: true,wishlistCount, message: "Book added to wishlist." });
         
 
     } catch (error) {
@@ -318,8 +265,10 @@ const addWishlist=async(req,res)=>{
 
 const deleteWishlist=async(req,res)=>{
     try {
+        const user= await checkUserSession(req)
         await Wishlist.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true });
+        const wishlistCount = await Wishlist.countDocuments({ user_id: user });
+    res.status(200).json({ success: true,wishlistCount });
     } catch (error) {
         console.error('Error deleting wishlist item:', error);
     res.status(500).json({ success: false });

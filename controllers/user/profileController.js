@@ -17,7 +17,7 @@ const loadprofile=async(req,res)=>{
         
         res.render('profile',{user:user||{},searchQuery: search || "",message:null})
     } catch (error) {
-        console.log(error)
+        console.error('error in profilepage loading',error)
     }
 }
 
@@ -54,6 +54,7 @@ const updateProfileImage = async (req, res) => {
 
 
 
+
 const deleteProfileImage = async (req, res) => {
     try {
        
@@ -74,7 +75,7 @@ const deleteProfileImage = async (req, res) => {
                 
                 fs.unlinkSync(imagePath);
             } else {
-                console.log("File not found:", imagePath);
+                return res.status(404).json({ success: false, message: "file not found!" });
             }
         }
 
@@ -98,7 +99,7 @@ const loadChangemail=async(req,res)=>{
     try {
         res.render('changemail',{message:null})
     } catch (error) {
-        console.log(error)
+        console.error('error in loademail changing page',error)
     }
 }
 const changEmail=async(req,res)=>{
@@ -130,7 +131,7 @@ const changEmail=async(req,res)=>{
         } else {
             res.send(`<script>alert('Failed to send OTP. Try again later.'); window.location.href='/profile/email-change';</script>`);
         }
-        console.log("OTP Sent",otp);
+        
 
     } catch (error) {
         
@@ -153,7 +154,7 @@ const verifyChangEmail=async(req,res)=>{
         if (!user) return res.status(404).send("User not found");
 
         
-         console.log("Received OTP from User:", otp);
+         
          
          if (!req.session.emailOtp || !req.session.newEmail) {
             return res.send(`<script>alert('No OTP request found.'); window.location.href='/profile/email-change';</script>`);
@@ -191,7 +192,7 @@ const resendEmailOtp= async(req,res)=>{
     const newOtp=generateOtp()
    req.session.emailOtp=newOtp;    
     req.session.otpExpires = Date.now() + 60000;
-    console.log("new otp",newOtp)
+    
     res.json({success:true,message:"new otp sent"})
 
 }
@@ -239,7 +240,7 @@ const changephone=async(req,res)=>{
         }
 
         await User.findByIdAndUpdate(userId, { phone });
-        return res.json({ success: true, message: "Username updated successfully" });
+        return res.json({ success: true, message: "phone number updated successfully" });
     } catch (error) {
 
         console.error("Error updating phone:", error);
@@ -255,7 +256,7 @@ const passwordChange=async(req,res)=>{
 
         res.render('changepass',{message:null})
     } catch (error) {
-        console.log(error)
+        console.error('password change error',error)
         
     }
 }

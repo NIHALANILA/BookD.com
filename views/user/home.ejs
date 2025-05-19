@@ -73,9 +73,9 @@
                  
                  <img src="<%= newArrivals[i].book_images[0] %>" alt="<%= newArrivals[i].title %>" class="product-image img-fluid">
                 </a>
-                <form action="/wishlist" method="POST" style="display:inline;">
-                  <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
-                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                <form  style="display:inline;">
+                 
+                  <button  class="btn-icon btn-wishlist wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;" data-bookid="<%= newArrivals[i]._id %>">
                         <svg width="24" height="24" viewBox="0 0 24 24">
                         <use xlink:href="#heart"></use>
                         </svg>
@@ -118,9 +118,9 @@
  
                  </a>
                
-                <form action="/wishlist" method="POST" style="display:inline;">
+                <form  style="display:inline;">
                   <input type="hidden" name="bookId" value="<%= newArrivals[i]._id %>">
-                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                  <button  class="btn-icon btn-wishlist wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;" data-bookid="<%= newArrivals[i]._id %>">
                         <svg width="24" height="24" viewBox="0 0 24 24">
                         <use xlink:href="#heart"></use>
                         </svg>
@@ -188,9 +188,9 @@
  
                  </a>
                
-                 <form action="/wishlist" method="POST" style="display:inline;">
-                  <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
-                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                 <form  style="display:inline;">
+                 
+                  <button  class="btn-icon btn-wishlist wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;" data-bookid="<%= bestSellers[i]._id %>">
                         <svg width="24" height="24" viewBox="0 0 24 24">
                         <use xlink:href="#heart"></use>
                         </svg>
@@ -240,9 +240,9 @@
    
                    </a>
                  
-                  <form action="/wishlist" method="POST" style="display:inline;">
+                  <form  style="display:inline;">
                   <input type="hidden" name="bookId" value="<%= bestSellers[i]._id %>">
-                  <button type="submit" class="btn-icon btn-wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                  <button  class="btn-icon btn-wishlist wishlist" style="background:none; border:none; padding:0; margin:0; cursor:pointer;"  data-bookid="<%= bestSellers[i]._id %>">
                         <svg width="24" height="24" viewBox="0 0 24 24">
                         <use xlink:href="#heart"></use>
                         </svg>
@@ -260,7 +260,7 @@
                             style="all: unset; cursor: pointer;"
                             title="Add to cart"
                             class="add-to-cart"
-                             data-bookid="<%= newArrivals[i]._id %>">
+                             data-bookid="<%= bestSellers[i]._id %>">
                       <span class="material-symbols-outlined" style="font-size: 24px; color: #333;">shopping_cart</span>
                     </button>
                     <p>
@@ -332,6 +332,10 @@
           const data = await response.json();
 
           if (response.ok&& data.success) {
+             document.querySelector("#cartCount").textContent = data.totalItems;
+              document.querySelector("#cartCountSmall").textContent=data.totalItems
+             document.querySelector("#wishlistCount").textContent = data.wishlistCount;
+             document.querySelector("#wishlistCountSmall").textContent = data.wishlistCount;
             Swal.fire({
               icon: 'success',
               title: 'Added to cart',
@@ -348,7 +352,14 @@
             }).then(() => {
       window.location.href = data.redirect;
     });
-            }
+            }else {
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: data.message || 'Something went wrong.'
+    });
+  }
             
           }
         } catch (err) {
@@ -361,6 +372,60 @@
       });
     });
   });
+
+  document.querySelectorAll('.wishlist').forEach(button => {
+  button.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const bookId = button.dataset.bookid;
+    try {
+      const response = await fetch('/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bookId })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        document.querySelector("#wishlistCount").textContent = data.wishlistCount;
+        document.querySelector("#wishlistCountSmall").textContent = data.wishlistCount;
+        Swal.fire({
+          icon: 'success',
+          title: "Added to Wishlist",
+          text: data.message,  
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } else {
+            if(data.redirect){
+              Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message
+            }).then(() => {
+      window.location.href = data.redirect;
+    });
+            }else {
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: data.message || 'Something went wrong.'
+    });
+  }
+            
+          }
+
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops',
+        text: 'something went wrong'
+      });
+    }
+  });
+});
  
   </script>
   

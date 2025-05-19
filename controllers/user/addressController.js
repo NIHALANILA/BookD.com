@@ -99,7 +99,7 @@ const loadeditaddress=async(req,res)=>{
         }
         res.render('editAddress',{user:userProfile||{},searchQuery: search || "",message:null})
     } catch (error) {
-        console.log(error)
+        console.error('error in loading edit address',error.message)
     }
 }
 
@@ -162,7 +162,7 @@ const deleteAddress=async(req,res)=>{
         }
 
         await Address.findByIdAndDelete(addressId);
-        return res.json({ success: true, message: "Username updated successfully" });
+        return res.json({ success: true, message: "Address deleted succefully" });
     
         
     } catch (error) {

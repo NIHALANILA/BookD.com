@@ -92,7 +92,7 @@ const statusEdit = async (req, res) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      console.log(status)
+      
 
       const allowedStatusupdate={
         processing:["delivered","shipped"],
@@ -146,7 +146,7 @@ const statusEdit = async (req, res) => {
           
         }
   
-        await refundToWallet(order.userId, order.netAmount - order.tax);
+        await refundToWallet(order.userId, order.netAmount - order.shippingCharge);
       }
   
       // in partial return we need to do some calculation in refunding price(to wallet) and order need to update 
@@ -241,7 +241,7 @@ const statusEdit = async (req, res) => {
   };
   
   async function orderReturnFromItem(req,res,order){
-    console.log('orderreturnfrmitem called')
+   
 
     try {
       order.status="returned";
@@ -261,7 +261,7 @@ const statusEdit = async (req, res) => {
       return res.json({success:true,message:"Enitire order marked as returned"})
       
     } catch (error) {
-      console.log('errorr in last item return from an order',error)
+      console.error('errorr in last item return from an order',error)
       
     }
 

@@ -238,7 +238,7 @@
 };
 
 const backgroundColors = labels.map(label => {
-  // Normalize: remove spaces and convert to lowercase
+  
   const normalizedLabel = label.toLowerCase().replace(/\s+/g, '');
   const color = Object.entries(statusColorMap).find(([key]) => {
     return normalizedLabel === key.toLowerCase().replace(/\s+/g, '');

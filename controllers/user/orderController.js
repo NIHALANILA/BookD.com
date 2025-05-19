@@ -18,237 +18,7 @@ const Wallet=require('../../models/walletSchema')
 
 
 
-/*
-const loadcheckout = async (req, res) => {
-    try {
-        const user = await checkUserSession(req);
-        if (!user) return res.redirect('/login');
 
-        const addresses = await Address.find({ userId: user._id });
-
-        
-        
-
-            const cart = await Cart.aggregate([
-                { $match: { userId: user._id, status: 'active' } },
-                { $unwind: "$items" },
-                {
-                    $lookup: {
-                        from: 'books',
-                        localField: 'items.bookId',
-                        foreignField: '_id',
-                        as: 'bookData'
-                    }
-                },
-                { $unwind: "$bookData" },
-                {
-                    $project: {
-                        'bookData._id': 1,
-                        'bookData.title': 1,
-                        'bookData.price': 1,
-                        'bookData.stock':1,
-                        'bookData.book_images': { $arrayElemAt: ['$bookData.book_images', 0] },
-                        'quantity': '$items.quantity',
-                        'totalPrice': { $multiply: ['$items.quantity', '$bookData.price'] },
-                    }
-                }
-            ]);
-
-            if (!cart || cart.length === 0) {
-                req.flash("error", "Your cart is empty.");
-                return res.redirect('/books');
-            }
-
-            // Extract IDs of out-of-stock items
-               const outOfStockItems = cart
-              .filter((item) => item.quantity > item.bookData.stock)
-               .map((item) => item.bookData._id);
-
-               // Remove them from the user's cart in DB
-             if (outOfStockItems.length > 0) {
-               await Cart.updateOne(
-                { userId: user._id },
-              { $pull: { items: { bookId: { $in: outOfStockItems } } } }
-                             );
-                        }
-
-
-        const filteredCarts=cart.filter((item)=>item.quantity<=item.bookData.stock)
-          const cartItems = await Promise.all(filteredCarts.map(async (item) => {
-              const fullBook = await Books.findById(item.bookData._id);  
-              const offerData = await getBestOffer(fullBook);
-
-                 return {
-                 ...item,
-               discount: offerData?.discount || 0,
-               discountedPrice: offerData?.finalPrice || item.totalPrice
-                  };
-                       }));
-
-                const subtotal = cartItems.reduce((sum, item) => sum + item.discountedPrice*item.quantity, 0);
-                req.session.subtotal = subtotal;     
-        
-
-            const tax = subtotal * 0.05;
-        
-             const userId = user._id
-
-        
-        const coupons = await Coupon.find({
-            isActive: "yes",
-            expireDate: { $gte: new Date() },
-            minimumPrice: { $lte: subtotal },
-            isDeleted: false,
-            $or: [{
-
-                issuedTo:null,
-                $or:[ { limitPerUser: false }, 
-                    {                              // unlimited coupns always need to show but onetime used never show if it is used and (non refererred copuns)
-                      limitPerUser: true,
-                      usersUsed: { $nin: [userId] } 
-                    }]
-                
-            },
-
-            {
-
-                issuedTo:userId,
-                $or:[ { limitPerUser: false }, 
-                    {                              //unlimited coupns always need to show but onetime used never show if it is used- (refered to this user)
-                      limitPerUser: true,
-                      usersUsed: { $nin: [userId] } 
-                    }]
-                
-            },
-               
-              ]
-           
-        });
-        const shippingCharge=50
-        
-        const finalTotal=subtotal+tax+shippingCharge
-
-    
-        
-        
-        res.render('checkout', {
-            user,
-            cartItems,
-            addresses,
-            subtotal,
-            tax,
-            shippingCharge,            
-            finalTotal,
-            coupons,
-            session: req.session
-        });
-
-    } catch (error) {
-        console.error("Checkout error:", error);  //
-        req.flash("error", "Something went wrong.");
-        
-        res.redirect('/cart');
-    }
-};
-
-
-
-const buynow=async(req,res)=>{
-    try {
-        const user=await checkUserSession(req);
-        if(!user) return res.redirect('/login')
-
-         const {bookId} =req.body;
-         const book=await Books.findById(bookId);
-
-         if(!book){
-            req.flash("error","Book not found")
-            return res.redirect('/shop')
-         }
-         if(book.stock===0){
-            return res.redirect(`/book/${book._id}`)
-         }
-
-         const offer=await getBestOffer(bookId);
-
-         const discountedPrice=  offer.finalPrice;
-
-
-         const addresses= await Address.find({userId:user._id})
-
-         const item={
-            bookId:book.id,
-            title:book.title,
-            price:book.price,
-            discountedPrice,
-            quantity:1,
-            totalPrice:discountedPrice,
-            bookImage:book.book_images[0]
-
-         }
-
-      
-
-         const subtotal=discountedPrice;
-         const tax=subtotal*0.05;
-         const shippingCharge=50;
-         
-         const finalTotal=subtotal+tax+shippingCharge
-         req.session.subtotal = subtotal;
-         
-
-         const userId = user._id
-             
-        const coupons = await Coupon.find({
-            isActive: "yes",
-            expireDate: { $gte: new Date() },
-            minimumPrice: { $lte: subtotal },
-            isDeleted: false,
-            $or: [{
-
-                issuedTo:null,
-                $or:[ { limitPerUser: false }, 
-                    {                              // unlimited coupns always need to show but onetime used never show if it is used and (non refererred copuns)
-                      limitPerUser: true,
-                      usersUsed: { $nin: [userId] } 
-                    }]
-                
-            },
-
-            {
-
-                issuedTo:userId,
-                $or:[ { limitPerUser: false }, 
-                    {                              //unlimited coupns always need to show but onetime used never show if it is used- (refered to this user)
-                      limitPerUser: true,
-                      usersUsed: { $nin: [userId] } 
-                    }]
-                
-            },
-               
-              ]
-        });
-
-         res.render('checkout',{
-            user,
-            cartItems:[item],
-            addresses,
-            subtotal,
-            tax,
-            shippingCharge,
-            finalTotal,
-            coupons,
-            session:req.session
-         })
-    } catch (error) {
-
-        console.error(error)
-        req.flash('error',"Something went wrong")
-        res.redirect('/shop')
-        
-    }
-}
-*/
 
 const buynow = async (req, res) => {
     try {
@@ -481,7 +251,7 @@ const couponDiscount=async(req,res)=>{
 }
 
 const removeCoupon=async(req,res)=>{
-console.log('remove called')
+
     try {
         delete req.session.appliedCoupon;
 
@@ -509,7 +279,7 @@ console.log('remove called')
 
 const placeOrder = async (req, res) => {    
     try {
-        console.log("PaymentMethod received:", req.body.paymentMethod);
+        
 
         const { book, quantity,  addressId, paymentMethod} = req.body;
         
@@ -657,7 +427,7 @@ const placeOrder = async (req, res) => {
                 shippingCharge,
                 tax,
                 discount: totalDiscount,
-                couponApplied:couponApplied,
+                couponApplied:totalDiscount,
                 couponId: appliedCoupon
             });
         
@@ -730,7 +500,7 @@ const placeOrder = async (req, res) => {
         if (paymentMethod === "online") {
             try {
 
-                console.log("Saved Order ID:", savedOrder._id);
+                
               
              //follow razorpay verification -status will be default value-initiated
               const razorpayOrder = await razorpayInstance.orders.create({
@@ -1114,7 +884,7 @@ const downloadInvoice = async (req, res) => {
         // Conditional Refund Note
         if (order.discount === 0 && order.couponApplied !== 0) {
             doc.fillColor("red").text(
-                `Your coupon condition broke, so the full coupon amount (₹${order.couponApplied}) was deducted from the refund amount.`,50,y
+                `Your coupon condition broke, so the full discount  (₹${order.couponApplied}) was deducted from the refund amount.`,50,y
             );
         } else if (order.discount !== 0 && order.discount < order.couponApplied) {
             doc.fillColor("red").text(
@@ -1139,7 +909,7 @@ const orderFail=async(req,res)=>{
     if (!orderId) {
         return res.status(400).send("Order ID is missing.");
     }
-    console.log(orderId)
+    
     res.render('paymentFail',{orderId})
 }
 

@@ -24,7 +24,7 @@
     href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    
     <style>
       div.swiper-wrapper {
   height: 80%;
@@ -333,8 +333,12 @@ strong {
       <% coupons.forEach(coupon => { %>
         <li>
           <strong><%= coupon.code %> -</strong> 
+          
+         
           <strong><%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %></strong>
           <button class="btn btn-sm btn-success ms-2 apply-btn" data-code="<%= coupon.code %>"  onclick="applyCoupon('<%= coupon.code %>',this)">Apply</button>
+         <p> Minimum Order amount until the coupon valid is <strong><%= coupon.minimumPrice %></strong><a href="/returncancel" > 
+          <p style="color: #555">Orders placed using this coupon are subject to Our Return & Cancellation Policy</p></a></p>  
         </li>
       <% }); %>
     </ul>
@@ -510,7 +514,7 @@ function removeCoupon() {
       
       updateTotals(data.subtotal, data.tax, data.finalTotal);
     } else {
-      //alert('Failed to remove coupon: ' + data.error);
+      
 
       Swal.fire({
             icon: 'error',
@@ -580,7 +584,7 @@ function initPlaceOrder(){
         });
 
         const response = await res.json();
-        console.log("Received backend response:", response); 
+        
 
         if (res.ok && response.success) {
             if (data.paymentMethod === 'online') {
@@ -664,7 +668,7 @@ function initiateRazorpayPayment(response) {
 
 async function verifyPayment(paymentResponse, savedOrderId) {
     try {
-      console.log("Redirecting with savedOrderId:", savedOrderId);
+      
 
         const res = await fetch(`/verify-payment`, {
             method: 'POST',
@@ -686,7 +690,7 @@ async function verifyPayment(paymentResponse, savedOrderId) {
           
         }
     } catch (error) {
-        console.error("Error verifying payment:", error);
+        
         window.location.href = `/order-failure?orderId=${savedOrderId}`;
     }
 }

@@ -388,7 +388,7 @@ document.getElementById("confirmCancel").addEventListener("click", function ()  
 
       })
       .catch(error => {
-    console.error(" Cancel error:", error);
+    
     Swal.fire({
               icon: 'error',
               title: 'Oops!',
@@ -425,12 +425,12 @@ document.getElementById("confirmReturn").addEventListener("click", function () {
         Swal.fire({
             icon: 'success',
             title: 'Returned!',
-            text: 'Order returned successfully.'
+            text: 'return request submitted successfully.'
         }).then(() => {
             location.reload();
         });
 }).catch(error => {
-        console.error("Return error:", error);
+        
         Swal.fire({
             icon: 'error',
             title: 'Oops!',
@@ -489,7 +489,7 @@ document.getElementById("confirmCancelItem").addEventListener("click", function 
       }
     })
     .catch(err => {
-      console.log("Cancel Item Error:", err);
+      
       alert("Something went wrong.");
     });
 });
@@ -521,7 +521,7 @@ document.getElementById("confirmReturnItem").addEventListener("click", function 
         Swal.fire({
           icon: 'success',
           title: 'Returned!',
-          text: data.message || "Item returned successfully."
+          text: data.message || "submitted return request successfully."
         }).then(() => {
           location.reload();
         });
@@ -535,7 +535,7 @@ document.getElementById("confirmReturnItem").addEventListener("click", function 
       }
     })
     .catch(err => {
-      console.error("Return Item Error:", err);
+      
       
       Swal.fire({
         icon: 'error',

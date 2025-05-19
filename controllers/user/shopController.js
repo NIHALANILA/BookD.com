@@ -48,7 +48,8 @@ for (let book of bestSellers) {
     
     }
     catch(error){
-        console.log(error)
+        console.error(error)
+       return res.redirect('/pageNotFound')
 
     }
 }
@@ -178,7 +179,7 @@ const loadShopage = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        console.error('error in loading shop page',error.message)
         res.status(500).send("Internal Server Error");
     }
 };

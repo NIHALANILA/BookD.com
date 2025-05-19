@@ -1,6 +1,6 @@
 
 <%-include("../../views/partials/admin/header")%>
-            <!-- Book Management Section -->
+           
             
                 <h2>User Management</h2>
                  <!-- Search Form -->
@@ -92,7 +92,7 @@
                 await Swal.fire("Error!", "Failed to block user.", "error");
             }
         } catch (error) {
-            console.error("Error blocking user:", error);
+            
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
     }
@@ -120,7 +120,7 @@ async function unblockUser(userId) {
                 await Swal.fire("Error!", "Failed to unblock user.", "error");
             }
         } catch (error) {
-            console.error("Error unblocking user:", error);
+            
             await Swal.fire("Error!", "Something went wrong.", "error");
         }
     }

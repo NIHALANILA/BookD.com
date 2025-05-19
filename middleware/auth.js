@@ -1,6 +1,7 @@
 const User=require('../models/userSchema')
 const {checkUserSession} = require('../helpers/userDry')
 const Cart = require("../models/cartSchema");
+const Wishlist=require('../models/wishlistSchema')
 
 
 const userIn=async(req,res,next)=>{
@@ -13,7 +14,7 @@ const userIn=async(req,res,next)=>{
         }
     } catch (error) {
 
-        console.log(error)
+        console.error('error in checking user session',error)
         
     }
 
@@ -28,7 +29,7 @@ const userNotIn=async(req,res,next)=>{
             res.redirect('/')
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         
     }
 }
@@ -42,10 +43,14 @@ const loadCommonData = async (req, res, next) => {
 
 
         let cart = { items: [] }; 
+         let wishlistData=[]
         if (userData) {
             const cartData = await Cart.findOne({ userId: userData._id }).populate("items.bookId");
             if (cartData) cart = cartData;
+            wishlistData = await Wishlist.find({ user_id: userData._id }); 
+            
         }
+       
 
         
         const searchQuery = req.query.search || "";
@@ -54,6 +59,9 @@ const loadCommonData = async (req, res, next) => {
         res.locals.user = userData;
         res.locals.cart = cart;
         res.locals.searchQuery = searchQuery;
+        res.locals.cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        res.locals.wishlistCount = wishlistData.length;
+
 
         next(); 
     } catch (error) {

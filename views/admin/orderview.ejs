@@ -123,10 +123,13 @@ button:hover {
 
 <hr>
 <h4> Shipping Address</h4>
+<% if (order.addressId) { %>
 <p>
   <%= order.addressId.name %>, <%= order.addressId.place %>, 
   <%= order.addressId.city %> ,<%= order.addressId.state %>, <%= order.addressId.pincode %>
-  
+  <% } else { %>
+  <em>Address not available</em>
+<% } %>
 </p>
 
 <hr>
@@ -137,7 +140,7 @@ button:hover {
       <th>Book Name</th>
       <th>Quantity</th>
       <th>Price</th>
-      <th>Discount</th>
+      <th>Saled price</th>
       <th>Total</th>
       <th>Status</th>
 
@@ -149,7 +152,7 @@ button:hover {
         <td><%= item.bookId.title %></td>
         <td><%= item.quantity %></td>
         <td>₹<%= item.price %></td>
-        <td>₹<%= item.discount %></td>
+        <td>₹<%=item.price -item.discount %></td>
         <td>₹<%= item.totalPrice %></td>
         <td>
           <%= item.status %>
@@ -168,7 +171,7 @@ button:hover {
 <hr>
 <% if (order.status!=="cancelled") { %>
 <h4> Payment Summary</h4>
-<p><strong>Subtotal:</strong> ₹<%= order.total.toFixed(2) %></p>
+<p><strong>Total:</strong> ₹<%= order.total.toFixed(2) %></p>
 <p><strong>Shipping:</strong> ₹<%= order.shippingCharge %></p>
 <p><strong>Tax:</strong> ₹<%= order.tax.toFixed(2) %></p>
 <p><strong>Discount:</strong> ₹<%= order.discount %></p>

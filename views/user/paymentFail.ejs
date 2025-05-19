@@ -25,7 +25,7 @@
     href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
     rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <%- typeof extraCSS !== 'undefined' ? extraCSS : "" %>
+    
     <style>
       div.swiper-wrapper {
   height: 80%;
@@ -124,7 +124,7 @@ p {
     retryBtn.addEventListener("click", async function(e) {
       e.preventDefault();
       const orderId = retryBtn.getAttribute("data-orderid");
-      console.log("Retry clicked with orderId:", orderId);
+      
       await retryPayment(orderId);
     });
   } 
@@ -137,7 +137,7 @@ p {
     const response = await res.json();
 
     if (response.success) {
-      console.log('retry payment response:',response)
+      
       initiateRazorpayPayment(response); // Use the same existing function
     } else {
       alert("Retry failed. Please try again later.");
@@ -201,7 +201,7 @@ const savedOrderId = response.savedOrderId;
 
 async function verifyPayment(paymentResponse, savedOrderId) {
   try {
-    console.log("Redirecting with savedOrderId:", savedOrderId);
+    
 
       const res = await fetch(`/verify-payment`, {
           method: 'POST',
@@ -220,10 +220,10 @@ async function verifyPayment(paymentResponse, savedOrderId) {
           window.location.href = `/orders/success/${savedOrderId}`;
       } else {
         window.location.href = `/order-failure?orderId=${savedOrderId}`;
-        console.log("save order id is:",savedOrderId)
+        
       }
   } catch (error) {
-      console.error("Error verifying payment:", error);
+      
       window.location.href = `/order-failure?orderId=${savedOrderId}`;
   }
 }
@@ -237,7 +237,7 @@ async function verifyPayment(paymentResponse, savedOrderId) {
 </html>
 
 
-  <!--old-->
+  
   
 
   
