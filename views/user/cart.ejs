@@ -235,6 +235,9 @@ p{
                                             <!-- Increase Quantity -->
                                             <button type="button" class="btn btn-outline-secondary btn-sm increase-btn"
                                                 <% if (item.quantity >= item.stock || item.stock === 0) { %> disabled <% } %>>+</button>
+                                                <% if (item.quantity >= item.stock || item.stock === 0) { %>
+                                                <small class="text-danger">No more stock available</small>
+                                               <% } %>
                                         </form>
                                         
     
