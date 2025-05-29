@@ -15,6 +15,8 @@ const loadlogin=(req,res)=>{
         return res.render('admin-login',{message:""})
     }
     catch(error){
+        return res.redirect('/pageNotFound')
+        
        console.error( error.message);
 
     }
@@ -43,7 +45,7 @@ try {
     
  catch (error) {
     console.error( error.message);
-    return res.redirect('/pageNotFounnd')
+    return res.redirect('/pageNotFound')
 }}
 
 
@@ -68,6 +70,7 @@ const loaddashboard=async(req,res)=>{
     }
 
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error( error.message);
     }
 }
@@ -76,6 +79,7 @@ const logout=async(req,res)=>{
         req.session.admin = null;
         res.redirect('/admin/login');
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error.message);
         
     }

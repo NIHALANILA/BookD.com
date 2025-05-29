@@ -58,7 +58,7 @@ const buynow = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        req.flash('error', "Something went wrong");
+        
         return res.redirect('/shop');
     }
 };
@@ -192,8 +192,7 @@ const loadcheckout = async (req, res) => {
 
     } catch (error) {
         console.error("Checkout error:", error);
-        req.flash("error", "Something went wrong.");
-        res.redirect('/cart');
+       res.redirect('/pageNotFound')
     }
 };
 
@@ -1078,8 +1077,9 @@ const cancelItem=async(req,res)=>{
 
         res.json({success:true})
     } catch (error) {
-
-        console.error(error)
+         console.error('cancelling item error',error)
+          return res.status(500).json({message:"Something went wrong"})
+       
         
     }
 }

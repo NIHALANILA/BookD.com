@@ -35,6 +35,7 @@ const listCoupons=async(req,res)=>{
        
         
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error)
     }
 }
@@ -82,6 +83,7 @@ const addCoupon=async(req,res)=>{
 
         res.status(200).json({ message: "Coupon saved successfully!" });
     } catch (error) {
+         res.status(500).json({ message: "something went wrong!" });
         console.error(error)
         
     }
@@ -92,6 +94,7 @@ const loadEditCoupon=async(req,res)=>{
         const coupon = await Coupon.findById(req.params.id);
         res.render('editCoupon',{coupon})
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error)
     }
 
@@ -133,6 +136,7 @@ const editCoupon=async(req,res)=>{
       res.status(200).json({ message: "Coupon updated successfully", coupon: updatedCoupon });
 
     } catch (error) {
+        res.status(500).json({ message: "something went wrong" });
         console.error(error)
         
     }

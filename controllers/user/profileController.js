@@ -18,8 +18,8 @@ const loadprofile=async(req,res)=>{
         res.render('profile',{user:user||{},searchQuery: search || "",message:null})
     } catch (error) {
         console.error('error in profilepage loading',error)
-    }
-}
+        res.redirect('/pageNotFound');
+}}
 
 
 const updateProfileImage = async (req, res) => {
@@ -100,6 +100,7 @@ const loadChangemail=async(req,res)=>{
         res.render('changemail',{message:null})
     } catch (error) {
         console.error('error in loademail changing page',error)
+        res.redirect('/pageNotFound');
     }
 }
 const changEmail=async(req,res)=>{
@@ -257,6 +258,7 @@ const passwordChange=async(req,res)=>{
         res.render('changepass',{message:null})
     } catch (error) {
         console.error('password change error',error)
+        res.redirect('/pageNotFound');
         
     }
 }

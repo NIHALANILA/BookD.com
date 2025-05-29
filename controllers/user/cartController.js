@@ -124,7 +124,7 @@ const viewCart = async (req, res) => {
     } catch (error) {
         console.error(error);
         
-        res.redirect("/cart");
+        res.redirect('/pageNotFound');
     }
 };
 

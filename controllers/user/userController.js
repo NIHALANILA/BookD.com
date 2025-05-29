@@ -69,6 +69,7 @@ const signup=async(req,res)=>{
     }
     catch(error){
         console.error(error)
+        res.redirect('/pageNotFound');
 
  
     }
@@ -77,21 +78,23 @@ const signup=async(req,res)=>{
 
 const verifyOtp = async (req, res) => {
     
-      
-      const {otp}=req.body
-   
-    if (otp === req.session.userOtp) {
+    try{
+
         
-
-        const user = req.session.userData;
-        const passwordHash = await securePassword(user.password);
-
-        //  referal code of new user
-        const generateReferralCode = () => {
-            return Math.random().toString(36).substring(2, 8).toUpperCase(); 
-        };
-
-        const saveUserData = new User({
+        const {otp}=req.body
+        
+        if (otp === req.session.userOtp) {
+            
+            
+            const user = req.session.userData;
+            const passwordHash = await securePassword(user.password);
+            
+            //  referal code of new user
+            const generateReferralCode = () => {
+                return Math.random().toString(36).substring(2, 8).toUpperCase(); 
+            };
+            
+            const saveUserData = new User({
             username: user.username,
             email: user.email,
             phone: user.phone,
@@ -101,15 +104,15 @@ const verifyOtp = async (req, res) => {
         });
 
         await saveUserData.save();
-
-         
-         if (user.referral) {
+        
+        
+        if (user.referral) {
             const referrer = await User.findOne({ referalCode: user.referral });
             if (referrer && !referrer.redeemedUsers.includes(saveUserData._id)) {
                 referrer.redeemedUsers.push(saveUserData._id);
                 referrer.redeemed = true;
                 await referrer.save();
-
+                
                 
                 const referralCoupon = new Coupon({
                     code: "REF" + Math.random().toString(36).substring(2, 6).toUpperCase(),
@@ -139,42 +142,60 @@ const verifyOtp = async (req, res) => {
         delete req.session.userOtp;
         delete req.session.userData;
         delete req.session.otpExpires;
-
+        
         
         return res.redirect('/'); 
     } 
 
     //forget password
     else if (otp === req.session.resetOtp) {
-           
+        
         delete req.session.resetOtp;
         delete req.session.otpExpires;
-
+        
         return res.render("reset-password", { email: req.session.resetEmail, message: "" });
     } 
     
     else {
-       
+        
         return res.render("verify-otp", { message: "OTP incorrect", otpExpires: req.session.otpExpires });
     }
     
+    
+    
+}
+catch(error){
+    res.redirect('/pageNotFound');
+    return res.json({message:'something went wrong'})
+}
 
-
-};
-
+}
 
 const resendOtp= async(req,res)=>{
-    const newOtp=generateOtp()
+    try {
+         const newOtp=generateOtp()
     req.session.userOtp=newOtp;    
     req.session.otpExpires = Date.now() + 60000;
     res.json({success:true,message:"new otp sent"})
+    } catch (error) {
+        res.status(500).json({message:'something went wrong'})
+        
+    }
+   
 
 }
 const resendPassOtp= async(req,res)=>{
-    const newOtp=generateOtp()
+    try {
+
+        const newOtp=generateOtp()
    req.session.resetOtp=newOtp;    
     req.session.otpExpires = Date.now() + 60000;
     res.json({success:true,message:"new otp sent"})
+        
+    } catch (error) {
+        res.status(500).json({message:'something went wrong'})
+    }
+    
 
 }
 
@@ -264,6 +285,7 @@ const login=async(req,res)=>{
     catch(error){
 
         console.error(error)
+        return res.status(500).json({message:'something went wrong'})
     }
 }
 

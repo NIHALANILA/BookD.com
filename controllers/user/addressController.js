@@ -100,6 +100,7 @@ const loadeditaddress=async(req,res)=>{
         res.render('editAddress',{user:userProfile||{},searchQuery: search || "",message:null})
     } catch (error) {
         console.error('error in loading edit address',error.message)
+        res.redirect('/pageNotFound')
     }
 }
 

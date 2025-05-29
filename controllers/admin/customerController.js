@@ -39,6 +39,8 @@ const customerlist= async(req,res)=>{
     
     } catch (error) {
        console.error(error.message);
+       res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
+       
     }
 }
 

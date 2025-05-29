@@ -262,6 +262,7 @@ const statusEdit = async (req, res) => {
       
     } catch (error) {
       console.error('errorr in last item return from an order',error)
+      res.status(500).send("Internal Server Error");
       
     }
 

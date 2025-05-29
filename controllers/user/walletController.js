@@ -20,6 +20,7 @@ const getWalletPage = async (req, res) => {
         
     } catch (error) {
         console.error('error in getWalletPage',error.message)
+        res.redirect('/pageNotfound')
     }
     
 };

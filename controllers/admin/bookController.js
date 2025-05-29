@@ -69,6 +69,7 @@ const query = conditions.length > 1 ? { $and: conditions } : conditions[0];
             totalPages,
             message});
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error.message);
     }
 };
@@ -78,6 +79,7 @@ const loadaddbook = async (req, res) => {
         const categories = await Category.find({ isListed: true,isDeleted:false });
         res.render("addbook", { categories,message:null });
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error.message);
     }
 };
@@ -140,6 +142,7 @@ const addbook = async (req, res) => {
         await newBook.save();
         res.redirect("/admin/books");
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error);
     }
 };
@@ -151,6 +154,7 @@ const loadeditbook=async(req,res)=>{
     const categories = await Category.find({isListed:true,isDeleted:false}); 
     res.render('editbook', { book, categories });
     } catch (error) {
+        return res.redirect('/pageNotFound')
         console.error(error.message);
         
     }

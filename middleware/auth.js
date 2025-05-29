@@ -71,16 +71,27 @@ const loadCommonData = async (req, res, next) => {
 };
 //success message after order place
 const success=async(req,res)=>{
+    try {
+         res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:true})
+        
+    } catch (error) {
+      return res.status(500).json({message:'something went wrong'})
+    }
 
-    res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:true})
+   
 
 }
 //to load the same success page as view details without success message
 
 const view=async(req,res)=>{
 
-    res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:false})
+    try {
+        res.render('ordSuccess',{order:res.locals.order,isOrderSuccess:false})
 
+    } catch (error) {
+        return res.status(500).json({message:'something went wrong'})
+    }
+    
 }
 
 
