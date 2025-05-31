@@ -156,11 +156,11 @@ p{
                 <% if(order.status==='rejected'){ %>
                   <p><strong>Order Status:</strong>Delivered(Return request rejected-pls contact )</p>
                   <%}else {%>
-                    <p><strong>Order Status:</strong> <%= order.status %></p>
+                    <p><strong>Order Status:</strong> <%= order.status.charAt(0).toUpperCase()+order.status.slice(1) %></p>
                     <%} %>
                 
                 <p><strong>Payment Method:</strong> 
-                    <%= order.paymentMethod %>
+                    <%= order.paymentMethod.charAt(0).toUpperCase()+order.paymentMethod.slice(1) %>
                 </p>
                 <p><strong>Total Amount:</strong> ₹<%= order.total %></p>
                 <p><strong>Included Items:</strong> <%= order.orderItems.length-(order.cancelledItems||0)-(order.returnedItems||0) %></p>
@@ -196,8 +196,8 @@ p{
             <!-- Shipping Address -->
             <div class="address-box">
                 <h3>Shipping Address</h3>
-                <p><strong>Name:</strong> <%= order.addressId.name %></p>
-                <p><strong>Address:</strong> <%= order.addressId.address %>, <%= order.addressId.city %></p>
+                <p><strong>Name:</strong> <%= order.addressId.name.charAt(0).toUpperCase()+order.addressId.name.slice(1) %></p>
+                <p><strong>Address:</strong> <%= order.addressId.address.charAt(0).toUpperCase()+order.addressId.address.slice(1) %>, <%= order.addressId.city.charAt(0).toUpperCase()+order.addressId.city.slice(1) %></p>
                 <p><strong>PinCode:</strong> <%= order.addressId.pincode %></p>
                 <p><strong>Phone:</strong> <%= order.addressId.phone %></p>
             </div>

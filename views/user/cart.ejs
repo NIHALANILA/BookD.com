@@ -236,7 +236,7 @@ p{
                                             <button type="button" class="btn btn-outline-secondary btn-sm increase-btn"
                                                 <% if (item.quantity >= item.stock || item.stock === 0) { %> disabled <% } %>>+</button>
                                                 <% if (item.quantity >= item.stock || item.stock === 0) { %>
-                                                <small class="text-danger">No more stock available</small>
+                                                <small class="text-danger ms-3 " id="stockmsg">No more stock available</small>
                                                <% } %>
                                         </form>
                                         
@@ -339,6 +339,16 @@ p{
                     // Enable/Disable buttons
                     decreaseBtn.disabled = data.newQuantity <= 1;
                     increaseBtn.disabled = data.newQuantity >= data.stock;
+
+                    const stockMsg=document.getElementById('stockmsg');
+                    if(data.newQuantity>=data.stock){
+                        stockMsg.innerText="No more stock available";
+                        stockMsg.style.display='inline'
+                    }
+                    else{
+                        stockMsg.style.display='none'
+                    }
+                    
                     
                     // Update total price
                     document.querySelector("#totalPrice").textContent = "₹" + data.totalPrice;

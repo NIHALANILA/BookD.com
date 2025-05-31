@@ -26,7 +26,7 @@ const checkAndRestoreCategory = async (name, excludeId = null) => {     //exclud
     return { exists: false };
           } catch (error) {
             console.error(`[ERROR] ${new Date().toISOString()} - ${error.message}`);
-           res.status(500).send("Something went wrong.");
+           
           }                                                                                                                                     
     
 };

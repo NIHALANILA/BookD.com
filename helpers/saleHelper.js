@@ -1,8 +1,12 @@
 const Order = require('../models/orderSchema') 
 const moment = require('moment');
 
-async function getSalesReport({ filterType, fromDate, toDate }) {
+async function getSalesReport({ filterType, fromDate, toDate,page = 1, limit = 10, isDownload = false}) {
   try {
+      // Default pagination logic
+    const skip = (page - 1) * limit;
+    const effectiveLimit = parseInt(limit);
+
     let matchStage = {
       status: {$in: ['delivered', 'orderRequested','itemRequested','Partial return'] }
     };
@@ -78,11 +82,13 @@ async function getSalesReport({ filterType, fromDate, toDate }) {
             { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },  // Unwind userDetails
             {
               $project: {
+                orderId:1,
                 userId: 1,
                 status: 1,
                 orderItems: 1,
                 discount: 1,
                 netAmount:1,
+                total:1,
                 paymentMethod:1,
                 createdAt: 1,
                 updatedAt: 1,
@@ -93,16 +99,21 @@ async function getSalesReport({ filterType, fromDate, toDate }) {
 
             { 
               $sort: { createdAt: -1 }  
-            }
+            },
+             ...(isDownload ? [] : [ { $skip: skip }, { $limit: effectiveLimit } ])
             
           ],
+          totalCount: [
+          { $count: "count" }
+        ]
          
         }
       }
     ]);
-
+    const totalCount = result[0].totalCount[0]?.count || 0;
     return {
-      result: result[0],
+      result: {...result[0],
+       totalCount,},
       dateRange: matchStage.createdAt || null,
       computedFrom: matchStage.createdAt?.$gte || null,
       computedTo: matchStage.createdAt?.$lte || null,

@@ -710,7 +710,7 @@ const orderCancel=async(req,res)=>{
        
         
       if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
-        await refundToWallet(order.userId, order.netAmount);
+        await refundToWallet(order.userId, order.netAmount,`Refund for cancelled order ${order.orderId}`);
       }
 
         res.json({ success: true });
@@ -828,8 +828,8 @@ const downloadInvoice = async (req, res) => {
             const status = item.status || "Ordered";
             const title = item.bookId.title;
             const qty = item.quantity.toString();
-            const price = `₹${item.price.toFixed(2)}`;
-            const discount = `₹${item.discount.toFixed(2)}`;
+            const price = `${item.price.toFixed(2)}`;
+            const discount = `${item.discount.toFixed(2)}`;
 
             // Draw table row borders for a single table
             doc.rect(titleX, y, 150, rowHeight).stroke();
@@ -858,11 +858,11 @@ const downloadInvoice = async (req, res) => {
                const summaryColWidth = 250;
        
                const summaryItems = [
-                   { label: "Discount", value: `₹${order.discount.toFixed(2)}` },
-                   { label: "Tax", value: `₹${order.tax.toFixed(2)}` },
-                   { label: "Shipping Charge", value: `₹${order.shippingCharge.toFixed(2)}` },
-                   { label: "Total Amount", value: `₹${order.total.toFixed(2)}` },
-                   { label: "Amount Paid", value: `₹${order.netAmount.toFixed(2)}` },
+                   { label: "Discount", value: `${order.discount.toFixed(2)}` },
+                   { label: "Tax", value: `${order.tax.toFixed(2)}` },
+                   { label: "Shipping Charge", value: `${order.shippingCharge.toFixed(2)}` },
+                   { label: "Total Amount", value: `${order.total.toFixed(2)}` },
+                   { label: "Amount Paid", value: `${order.netAmount.toFixed(2)}` },
                ];
        
                summaryItems.forEach((item, index) => {
@@ -883,11 +883,11 @@ const downloadInvoice = async (req, res) => {
         // Conditional Refund Note
         if (order.discount === 0 && order.couponApplied !== 0) {
             doc.fillColor("red").text(
-                `Your coupon condition broke, so the full discount  (₹${order.couponApplied}) was deducted from the refund amount.`,50,y
+                `Your coupon condition broke, so the full discount  (${order.couponApplied}) was deducted from the refund amount.`,50,y
             );
         } else if (order.discount !== 0 && order.discount < order.couponApplied) {
             doc.fillColor("red").text(
-                `Your order total changed. The discounted amount for returned/cancelled items was deducted. Initial coupon: ₹${order.couponApplied}`,50,y
+                `Your order total changed. The discounted amount for returned/cancelled items was deducted. Initial coupon: ${order.couponApplied}`,50,y
             );
         }
 
@@ -1037,7 +1037,7 @@ const cancelItem=async(req,res)=>{
 
             if(remainingTotal<minimumPrice){
                  
-                proportionalDiscount=order.discount;
+                proportionalDiscount=order.discount;   
                 order.discount=0;
             }
             else{
@@ -1056,9 +1056,10 @@ const cancelItem=async(req,res)=>{
         if(order.paymentMethod!=="cod"){
             returnTax=Number((cancelTotal*0.05).toFixed(2))
              refundAmount=cancelTotal+returnTax-proportionalDiscount
-           
+           let book = await Books.findById(item.bookId);
+
             refundAmount = Number(refundAmount.toFixed(2));                                              //if payment was through online or wallet 
-            await refundToWallet(order.userId,refundAmount)
+            await refundToWallet(order.userId,refundAmount,`Refund for cancelling ${book.title} from order ${order.orderId}`)
         }
         
          
@@ -1091,14 +1092,15 @@ async function orderCancelFromItem(req,res,order,reason){
         await order.save()
 
         for(let item of order.orderItems){
-            if(item.status="Ordered"){
+            if(item.status==="Ordered"){
+                 item.status = "Cancelled"
                 await Books.findByIdAndUpdate(item.bookId,{$inc:{stock:item.quantity}})
             }
             
         }
 
         if(order.paymentMethod!=="cod"){
-            await refundToWallet(order.userId,order.netAmount)
+            await refundToWallet(order.userId,order.netAmount,`refund for the last item in the order ${order.orderId}`)
         }
 
         return res.json({success:true,message:"Enitire order cancelled"})

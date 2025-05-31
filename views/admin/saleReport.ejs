@@ -92,7 +92,6 @@ table thead {
       <tr>
         <th>Total Ordes</th>
         <th>Total Amount</th>
-        <th>Net Sales</th>
         <th>Total Order Discount</th>
         <th>Total Coupon Used</th>
       </tr>
@@ -101,7 +100,6 @@ table thead {
       <% result.totalMetrics.forEach(metric => { %>
         <td><%= metric.totalOrders %></td>
         <td><%= metric.totalAmount.toFixed(2) %></td>
-        <td><%= metric.netSales.toFixed(2) %></td>
         <td><%= metric.totalOrderDiscount.toFixed(2) %></td>
         <td><%= metric.totalCouponUsed %></td>
       <% }) %>
@@ -113,52 +111,48 @@ table thead {
         <tr>
             
           <th>SI.No</th>
-            <th>User Email</th>  
-            <th>User Name</th> 
-            <th>Amount Paid </th> 
+            <th>Order Id</th>  
+            <th>Date</th> 
+            <th>Amount </th> 
             <th>Discount given </th> 
-             <th>Status</th>
+             <th>Payment Method</th>
             
         </tr>
     </thead>
     <tbody>
         <% result.orderDetails.forEach((order, index) => { %>
             <tr>
-              <td><%=  index + 1 %></td>
-                <td><%= order.email %></td>
-                <td><%= order.username %></td>
-                <td><%= order.netAmount.toFixed(2) %></td>              
+              <td><%=(currentPage-1)*10+ index + 1 %></td>
+                <td><%= order.orderId %></td>
+                <td><%= moment(order.createdAt).format('MMM DD YYYY') %></td>
+                <td><%= order.total.toFixed(2) %></td>              
                 <td><%= order.discount .toFixed(2) %></td>              
-                <td><%= order.status %></td>
+                <td><%= order.paymentMethod %></td>
             </tr>
         <% }); %>
     </tbody>
   </table>
 
+  <div class="pagination-container">
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>&filterType=<%= filterType %><%= from && to ? '&fromDate=' + from + '&toDate=' + to : '' %>">
+<button>&laquo; Prev</button></a>
+  <% } %>
+
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>&filterType=<%= filterType %><%= from && to ? '&fromDate=' + from + '&toDate=' + to : '' %>">
+    <button><%= i %></button>
+      
+    </a>
+  <% } %>
+
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>&filterType=<%= filterType %><%= from && to ? '&fromDate=' + from + '&toDate=' + to : '' %>">
+<button> Next &raquo;</button></a>
+  <% } %>
+</div>
 
 
-
-
-
-<h2>Status Counts</h2>
-<table class="table table-bordered table-striped book-table">
-  <thead>
-    <tr>
-      <th>Status</th>
-      <th>Count</th>
-      <th>Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% result.statusCounts.forEach(status => { %>
-      <tr>
-        <td><%= status._id %></td>
-        <td><%= status.count %></td>
-        <td><%= status.totalAmount %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
 
 
 

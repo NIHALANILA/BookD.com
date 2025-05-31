@@ -14,7 +14,7 @@ const listOrders = async (req, res) => {
         const search = req.query.search || '';
         const status = req.query.status || '';
         const page = parseInt(req.query.page) || 1;
-        const perPage = 10;
+        const perPage = 20;
 
         const query = {};
 
@@ -146,7 +146,7 @@ const statusEdit = async (req, res) => {
           
         }
   
-        await refundToWallet(order.userId, order.netAmount - order.shippingCharge);
+        await refundToWallet(order.userId, order.netAmount - order.shippingCharge,`Refund for return of order ${order.orderId}`);
       }
   
       // in partial return we need to do some calculation in refunding price(to wallet) and order need to update 
@@ -187,7 +187,7 @@ const statusEdit = async (req, res) => {
         if (!coupon) {
           
           const refundAmount =Number((returnTotal + returnTax).toFixed(2)) ;
-          await refundToWallet(order.userId, refundAmount);
+          await refundToWallet(order.userId, refundAmount,`refund for item in order ${order.orderId}`);
          
 
         } else {
@@ -202,7 +202,8 @@ const statusEdit = async (req, res) => {
             proportionalDiscount=order.discount; //so in this, discount will be updated to zero
            
 
-            await refundToWallet(order.userId, refundAmount);
+            await refundToWallet(order.userId, refundAmount,`refund for return item from order ${order.orderId},this return caused coupon condition break 
+               so the discount given to you deducted from refund amount as per our policy ` );
             order.discount=0;
           } else {
             // if coupon condition still hold 
@@ -219,7 +220,8 @@ const statusEdit = async (req, res) => {
   
             const refundAmount =Number((returnTotal - proportionalDiscount+returnTax).toFixed(2)) ;
             order.discount-=proportionalDiscount
-            await refundToWallet(order.userId, refundAmount);
+            await refundToWallet(order.userId, refundAmount,`refund for item return from order ${order.orderId},propotional discount you received for this item 
+              deducted from refund amount as per our coupon policy`);
           }
         }
         order.returnedItems++; 
@@ -256,7 +258,7 @@ const statusEdit = async (req, res) => {
         }
         
       }
-      await refundToWallet(order.userId, order.netAmount - order.tax);
+      await refundToWallet(order.userId, order.netAmount - order.tax,`refund for the last item in the order ${order.orderId}`);
       await order.save(); 
       return res.json({success:true,message:"Enitire order marked as returned"})
       

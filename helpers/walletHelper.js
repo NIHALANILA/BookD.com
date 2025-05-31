@@ -1,6 +1,6 @@
 const Wallet = require("../models/walletSchema");
 
-const refundToWallet = async (userId, amount) => {
+const refundToWallet = async (userId, amount,message) => {
     try {
 
         let wallet = await Wallet.findOne({ userId });
@@ -13,7 +13,7 @@ const refundToWallet = async (userId, amount) => {
               type: 'credit',
               amount: amount,
               date: new Date(),
-              note: 'Refund for returned order'
+              note: message
           }]
       });
   } else {
@@ -23,7 +23,7 @@ const refundToWallet = async (userId, amount) => {
           type: 'credit',
           amount: amount,
           date: new Date(),
-          note: 'Refund for returned order'
+          note: message
       });
   }
 
@@ -31,7 +31,7 @@ const refundToWallet = async (userId, amount) => {
         
     } catch (error) {
         console.error(`[ERROR] ${new Date().toISOString()} - ${error.message}`);
-        res.status(500).send("Something went wrong.");
+        
 
         
     }

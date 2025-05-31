@@ -46,7 +46,7 @@ const processImages = async (req, res, next) => {
         next();
     } catch (error) {
         console.error("Image processing failed:", error);
-        res.status(500).json({ message: "Error processing images" });
+        
     }
 };
 
@@ -72,7 +72,7 @@ const processProfileImage=async(req,res,next)=>{
     } catch (error) {
 
         console.error("Profile image processing failed:", error);
-        res.status(500).json({ message: "Error processing profile image" });
+        
         
     }
 }
