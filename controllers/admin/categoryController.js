@@ -38,6 +38,7 @@ const listCategories = async (req, res) => {
 const addCategory = async (req, res) => {
     try {
         const { name } = req.body;
+         name = name.trim().toLowerCase();
         const result = await checkAndRestoreCategory(name);
 
         if (result.restored) {
